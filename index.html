@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Millikan's Basement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1113; --panel:#15191d; --panel2:#1b2025; --line:#2a3138; --text:#e7e3d9; --muted:#8d969f;
+  --amber:#f2a541; --plus:#ff6161; --minus:#4fa6ff; --beam:#7dffb3; --ghost:#ffb347; --shot2:#ff7ad9;
+  --ok:#6bdc8c; --bad:#ff7a6b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px;line-height:1.4;font-weight:500}
+sub{font-size:.72em;vertical-align:-.28em;line-height:0}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:12px 16px;border-bottom:1px solid var(--line);background:#0a0c0e}
+.brand .kicker{font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.brand h1{margin:2px 0 0;font-size:27px;font-weight:700;letter-spacing:-.01em}
+nav.modes{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+nav.modes button{background:transparent;border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer;color:var(--muted);min-height:40px}
+nav.modes button.on{border-color:var(--amber);color:var(--text);background:#2a2216}
+.predict-switch{display:flex;align-items:center;gap:10px;font-weight:600}
+.switch{position:relative;width:52px;height:30px;border-radius:15px;background:#2a3138;border:1px solid var(--line);cursor:pointer;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:left .15s}
+.switch.on{background:#3a2c14;border-color:var(--amber)}
+.switch.on::after{left:25px;background:var(--amber)}
+main{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:calc(100vh - 110px)}
+@media (max-width:920px){main{grid-template-columns:1fr}}
+.stage{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0}
+.canvas-wrap{position:relative;flex:1;min-height:440px}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.overlay-tl{position:absolute;top:10px;left:12px;font:600 13px 'JetBrains Mono',monospace;color:var(--amber);pointer-events:none;text-shadow:0 0 4px #000}
+.view-btns{position:absolute;top:8px;right:10px;display:flex;gap:6px}
+.view-btns button{width:40px;height:40px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:600}
+.firebar{display:flex;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:10px 16px;cursor:pointer;min-height:48px;font-weight:600}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.fire{background:#3b1d14;border-color:#ff7a4a;color:#ffd9c9;min-width:120px;font-size:17px;letter-spacing:.05em}
+.btn.primary{background:#2a2216;border-color:var(--amber)}
+.legend{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+aside{background:var(--panel);overflow-y:auto;max-height:calc(100vh - 110px)}
+@media (max-width:920px){aside{max-height:none}}
+section.card{border-bottom:1px solid var(--line);padding:12px 16px}
+section.card h2{margin:0 0 8px;font:700 13.5px 'Space Grotesk',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ctl{margin:8px 0 12px}
+.ctl .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.ctl label{font-size:14px}
+.ctl input[type=number]{width:96px;font-weight:700;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;text-align:right;font-family:'JetBrains Mono',monospace}
+.ctl .unit{font:13px 'JetBrains Mono',monospace;color:var(--muted);min-width:34px}
+input[type=range]{width:100%;accent-color:var(--amber);height:28px}
+select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;min-height:40px}
+.seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{flex:1;background:transparent;border:0;padding:8px 6px;cursor:pointer;color:var(--muted);min-height:40px;font-size:14px}
+.seg button.on{background:#2a2216;color:var(--text)}
+.toggle-row{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
+.disabled-block{opacity:.38;pointer-events:none}
+.locked .ctl input,.locked .ctl select,.locked .seg,.locked .switch{pointer-events:none;opacity:.6}
+.ro{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:14px}
+.ro div:nth-child(odd){color:var(--muted)}
+.ro div:nth-child(even){font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
+.ro .note{grid-column:1/-1;color:var(--muted);font-size:12.5px;font-family:inherit;text-align:left}
+.hidden-note{color:var(--muted);font-size:13px;font-style:italic}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prompt{background:#1f1a12;border:1px solid #4a3a1c;border-radius:8px;padding:10px 12px;font-size:14.5px}
+.prompt b{color:var(--amber)}
+.givens{font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:6px;color:#e9d9b8}
+.answer{display:flex;gap:8px;margin-top:10px}
+.answer input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:16px}
+.choices{display:grid;gap:8px;margin-top:10px}
+.choices button{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;min-height:44px}
+.choices button.on{border-color:var(--amber);background:#2a2216}
+.feedback{margin-top:10px;border-radius:8px;padding:10px 12px;font-size:14px}
+.feedback.ok{background:#14261a;border:1px solid #2f6b40}
+.feedback.bad{background:#2a1614;border:1px solid #7a3229}
+.feedback .big{font-weight:700;font-size:16px;margin-bottom:4px}
+.mono{font-family:'JetBrains Mono',monospace}
+.small{font-size:12.5px;color:var(--muted)}
+.log{max-height:180px;overflow-y:auto;font-size:12.5px}
+.log table{width:100%;border-collapse:collapse}
+.log td,.log th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
+.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(14,17,19,.92)}
+.placeholder .box{max-width:520px;border:1px solid var(--line);border-radius:10px;padding:20px 22px;background:var(--panel)}
+.placeholder h3{margin:0 0 8px;color:var(--amber)}
+footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="kicker">Strothoff Physics Laboratories</div>
+    <h1>Millikan's Basement</h1>
+  </div>
+  <nav class="modes" id="modes">
+    <button data-mode="beam" class="on">Beam line</button>
+    <button data-mode="selector">Velocity selector</button>
+    <button data-mode="spectro">Mass spectrometer</button>
+    <button data-mode="millikan">Millikan</button>
+  </nav>
+  <div class="predict-switch"><span>Predict</span><div class="switch" id="predictSwitch" role="switch" aria-checked="false" tabindex="0"></div></div>
+</header>
+
+<main>
+  <div class="stage">
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="cv"></canvas>
+      <div class="overlay-tl" id="timeLabel"></div>
+      <div class="view-btns">
+        <button id="zoomIn" title="Zoom in">+</button>
+        <button id="zoomOut" title="Zoom out">−</button>
+        <button id="zoomFit" title="Fit view">⤢</button>
+      </div>
+      <div class="placeholder" id="placeholder" style="display:none"><div class="box"><h3 id="phTitle"></h3><div id="phText"></div></div></div>
+    </div>
+    <div class="firebar">
+      <button class="btn fire" id="fireBtn">FIRE</button>
+      <button class="btn" id="clearBtn">Clear shots</button>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+  <aside id="side">
+    <section class="card" id="predictCard" style="display:none"></section>
+    <section class="card" id="controlsCard"></section>
+    <section class="card" id="readoutCard"><h2>Readouts</h2><div id="readouts"></div></section>
+    <section class="card" id="optsCard"></section>
+  </aside>
+</main>
+<footer>
+  <span>Millikan's Basement · Strothoff Physics Laboratories</span>
+  <span>Created by Christopher B. Slough, Head of Science, Strothoff International School</span>
+</footer>
+
+<script>
+"use strict";
+/* ================= constants (IB data booklet values) ================= */
+const C = { e:1.60e-19, me:9.110e-31, mp:1.673e-27, u:1.661e-27, c:3.00e8 };
+const PARTICLES = {
+  positron:{ name:'Positron',  sym:'e⁺',  m:C.me,          q:C.e },
+  proton:  { name:'Proton',    sym:'p⁺',  m:C.mp,          q:C.e },
+  deuteron:{ name:'Deuteron',  sym:'d⁺',  m:2.014*C.u,     q:C.e },
+  alpha:   { name:'Alpha',     sym:'α²⁺', m:4.0015*C.u,    q:2*C.e },
+  custom:  { name:'Custom ion',sym:'ion', m:null, q:null }
+};
+const COLORS = { dist:'#2dd4bf', dim:'#c58cff', len:'#ffd23f', yind:'#ffffff', vcomp:'#8ff0ff', beam:'#7dffb3', shot2:'#ff7ad9', ghost:'#ffb347', plus:'#ff6161', minus:'#4fa6ff', amber:'#f2a541' };
+
+/* ================= formatting ================= */
+const SUP = {'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup = n => String(n).split('').map(ch=>SUP[ch]||ch).join('');
+function fmt(x, sf=3){
+  if (x===null || x===undefined || !isFinite(x)) return '—';
+  if (x===0) return '0';
+  const neg = x<0; let a = Math.abs(x);
+  let ex = Math.floor(Math.log10(a));
+  let man = a/Math.pow(10,ex);
+  let ms = man.toFixed(sf-1);
+  if (parseFloat(ms)>=10){ ex+=1; man=a/Math.pow(10,ex); ms=man.toFixed(sf-1); }
+  let s;
+  if (ex>=-2 && ex<=3){ s = Number(a.toPrecision(sf)).toString();
+    // keep trailing zeros for sig figs
+    const digits = s.replace('.','').replace(/^0+/,'').length;
+    if (digits<sf){ const dec = Math.max(0, sf-1-ex); s = a.toFixed(dec); }
+  } else s = `${ms} × 10${sup(ex)}`;
+  return (neg?'−':'') + s;
+}
+const fu = (x,u,sf=3)=> `${fmt(x,sf)} ${u}`;
+function parseNum(str){
+  if (typeof str!=='string') return NaN;
+  let s = str.trim().replace(/−/g,'-').replace(/,/g,'.').replace(/\s+/g,'');
+  s = s.replace(/[×x\*]10\^?\(?(-?\d+)\)?/i, 'e$1');
+  if (s==='') return NaN;
+  return Number(s);
+}
+function sigFigs(str){
+  let s = str.trim().replace(/−/g,'-').replace(/^[-+]/,'').split(/[eE×x*]/)[0].replace(',', '.');
+  s = s.replace('.', ''); s = s.replace(/^0+/,'');
+  return s.length;
+}
+const rndStep = (a,b,step)=> +(a + step*Math.floor(Math.random()*(Math.round((b-a)/step)+1))).toFixed(10);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const p3 = x => Number(x.toPrecision(3));
+
+/* ================= state ================= */
+function defaultState(){
+  return { particle:'positron', customU:20, customQ:1, Vacc:1000, gap:0.02,
+    platesOn:true, Vp:200, pol:1, d:0.02, L:0.05,
+    screenOn:true, D:0.15,
+    BOn:false, B:0.001, Bdir:-1, W:0.20 };
+}
+let S = defaultState();
+const opts = { dots:true, comps:true, force:true, rhr:true };
+let mode = 'beam';
+
+function particleOf(st){
+  const p = PARTICLES[st.particle];
+  if (st.particle==='custom') return { name:'Custom ion', sym:`${st.customU} u, +${st.customQ}e`, m:st.customU*C.u, q:st.customQ*C.e };
+  return p;
+}
+const Vcap = p => p.m*Math.pow(0.1*C.c,2)/(2*p.q);
+
+/* ================= physics: layout + analytic trajectory ================= */
+const HH = 0.25; // half-height of B region / view limit (m)
+function layout(st){
+  const L = {};
+  L.xg0 = 0.03; L.xg1 = L.xg0 + st.gap; let cur = L.xg1;
+  if (st.platesOn){ L.xp0 = cur + 0.03; L.xp1 = L.xp0 + st.L; cur = L.xp1; }
+  if (st.BOn){
+    let gapB = 0.04;
+    if (!st.platesOn && typeof view!=='undefined' && view.scale>50){ const u=psuU(); gapB = Math.max(gapB, L.xg0 + (PSU.accW*u - 36*u + 18)/view.scale - cur); }
+    L.xb0 = cur + gapB; L.xb1 = L.xb0 + st.W; L.xEnd = L.xb1 + 0.06; }
+  else if (st.screenOn){ L.xs = cur + st.D; L.xEnd = L.xs + 0.02; }
+  else L.xEnd = cur + 0.15;
+  L.hw = st.platesOn ? Math.max(st.d/2+0.025, (!st.BOn && st.screenOn)? 0.064 : 0) : 0;
+  if (st.platesOn) L.xw = L.xp0 + 0.85*st.L;
+  return L;
+}
+function firstRoot(A,B,Cc,tmax){
+  const r=[];
+  if (Math.abs(A)<1e-300){ if (Math.abs(B)>1e-300) r.push(-Cc/B); }
+  else { const disc=B*B-4*A*Cc; if (disc>=0){ const sq=Math.sqrt(disc); r.push((-B-sq)/(2*A),(-B+sq)/(2*A)); } }
+  const ok = r.filter(s=>s>1e-18 && s<=tmax);
+  return ok.length? Math.min(...ok): null;
+}
+function computeShot(st){
+  const p = particleOf(st), L = layout(st), segs=[], res={ p, L };
+  let t=0, s0;
+  const push = (dur, f, acc, kind)=>{ segs.push({t0:t, t1:t+dur, f, acc, kind}); t+=dur; };
+  // Stage 1: accelerate from rest
+  const a = p.q*st.Vacc/(p.m*st.gap), v0 = Math.sqrt(2*p.q*st.Vacc/p.m), tg = v0/a;
+  push(tg, s=>({x:L.xg0+0.5*a*s*s, y:0, vx:a*s, vy:0}), ()=>({ax:a, ay:0}), 'gap');
+  res.v = v0; res.KE = p.q*st.Vacc; res.KEeV = res.KE/C.e; res.tGap = tg; res.Egap = st.Vacc/st.gap; res.vc = v0/C.c;
+  let s = {x:L.xg1, y:0, vx:v0, vy:0};
+  const straight = (dur)=>{ const q={...s}; push(dur, u=>({x:q.x+q.vx*u, y:q.y+q.vy*u, vx:q.vx, vy:q.vy}), ()=>({ax:0,ay:0}), 'drift'); s={x:q.x+q.vx*dur, y:q.y+q.vy*dur, vx:q.vx, vy:q.vy}; };
+  const straightTo = (xt)=>{ if (s.vx>0 && xt>s.x) straight((xt-s.x)/s.vx); };
+  // Stage 2: plates
+  if (st.platesOn){
+    straightTo(L.xp0);
+    const E = st.Vp/st.d, ay = -st.pol*p.q*E/p.m, tP = st.L/s.vx, q={...s};
+    res.E = E; res.ay = ay; res.tPlates = tP;
+    let hit=null, plate=null;
+    for (const [b,name] of [[st.d/2,'upper'],[-st.d/2,'lower']]){
+      const r = firstRoot(0.5*ay, q.vy, q.y-b, tP);
+      if (r!==null && (hit===null || r<hit)){ hit=r; plate=name; }
+    }
+    const f = u=>({x:q.x+q.vx*u, y:q.y+q.vy*u+0.5*ay*u*u, vx:q.vx, vy:q.vy+ay*u});
+    if (hit!==null){
+      push(hit, f, ()=>({ax:0,ay}), 'plates');
+      const e=f(hit); res.strike = { plate, x:e.x-L.xp0, pos:e }; res.end='strike';
+      return finish();
+    }
+    push(tP, f, ()=>({ax:0,ay}), 'plates');
+    s = f(tP); res.yExit = s.y; res.vyExit = s.vy; res.theta = Math.atan2(s.vy, s.vx)*180/Math.PI;
+  }
+  // Stage 3: B field
+  if (st.BOn){
+    straightTo(L.xb0);
+    const Bz = st.Bdir*st.B, Om = p.q*Bz/p.m, q={...s}, vmag=Math.hypot(q.vx,q.vy);
+    const f = u=>{ const c=Math.cos(Om*u), sn=Math.sin(Om*u);
+      return { x:q.x+(q.vx*sn+q.vy*(1-c))/Om, y:q.y+(-q.vx*(1-c)+q.vy*sn)/Om,
+               vx:q.vx*c+q.vy*sn, vy:-q.vx*sn+q.vy*c }; };
+    const inside = P=> P.x>=L.xb0-1e-12 && P.x<=L.xb1 && Math.abs(P.y)<=HH;
+    const P = 2*Math.PI/Math.abs(Om), N=6000, ds=P/N;
+    let lo=0, hi=null;
+    for (let k=1;k<=N*1.02;k++){ const u=k*ds; if (!inside(f(u))){ lo=u-ds; hi=u; break; } }
+    if (hi===null) hi=P;
+    for (let k=0;k<60;k++){ const mid=(lo+hi)/2; if (inside(f(mid))) lo=mid; else hi=mid; }
+    const tB = hi, e = f(tB);
+    push(tB, f, u=>{ const v=f(u); return {ax:Om*v.vy, ay:-Om*v.vx}; }, 'B');
+    res.r = p.m*vmag/(p.q*st.B); res.T = 2*Math.PI*p.m/(p.q*st.B); res.freq = 1/res.T;
+    res.F = p.q*vmag*st.B; res.ac = vmag*vmag/res.r; res.tB = tB; res.yEntryB = q.y; res.sense = Om<0?'anticlockwise':'clockwise';
+    let side = e.x<L.xb0+1e-9?'left': e.x>=L.xb1-1e-9?'right': e.y>0?'top':'bottom';
+    res.exitSide = side; res.exitY = e.y; res.exitAngle = Math.atan2(e.vy,e.vx)*180/Math.PI;
+    s = e;
+    if (side==='left'){ res.detector = { y:e.y, dist:e.y-q.y }; res.end='detector'; return finish(); }
+    if (side==='right') straightTo(L.xEnd); else straight(0.25/vmag);
+    res.end='exit'; return finish();
+  }
+  if (st.screenOn){ straightTo(L.xs); res.screenY = s.y; res.end='screen'; }
+  else straightTo(L.xEnd);
+  return finish();
+  function finish(){ res.segs=segs; res.T_total=t; res.poly=samplePoly(segs); return res; }
+}
+function samplePoly(segs){
+  const pts=[];
+  for (const g of segs){ const n = g.kind==='B'?500:(g.kind==='gap'?40:60);
+    for (let k=0;k<=n;k++){ const u=(g.t1-g.t0)*k/n, P=g.f(u); pts.push({t:g.t0+u, x:P.x, y:P.y}); } }
+  return pts;
+}
+function stateAt(res, t){
+  const segs=res.segs; let g=segs[segs.length-1];
+  for (const sg of segs){ if (t<=sg.t1){ g=sg; break; } }
+  const u=Math.max(0,Math.min(t,g.t1)-g.t0), P=g.f(u), A=g.acc(u);
+  return {...P, ax:A.ax, ay:A.ay};
+}
+
+/* ================= canvas + view ================= */
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let CW=0, CH=0, DPR=1, view={scale:1, z:1, panX:0, panY:0};
+function resize(){
+  const r = cv.getBoundingClientRect(); DPR = window.devicePixelRatio||1;
+  CW=r.width; CH=r.height; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  fitScale(); draw();
+}
+const GH = 0.025;                 // gun grid half-height (m)
+const PSU = { accW:184, accH:112, plW:164, plPad:58 };
+const psuU = ()=> Math.max(0.6, Math.min(1, CW/1000));
+let fitScale = function(){
+  const L=layout(S); let ymax=0.03;
+  if (S.platesOn) ymax=Math.max(ymax, S.d/2+0.012);
+  if (S.BOn){
+    if (predict.on || !(S.B>0)) ymax = HH;
+    else { const r=computeShot(S); for (const P of r.poly) ymax=Math.max(ymax, Math.min(HH, Math.abs(P.y)+0.02)); }
+  }
+  const u=psuU(); const rightPx = S.platesOn ? PSU.plW*u + 24 : 24;
+  let s = Math.min((CW-25-rightPx)/L.xEnd, (CH/2-26)/ymax);
+  if (S.platesOn) s = Math.min(s, (CH/2 - PSU.plPad*u - 8)/L.hw);
+  s = Math.min(s, (CH/2 - 18 - PSU.accH*u - 8)/GH);
+  view.scale = Math.max(s, 40);
+}
+const _fit1 = fitScale;
+fitScale = function(){ _fit1(); _fit1(); _fit1(); };
+function W2B(x,y){ return [25 + x*view.scale, CH/2 - y*view.scale]; }
+function B2S(bx,by){ return [CW/2 + (bx-CW/2)*view.z + view.panX, CH/2 + (by-CH/2)*view.z + view.panY]; }
+function S2B(sx,sy){ return [CW/2 + (sx-CW/2-view.panX)/view.z, CH/2 + (sy-CH/2-view.panY)/view.z]; }
+function W2S(x,y){ const b=W2B(x,y); return B2S(b[0],b[1]); }
+const pxPerM = ()=> view.scale*view.z;
+new ResizeObserver(resize).observe(document.getElementById('canvasWrap'));
+document.getElementById('zoomIn').onclick=()=>{view.z=Math.min(view.z*1.6,40);draw();};
+document.getElementById('zoomOut').onclick=()=>{view.z=Math.max(view.z/1.6,0.3);draw();};
+document.getElementById('zoomFit').onclick=()=>{view.z=1;view.panX=0;view.panY=0;fitScale();draw();};
+/* pointer: turn a supply knob, otherwise pan */
+let drag=null, knobDrag=null;
+function evPos(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
+function knobAt(e){
+  if (mode!=='beam' || predict.on) return null;
+  const [bx,by]=S2B(...evPos(e)), g=psuGeom();
+  for (const key of ['acc','pl']){ const q=g[key]; if (!q) continue; const k=q.knob;
+    if (Math.hypot(bx-k.x,by-k.y) < k.r+10) return {ctl:q.ctl, cx:k.x, cy:k.y}; }
+  return null;
+}
+const knobAngle=(cx,cy,bx,by)=> Math.atan2(bx-cx, -(by-cy))*180/Math.PI;
+function setFromKnob(key, frac){
+  const d=ctlDefs[key], max=maxFor(key);
+  let v = d.min + Math.max(0,Math.min(1,frac))*(max-d.min); v = +(Math.round(v/d.step)*d.step).toFixed(6);
+  if (v!==d.get()){ d.set(v); syncCtl(key); shots=[]; renderLegend([]); renderReadouts(); draw(); }
+}
+cv.addEventListener('pointerdown',e=>{
+  const kn=knobAt(e);
+  if (kn){ const [bx,by]=S2B(...evPos(e)), d=ctlDefs[kn.ctl];
+    knobDrag={...kn, last:knobAngle(kn.cx,kn.cy,bx,by), frac:(d.get()-d.min)/(maxFor(kn.ctl)-d.min)};
+    cv.setPointerCapture(e.pointerId); return; }
+  drag={x:e.clientX,y:e.clientY,px:view.panX,py:view.panY};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';
+});
+cv.addEventListener('pointermove',e=>{
+  if (knobDrag){ const [bx,by]=S2B(...evPos(e)); const a=knobAngle(knobDrag.cx,knobDrag.cy,bx,by);
+    let da=a-knobDrag.last; if (da>180) da-=360; if (da<-180) da+=360; knobDrag.last=a;
+    knobDrag.frac=Math.max(0,Math.min(1,knobDrag.frac+da/270)); setFromKnob(knobDrag.ctl,knobDrag.frac); return; }
+  if (!drag){ cv.style.cursor = knobAt(e)?'pointer':'grab'; return; }
+  view.panX=drag.px+e.clientX-drag.x; view.panY=drag.py+e.clientY-drag.y; draw();
+});
+cv.addEventListener('pointerup',()=>{drag=null;knobDrag=null;cv.style.cursor='grab';});
+cv.addEventListener('wheel',e=>{ e.preventDefault();
+  const kn=knobAt(e);
+  if (kn){ const d=ctlDefs[kn.ctl]; const v=d.get()+(e.deltaY<0?1:-1)*d.step; setFromKnob(kn.ctl,(v-d.min)/(maxFor(kn.ctl)-d.min)); return; }
+  const f=e.deltaY<0?1.15:1/1.15; view.z=Math.min(Math.max(view.z*f,0.3),40); draw();},{passive:false});
+
+/* ================= shots + animation ================= */
+let shots=[];           // {res, color, label, start, dur}
+let animating=false, timeInfo='';
+function niceStep(x){ const e=Math.floor(Math.log10(x)), m=x/Math.pow(10,e); const n = m<1.5?1:m<3.5?2:m<7.5?5:10; return n*Math.pow(10,e); }
+function fmtTime(t){ const units=[[1,'s'],[1e-3,'ms'],[1e-6,'µs'],[1e-9,'ns'],[1e-12,'ps']];
+  for (const [f,u] of units){ if (t>=f*0.999) return `${fmt(t/f,2)} ${u}`; } return `${fmt(t,2)} s`; }
+function fireShots(list){ // list of {st,color,label}
+  const made = list.map(o=>({res:computeShot(o.st), color:o.color, label:o.label}));
+  const Tmax = Math.max(...made.map(m=>m.res.T_total));
+  const factor = niceStep(3/Tmax); const n = Math.floor(Math.log10(factor)+1e-9); const mant = Math.round(factor/Math.pow(10,n));
+  const now = performance.now();
+  for (const m of made){ m.start=now; m.factor=factor; m.dur=m.res.T_total*factor*1000; m.dotDt = niceStep(Tmax/25); }
+  timeInfo = `Slow motion ×${mant>1?mant+' × ':''}10${sup(n)}  ·  dots every ${fmtTime(made[0].dotDt)}`;
+  shots.forEach(s=>s.old=true);
+  shots = shots.filter(s=>!s.group || s.group===null).slice(-3).concat(made);
+  animating=true; requestAnimationFrame(tick);
+  return made;
+}
+let onAnimDone=null;
+function tick(){
+  draw();
+  const now=performance.now();
+  const live = shots.filter(s=>!s.old && now-s.start < s.dur);
+  if (live.length) requestAnimationFrame(tick);
+  else { animating=false; draw(); if (onAnimDone){ const f=onAnimDone; onAnimDone=null; f(); } }
+}
+
+/* ================= drawing ================= */
+function draw(){
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle='#0c0f11'; ctx.fillRect(0,0,CW,CH);
+  if (mode!=='beam'){ document.getElementById('timeLabel').textContent=''; return; }
+  const L = layout(S), k=pxPerM();
+  drawGrid(k);
+  drawApparatus(L,k);
+  // preview path
+  if (!predict.on){
+    const pr = computeShot(S);
+    drawPoly(pr.poly, Infinity, 'rgba(125,255,179,0.22)', 1.5, [6,5]);
+  }
+  // ghost
+  if (predict.on && predict.ghost) predict.ghost(ctx);
+  // target markers
+  if (predict.on && predict.target) predict.target(ctx);
+  const now=performance.now();
+  for (const sh of shots){
+    const tReal = sh.old? sh.res.T_total : Math.min(sh.res.T_total, (now-sh.start)/1000/sh.factor);
+    const col = sh.old? 'rgba(125,255,179,0.25)': sh.color;
+    drawPoly(sh.res.poly, tReal, col, sh.old?1.5:2.4);
+    if (!sh.old && opts.dots) drawDots(sh, tReal);
+    if (!sh.old) drawParticle(sh, tReal);
+    if (!sh.old && tReal>=sh.res.T_total) drawEndMarks(sh);
+  }
+  drawKey();
+  if (S.BOn && opts.rhr && (!predict.on || predict.revealed)) drawRHR();
+  document.getElementById('timeLabel').textContent = shots.some(s=>!s.old)? timeInfo : 'Path preview — press FIRE';
+  if (predict.on && !shots.some(s=>!s.old)) document.getElementById('timeLabel').textContent='';
+}
+function drawGrid(k){
+  // 1 cm grid where readable
+  let step = 0.01; if (k*step<14) step=0.05; if (k*step<14) step=0.1;
+  const [x0,y0]=W2S(0,0);
+  ctx.strokeStyle='rgba(255,255,255,0.045)'; ctx.lineWidth=1; ctx.beginPath();
+  const first = Math.floor((0-x0)/(k*step)), last=Math.ceil((CW-x0)/(k*step));
+  for (let i=first;i<=last;i++){ const X=x0+i*k*step; ctx.moveTo(X,0); ctx.lineTo(X,CH); }
+  const fy=Math.floor((0-y0)/(k*step)), ly=Math.ceil((CH-y0)/(k*step));
+  for (let i=fy;i<=ly;i++){ const Y=y0+i*k*step; ctx.moveTo(0,Y); ctx.lineTo(CW,Y); }
+  ctx.stroke();
+  ctx.strokeStyle='rgba(242,165,65,0.12)'; ctx.setLineDash([3,6]); ctx.beginPath(); ctx.moveTo(0,y0); ctx.lineTo(CW,y0); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(141,150,159,0.8)'; ctx.font="600 12px 'JetBrains Mono', monospace";
+  ctx.fillText(`grid: ${step*100} cm`, 12, CH-10);
+}
+function textSub(str, X, Y, col, align='center', size=13, weight=600, outline=true){
+  const parts=[]; const re=/_\{([^}]*)\}/g; let last=0, m;
+  while ((m=re.exec(str))){ if (m.index>last) parts.push([str.slice(last,m.index),false]); parts.push([m[1],true]); last=re.lastIndex; }
+  if (last<str.length) parts.push([str.slice(last),false]);
+  const fN=`${weight} ${size}px 'Space Grotesk', sans-serif`, fS=`${weight} ${Math.round(size*0.7)}px 'Space Grotesk', sans-serif`;
+  let w=0; for (const [t,sb] of parts){ ctx.font=sb?fS:fN; w+=ctx.measureText(t).width; }
+  let x = align==='center'? X-w/2 : align==='right'? X-w : X;
+  ctx.textAlign='left'; ctx.lineJoin='round';
+  for (const [t,sb] of parts){ ctx.font=sb?fS:fN; const y=sb? Y+size*0.3 : Y;
+    if (outline){ ctx.strokeStyle='rgba(8,10,12,0.92)'; ctx.lineWidth=4; ctx.strokeText(t,x,y); }
+    ctx.fillStyle=col; ctx.fillText(t,x,y); x+=ctx.measureText(t).width; }
+  return w;
+}
+function label(txt,X,Y,col='#e7e3d9',align='center',size=13){ textSub(txt,X,Y,col,align,size,600,true); }
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function dblArrow(x1,y1,x2,y2,h=7){ const len=Math.hypot(x2-x1,y2-y1); h=Math.min(h,len/2.5); arrow(x1,y1,x2,y2,h); arrow(x2,y2,x1,y1,h); }
+
+/* power supplies: geometry in base pixels (scaled with zoom) */
+function psuGeom(){
+  const L=layout(S), g={}, u=psuU();
+  const [xa]=W2B(L.xg0,0), [xb]=W2B(L.xg1,0), [,ygb]=W2B(0,-GH);
+  const top=ygb+18*u, left=Math.max(8, xa-36*u), w=Math.max(PSU.accW*u, xb-left+76*u), h=PSU.accH*u;
+  g.acc = { u, ctl:'Vacc', title:'ACCELERATING SUPPLY', sym:'V_{acc}', val:S.Vacc, x:left, y:top, w, h,
+    terms:[{x:xa,y:top,col:COLORS.plus,sign:'+',lx:-14*u,ly:-6*u},{x:xb,y:top,col:COLORS.minus,sign:'−',lx:14*u,ly:-6*u}],
+    disp:{x:left+12*u, y:top+32*u, w:w-84*u, h:44*u}, knob:{x:left+w-38*u, y:top+54*u, r:22*u} };
+  if (S.platesOn){
+    const [xr]=W2B(L.xEnd,0), [,yt]=W2B(0,L.hw), [,yb]=W2B(0,-L.hw);
+    const x=xr+10, y=yt-PSU.plPad*u, H=(yb-yt)+2*PSU.plPad*u, W=PSU.plW*u;
+    const cT=S.pol>0?COLORS.plus:COLORS.minus, cB=S.pol>0?COLORS.minus:COLORS.plus;
+    const dy=Math.max(32*u, H/2-66*u);
+    g.pl = { u, ctl:'Vp', title:'PLATE SUPPLY', sym:'V_{p}', val:S.Vp, x, y, w:W, h:H,
+      terms:[{x,y:yt,col:cT,sign:S.pol>0?'+':'−',lx:-12*u,ly:-12*u},{x,y:yb,col:cB,sign:S.pol>0?'−':'+',lx:-12*u,ly:22*u}],
+      disp:{x:x+16*u, y:y+dy, w:W-32*u, h:44*u}, knob:{x:x+W/2, y:y+dy+(44+64)*u, r:22*u} };
+  }
+  return g;
+}
+function drawPSU(p, locked){
+  const u=p.u;
+  const gr=ctx.createLinearGradient(0,p.y,0,p.y+p.h); gr.addColorStop(0,'#2a3036'); gr.addColorStop(1,'#16191d');
+  ctx.fillStyle=gr; roundRect(p.x,p.y,p.w,p.h,10*u); ctx.fill(); ctx.strokeStyle='#4a545e'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#3d464f';
+  for (const [sx,sy] of [[p.x+7*u,p.y+7*u],[p.x+p.w-7*u,p.y+7*u],[p.x+7*u,p.y+p.h-7*u],[p.x+p.w-7*u,p.y+p.h-7*u]]){ ctx.beginPath(); ctx.arc(sx,sy,2.2*u,0,7); ctx.fill(); }
+  textSub(p.title, p.x+14*u, p.y+24*u, '#98a2ab','left',10.5*u,700,false);
+  const d=p.disp; ctx.fillStyle='#040605'; roundRect(d.x,d.y,d.w,d.h,5); ctx.fill(); ctx.strokeStyle='#2c3a2f'; ctx.lineWidth=1; ctx.stroke();
+  const vx=d.x+d.w-26*u, vy=d.y+d.h/2+8*u;
+  ctx.font=`700 ${23*u}px 'JetBrains Mono', monospace`; ctx.textAlign='right';
+  ctx.fillStyle='rgba(255,182,72,0.045)'; ctx.fillText('8888', vx, vy);
+  ctx.shadowColor='rgba(255,170,60,0.75)'; ctx.shadowBlur=9; ctx.fillStyle='#ffb648'; ctx.fillText(String(Math.round(p.val)), vx, vy); ctx.shadowBlur=0;
+  ctx.textAlign='left'; ctx.font=`700 ${16*u}px 'Space Grotesk', sans-serif`; ctx.fillText('V', vx+6*u, vy-1*u);
+  textSub(p.sym, d.x+d.w/2, d.y+d.h+19*u, COLORS.amber,'center',15*u,700,false);
+  const k=p.knob, def=ctlDefs[p.ctl], frac=Math.max(0,Math.min(1,(p.val-def.min)/(maxFor(p.ctl)-def.min)));
+  ctx.strokeStyle='#66717c'; ctx.lineWidth=1.5;
+  for (let i=0;i<=10;i++){ const a=(-135+27*i)*Math.PI/180; ctx.beginPath(); ctx.moveTo(k.x+Math.sin(a)*(k.r+4*u),k.y-Math.cos(a)*(k.r+4*u)); ctx.lineTo(k.x+Math.sin(a)*(k.r+8*u),k.y-Math.cos(a)*(k.r+8*u)); ctx.stroke(); }
+  const kg=ctx.createRadialGradient(k.x-7,k.y-8,2,k.x,k.y,k.r); kg.addColorStop(0,'#69727b'); kg.addColorStop(1,'#1b1f23');
+  ctx.fillStyle=kg; ctx.beginPath(); ctx.arc(k.x,k.y,k.r,0,7); ctx.fill(); ctx.strokeStyle=locked?'#3a434c':'#f2a541'; ctx.lineWidth=1.6; ctx.stroke();
+  const a=(-135+270*frac)*Math.PI/180;
+  ctx.strokeStyle='#ffb648'; ctx.lineWidth=3.5; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(k.x+Math.sin(a)*5,k.y-Math.cos(a)*5); ctx.lineTo(k.x+Math.sin(a)*(k.r-4),k.y-Math.cos(a)*(k.r-4)); ctx.stroke(); ctx.lineCap='butt';
+  for (const t of p.terms){
+    ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,9*u,0,7); ctx.fill();
+    ctx.fillStyle=t.col; ctx.beginPath(); ctx.arc(t.x,t.y,6.5*u,0,7); ctx.fill();
+    ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,2.2*u,0,7); ctx.fill();
+    textSub(t.sign, t.x+t.lx, t.y+t.ly, t.col,'center',17*u,700,true);
+  }
+}
+function drawApparatus(L,k){
+  const g=psuGeom(), locked=predict.on;
+  /* wires + supplies, drawn in base pixels so they zoom with the scene */
+  ctx.save(); ctx.translate(CW/2+view.panX, CH/2+view.panY); ctx.scale(view.z,view.z); ctx.translate(-CW/2,-CH/2);
+  const wire=(pts,col)=>{ ctx.lineJoin='round'; for (const [w,c] of [[6,'#040506'],[3,col]]){ ctx.strokeStyle=c; ctx.lineWidth=w; ctx.beginPath(); pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y)); ctx.stroke(); } };
+  { const a=g.acc, [,yg]=W2B(0,-GH); for (const t of a.terms) wire([[t.x,yg],[t.x,a.y]], t.col); drawPSU(a,locked); }
+  if (g.pl){ const p=g.pl, [xw,yT]=W2B(L.xw,S.d/2), [,yB]=W2B(L.xw,-S.d/2);
+    wire([[xw,yT],[xw,p.terms[0].y],[p.terms[0].x,p.terms[0].y]], p.terms[0].col);
+    wire([[xw,yB],[xw,p.terms[1].y],[p.terms[1].x,p.terms[1].y]], p.terms[1].col);
+    drawPSU(p,locked); }
+  ctx.restore();
+  /* accelerating grids */
+  for (const [x,col,sg] of [[L.xg0,COLORS.plus,'+'],[L.xg1,COLORS.minus,'−']]){
+    const [X,Ya]=W2S(x,GH), [,Yb]=W2S(x,-GH), [,Yh1]=W2S(x,0.0015), [,Yh2]=W2S(x,-0.0015);
+    ctx.strokeStyle=col; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(X,Ya); ctx.lineTo(X,Yh1); ctx.moveTo(X,Yh2); ctx.lineTo(X,Yb); ctx.stroke();
+    label(sg, X, Ya-8, col, 'center', 18);
+  }
+  if (S.platesOn){
+    const top=S.d/2, bot=-S.d/2, th=Math.max(5, 0.002*k);
+    const [X0,Yt]=W2S(L.xp0,top), [X1,Yb]=W2S(L.xp1,bot), [,Yc]=W2S(0,0);
+    const cTop = S.pol>0?COLORS.plus:COLORS.minus, cBot = S.pol>0?COLORS.minus:COLORS.plus;
+    // field arrows
+    if (S.Vp>0){ ctx.strokeStyle='rgba(242,165,65,0.35)'; ctx.fillStyle='rgba(242,165,65,0.35)'; ctx.lineWidth=1;
+      const n=Math.max(2,Math.floor((X1-X0)/40)); for (let i=1;i<n;i++){ const X=X0+(X1-X0)*i/n; const ya=Yt+6, yb=Yb-6;
+        const from = S.pol>0?ya:yb, to=S.pol>0?yb:ya; arrow(X,from,X,to,6); } }
+    // centre line + exit plane
+    ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.34)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+    ctx.beginPath(); ctx.moveTo(X0-18,Yc); ctx.lineTo(X1+4,Yc); ctx.moveTo(X1,Yt); ctx.lineTo(X1,Yb); ctx.stroke(); ctx.restore();
+    // plates
+    ctx.fillStyle=cTop; ctx.fillRect(X0,Yt-th,X1-X0,th); ctx.fillStyle=cBot; ctx.fillRect(X0,Yb,X1-X0,th);
+    label(S.pol>0?'+':'−', X0-12, Yt+2, cTop,'center',18); label(S.pol>0?'−':'+', X0-12, Yb+th+6, cBot,'center',18);
+    // y indicator
+    const rev=revealedPlateShot();
+    ctx.strokeStyle=COLORS.yind; ctx.fillStyle=COLORS.yind;
+    if (rev){ const [,Yy]=W2S(0,rev.yExit), xb=X1-7; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(xb,Yc,2.5,0,7); ctx.fill();
+      if (Math.abs(Yy-Yc)>8) arrow(xb,Yc,xb,Yy,Math.min(7,Math.abs(Yy-Yc)/2.5)); else { ctx.beginPath(); ctx.moveTo(xb-5,Yc); ctx.lineTo(xb+5,Yc); ctx.stroke(); }
+      const [xwS]=W2S(L.xw,0); textSub(`y = ${fmt(rev.yExit*1000,3)} mm`, Math.min(X1, xwS-8), Yt-th-9, COLORS.yind,'right',14,700);
+    } else { // sign convention marker: both arrows start on the centre line
+      const xb=X1-9, len=Math.max(10, Math.min(42, (Yb-Yt)/2-6)), h=Math.min(7,len/2.5);
+      ctx.lineWidth=2; arrow(xb,Yc,xb,Yc-len,h); arrow(xb,Yc,xb,Yc+len,h);
+      ctx.beginPath(); ctx.arc(xb,Yc,2.5,0,7); ctx.fill();
+      textSub('+y', xb-7, Yc-len+11, COLORS.yind,'right',16,700);
+      textSub('−y', xb-7, Yc+len-1, COLORS.yind,'right',16,700); }
+    // d: separation, right side
+    const xd=X1+18; ctx.strokeStyle=COLORS.dim; ctx.fillStyle=COLORS.dim; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(X1+2,Yt); ctx.lineTo(xd+6,Yt); ctx.moveTo(X1+2,Yb); ctx.lineTo(xd+6,Yb); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth=2.2; dblArrow(xd,Yt,xd,Yb,8);
+    textSub('d', xd+9, (Yt+Yb)/2-2, COLORS.dim,'left',19,700);
+    textSub(`${fmt(S.d*100,3)} cm`, xd+9, (Yt+Yb)/2+14, COLORS.dim,'left',13,700);
+    // L: length, below
+    const yL=Yb+th+24; ctx.strokeStyle=COLORS.len; ctx.fillStyle=COLORS.len; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(X0,Yb+th+3); ctx.lineTo(X0,yL+6); ctx.moveTo(X1,Yb+th+3); ctx.lineTo(X1,yL+6); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth=2.2; dblArrow(X0,yL,X1,yL,8);
+    const cx=(X0+X1)/2; textSub('L', cx-3, yL+22, COLORS.len,'right',19,700); textSub(` = ${fmt(S.L*100,3)} cm`, cx-3, yL+22, COLORS.len,'left',14,700);
+  }
+  if (S.BOn){
+    const [X0,Y0]=W2S(L.xb0,HH), [X1,Y1]=W2S(L.xb1,-HH);
+    ctx.fillStyle='rgba(14,24,40,0.72)'; ctx.fillRect(X0,Y0,X1-X0,Y1-Y0);
+    ctx.strokeStyle='rgba(79,166,255,0.45)'; ctx.lineWidth=1; ctx.strokeRect(X0,Y0,X1-X0,Y1-Y0);
+    const sp=38; ctx.fillStyle='rgba(150,190,255,0.34)'; ctx.font="15px 'Space Grotesk', sans-serif"; ctx.textAlign='center';
+    const xs=Math.max(X0,0), xe=Math.min(X1,CW), ys=Math.max(Y0,0), ye=Math.min(Y1,CH);
+    for (let X=X0+sp/2; X<X1; X+=sp){ if (X<xs-sp||X>xe+sp) continue; for (let Y=Y0+sp/2; Y<Y1; Y+=sp){ if (Y<ys-sp||Y>ye+sp) continue; ctx.fillText(S.Bdir<0?'⊗':'⊙',X,Y+5); } }
+    ctx.textAlign='left';
+    ctx.fillStyle='rgba(242,165,65,0.6)'; const [,Yh1]=W2S(L.xb0,0.004),[,Yh2]=W2S(L.xb0,-0.004);
+    ctx.fillRect(X0-3,Y0,4,Yh1-Y0); ctx.fillRect(X0-3,Yh2,4,Y1-Yh2);
+    label(`B = ${fmtB(S.B)} ${S.Bdir<0?'into page':'out of page'}`, (X0+X1)/2, Math.max(Y0,0)+22, '#a9cbff','center',15);
+  }
+  if (!S.BOn && S.screenOn){
+    const [X,Ya]=W2S(L.xs,0.05), [,Yb]=W2S(L.xs,-0.05);
+    ctx.strokeStyle='#3d5245'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(X,Ya); ctx.lineTo(X,Yb); ctx.stroke();
+    label('screen', X, Yb+18, '#8fae99','center',13);
+    if (S.platesOn){ // D: plate exit to screen, in line with L
+      // drawn on the side the beam is NOT deflected towards, so it never crosses the path
+      const th=Math.max(5, 0.002*k), [X1,Ybp]=W2S(L.xp1,-S.d/2), [,Ytp]=W2S(L.xp1,S.d/2);
+      const above = S.pol>0, yD = above? Ytp-th-26 : Ybp+th+24, ly = above? yD-10 : yD+22;
+      ctx.strokeStyle=COLORS.dist; ctx.fillStyle=COLORS.dist; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.moveTo(X1, above? Ytp-th-3 : Ybp+th+3); ctx.lineTo(X1, above? yD-6 : yD+6);
+      ctx.moveTo(X, above? Ya-2 : Yb+2); ctx.lineTo(X, above? yD-6 : yD+6); ctx.stroke(); ctx.setLineDash([]);
+      ctx.lineWidth=2.2; dblArrow(X1+3,yD,X-3,yD,8);
+      const cx=(X1+X)/2; textSub('D', cx-3, ly, COLORS.dist,'right',19,700); textSub(` = ${fmt(S.D*100,3)} cm`, cx-3, ly, COLORS.dist,'left',14,700);
+    }
+  }
+}
+function revealedPlateShot(){
+  if (predict.on && !predict.revealed) return null;
+  const now=performance.now();
+  for (let i=shots.length-1;i>=0;i--){ const sh=shots[i]; if (sh.old) continue; if (now-sh.start < sh.dur) return null; if (sh.res.yExit!==undefined) return sh.res; }
+  return null;
+}
+function drawKey(){
+  if (!S.platesOn) return;
+  const narrow=CW<640;
+  const items=[[COLORS.dim,'d','plate separation'],[COLORS.len,'L','plate length'],...(S.screenOn&&!S.BOn?[[COLORS.dist,'D','plate exit to screen']]:[]),[COLORS.yind,'y', narrow?'exit displacement from centre line (up +)':'displacement at plate exit, from centre line (up +)']];
+  ctx.font="600 12.5px 'Space Grotesk', sans-serif"; let w=0; for (const it of items) w=Math.max(w, ctx.measureText(it[2]).width);
+  const bw=w+58, bh=items.length*21+12, x=10, y=CH-30-bh;
+  ctx.fillStyle='rgba(10,12,14,0.88)'; roundRect(x,y,bw,bh,8); ctx.fill(); ctx.strokeStyle='#2a3138'; ctx.lineWidth=1; ctx.stroke();
+  items.forEach(([c,sy,t],i)=>{ const yy=y+22+i*21; ctx.strokeStyle=c; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(x+10,yy-5); ctx.lineTo(x+24,yy-5); ctx.stroke();
+    textSub(sy,x+30,yy,c,'left',15,700,false); textSub(t,x+46,yy,'#cfcabe','left',12.5,600,false); });
+}
+function fmtB(B){ return B<1e-2 ? `${fmt(B*1000,3)} mT` : `${fmt(B,3)} T`; }
+function arrow(x1,y1,x2,y2,h=7){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const a=Math.atan2(y2-y1,x2-x1); ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45)); ctx.lineTo(x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45)); ctx.closePath(); ctx.fill(); }
+function drawPoly(pts, tmax, col, w, dash){
+  ctx.strokeStyle=col; ctx.lineWidth=w; ctx.setLineDash(dash||[]); ctx.beginPath(); let started=false;
+  for (let i=0;i<pts.length;i++){ const P=pts[i]; if (P.t>tmax) break; const [X,Y]=W2S(P.x,P.y); if(!started){ctx.moveTo(X,Y);started=true;} else ctx.lineTo(X,Y); }
+  ctx.stroke(); ctx.setLineDash([]);
+}
+function drawDots(sh,tReal){ ctx.fillStyle=sh.color; for (let t=sh.dotDt; t<=tReal; t+=sh.dotDt){ const P=stateAt(sh.res,t); const [X,Y]=W2S(P.x,P.y); ctx.beginPath(); ctx.arc(X,Y,2.6,0,7); ctx.fill(); } }
+function drawParticle(sh,tReal){
+  const P=stateAt(sh.res,tReal); const [X,Y]=W2S(P.x,P.y);
+  const g=ctx.createRadialGradient(X,Y,0,X,Y,14); g.addColorStop(0,sh.color); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(X,Y,14,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(X,Y,3,0,7); ctx.fill();
+  const v=Math.hypot(P.vx,P.vy);
+  if (opts.comps && v>0){ ctx.lineWidth=2; ctx.strokeStyle='#8ff0ff'; ctx.fillStyle='#8ff0ff'; const Lx=46*P.vx/v, Ly=46*P.vy/v;
+    if (Math.abs(Lx)>3){ arrow(X,Y,X+Lx,Y,6); label('v_{x}',X+Lx+8,Y+4,'#8ff0ff','left',11); }
+    if (Math.abs(Ly)>3){ arrow(X,Y,X,Y-Ly,6); label('v_{y}',X+4,Y-Ly-4,'#8ff0ff','left',11); } }
+  const am=Math.hypot(P.ax,P.ay);
+  if (opts.force && am>0){ ctx.lineWidth=2; ctx.strokeStyle='#ff9a5a'; ctx.fillStyle='#ff9a5a'; const fx=40*P.ax/am, fy=40*P.ay/am; arrow(X,Y,X+fx,Y-fy,7); label('F',X+fx*1.25,Y-fy*1.25+4,'#ff9a5a','center',12); }
+}
+function drawEndMarks(sh){
+  const r=sh.res;
+  if (r.strike){ const [X,Y]=W2S(r.strike.pos.x,r.strike.pos.y); ctx.strokeStyle='#ffd27a'; ctx.lineWidth=2; for(let i=0;i<8;i++){const a=i*Math.PI/4; ctx.beginPath(); ctx.moveTo(X+4*Math.cos(a),Y+4*Math.sin(a)); ctx.lineTo(X+11*Math.cos(a),Y+11*Math.sin(a)); ctx.stroke();} }
+  if (r.end==='screen'){ const [X,Y]=W2S(r.L.xs, r.screenY); const g=ctx.createRadialGradient(X,Y,0,X,Y,12); g.addColorStop(0,'rgba(125,255,179,0.95)'); g.addColorStop(1,'rgba(125,255,179,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(X,Y,12,0,7); ctx.fill(); }
+  if (r.end==='detector'){ const [X,Y]=W2S(r.L.xb0, r.detector.y); ctx.fillStyle='#ffd27a'; ctx.fillRect(X-6,Y-2,8,4); }
+}
+function drawRHR(){
+  const x=CW-150, y=CH-120, w=136, h=104;
+  ctx.fillStyle='rgba(21,25,29,0.9)'; ctx.strokeStyle='#2a3138'; ctx.lineWidth=1; ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h);
+  label('F = qv × B  (q > 0)', x+w/2, y+15, '#8d969f','center',10.5);
+  const cx=x+46, cy=y+62;
+  ctx.lineWidth=2; ctx.strokeStyle='#8ff0ff'; ctx.fillStyle='#8ff0ff'; arrow(cx,cy,cx+40,cy,6); label('v',cx+48,cy+4,'#8ff0ff','center',12);
+  label(S.Bdir<0?'⊗':'⊙', cx, cy+5, '#9ec4ff','center',18); label('B',cx-16,cy+20,'#9ec4ff','center',11);
+  const up = S.Bdir<0; ctx.strokeStyle='#ff9a5a'; ctx.fillStyle='#ff9a5a'; arrow(cx,cy,cx,cy+(up?-34:34),6); label('F',cx+10,cy+(up?-28:38),'#ff9a5a','center',12);
+  label(up?'anticlockwise':'clockwise', x+w-6, y+h-8, '#8d969f','right',10.5);
+}
+
+/* ================= controls UI ================= */
+const ctlDefs = {
+  Vacc:{label:'Accelerating p.d. V<sub>acc</sub>', min:100, max:2500, step:10, unit:'V', get:()=>S.Vacc, set:v=>S.Vacc=v},
+  gap:{label:'Gap width', min:1, max:5, step:0.5, unit:'cm', get:()=>S.gap*100, set:v=>S.gap=v/100},
+  Vp:{label:'Plate p.d. V<sub>p</sub>', min:0, max:500, step:5, unit:'V', get:()=>S.Vp, set:v=>S.Vp=v},
+  d:{label:'Plate separation d', min:1, max:5, step:0.5, unit:'cm', get:()=>S.d*100, set:v=>S.d=v/100},
+  L:{label:'Plate length L', min:2, max:10, step:1, unit:'cm', get:()=>S.L*100, set:v=>S.L=v/100},
+  D:{label:'Screen distance D', min:5, max:30, step:1, unit:'cm', get:()=>S.D*100, set:v=>S.D=v/100},
+  W:{label:'Field region width', min:5, max:30, step:1, unit:'cm', get:()=>S.W*100, set:v=>S.W=v/100},
+  B:{label:'Magnetic field B', min:0.1, max:1000, log:true, unit:'mT', get:()=>S.B*1000, set:v=>S.B=v/1000},
+  customU:{label:'Ion mass', min:1, max:250, step:1, unit:'u', get:()=>S.customU, set:v=>S.customU=v},
+};
+function syncCtl(key){ const d=ctlDefs[key], r=document.getElementById('r_'+key), n=document.getElementById('n_'+key); if(!r) return; const v=d.get(); n.value=+v.toPrecision(4); r.value = d.log? Math.round(1000*Math.log10(v/d.min)/Math.log10(d.max/d.min)) : v; }
+function ctlHTML(key){
+  const d=ctlDefs[key], val=d.get();
+  const rng = d.log ? `<input type="range" id="r_${key}" min="0" max="1000" step="1" value="${val>0?Math.round(1000*Math.log10(val/d.min)/Math.log10(d.max/d.min)):0}">`
+                    : `<input type="range" id="r_${key}" min="${d.min}" max="${maxFor(key)}" step="${d.step}" value="${val}">`;
+  return `<div class="ctl"><div class="row"><label for="n_${key}">${d.label}</label><span><input type="number" id="n_${key}" value="${+val.toPrecision(4)}" step="any"> <span class="unit">${d.unit}</span></span></div>${rng}</div>`;
+}
+function maxFor(key){ if (key==='Vacc'){ const cap=Vcap(particleOf(S)); return Math.min(2500, Math.floor(cap/10)*10); } return ctlDefs[key].max; }
+function wireCtl(key){
+  const d=ctlDefs[key], r=document.getElementById('r_'+key), n=document.getElementById('n_'+key); if(!r) return;
+  r.oninput=()=>{ let v = d.log? d.min*Math.pow(d.max/d.min, r.value/1000) : +r.value; if (d.log) v=p3(v); d.set(v); n.value=+v.toPrecision(4); changed(); };
+  n.onchange=()=>{ let v=parseNum(n.value); if(!isFinite(v)) { n.value=+d.get().toPrecision(4); return; } v=Math.max(d.min, Math.min(maxFor(key), v)); d.set(v); n.value=+v.toPrecision(4);
+    r.value = d.log? Math.round(1000*Math.log10(v/d.min)/Math.log10(d.max/d.min)) : v; changed(); };
+}
+function segHTML(id, opts, cur){ return `<div class="seg" id="${id}">${opts.map(([v,t])=>`<button data-v="${v}" class="${String(v)===String(cur)?'on':''}">${t}</button>`).join('')}</div>`; }
+function wireSeg(id, fn){ const el=document.getElementById(id); if(!el) return; el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ fn(b.dataset.v); renderControls(); changed(); }); }
+function swHTML(id,on,text){ return `<div class="toggle-row" id="${id}"><div class="switch ${on?'on':''}"></div><span>${text}</span></div>`; }
+function wireSw(id,fn){ const el=document.getElementById(id); if(el) el.onclick=()=>{ fn(); renderControls(); changed(); }; }
+
+function renderControls(){
+  const card=document.getElementById('controlsCard');
+  if (mode!=='beam'){ card.innerHTML=''; return; }
+  const p=particleOf(S);
+  card.className = 'card' + (predict.on?' locked':'');
+  card.innerHTML = `
+    <h2>Stage 1 · Accelerate</h2>
+    <div class="ctl"><div class="row"><label>Particle</label>
+      <select id="particleSel">${Object.entries(PARTICLES).map(([k,v])=>`<option value="${k}" ${k===S.particle?'selected':''}>${v.name} (${v.sym})</option>`).join('')}</select></div></div>
+    ${S.particle==='custom'? ctlHTML('customU') + `<div class="ctl"><div class="row"><label>Ion charge</label>${segHTML('segQ',[[1,'+1e'],[2,'+2e'],[3,'+3e']],S.customQ)}</div></div>`:''}
+    ${ctlHTML('Vacc')}
+    <div class="small" style="margin:-6px 0 8px">Cap for this particle (v = 0.1c): ${fmt(Vcap(p),3)} V</div>
+    ${ctlHTML('gap')}
+    <h2 style="margin-top:14px">Stage 2 · Deflecting plates ${swHTML('swPlates',S.platesOn,'')}</h2>
+    <div class="${S.platesOn?'':'disabled-block'}">
+      ${ctlHTML('Vp')}
+      <div class="ctl"><div class="row"><label>Polarity</label>${segHTML('segPol',[[1,'Top +'],[-1,'Top −']],S.pol)}</div></div>
+      ${ctlHTML('d')}${ctlHTML('L')}
+    </div>
+    <h2 style="margin-top:14px">Stage 3 · Magnetic field ${swHTML('swB',S.BOn,'')}</h2>
+    <div class="${S.BOn?'':'disabled-block'}">
+      ${ctlHTML('B')}
+      <div class="ctl"><div class="row"><label>Direction</label>${segHTML('segBdir',[[-1,'⊗ Into page'],[1,'⊙ Out of page']],S.Bdir)}</div></div>
+      ${ctlHTML('W')}
+    </div>
+    <h2 style="margin-top:14px">Screen ${swHTML('swScreen',S.screenOn && !S.BOn,'')}</h2>
+    <div class="${S.screenOn && !S.BOn?'':'disabled-block'}">${ctlHTML('D')}
+      ${S.BOn?'<div class="small">The screen is replaced by the detector strip while the B field is on.</div>':''}</div>`;
+  document.getElementById('particleSel').onchange=e=>{ S.particle=e.target.value; const cap=Vcap(particleOf(S)); if (S.Vacc>cap) S.Vacc=Math.floor(cap/10)*10; renderControls(); changed(); };
+  ['Vacc','gap','Vp','d','L','D','W','B','customU'].forEach(wireCtl);
+  wireSeg('segQ',v=>{S.customQ=+v; const cap=Vcap(particleOf(S)); if(S.Vacc>cap)S.Vacc=Math.floor(cap/10)*10;});
+  wireSeg('segPol',v=>S.pol=+v); wireSeg('segBdir',v=>S.Bdir=+v);
+  wireSw('swPlates',()=>S.platesOn=!S.platesOn); wireSw('swB',()=>S.BOn=!S.BOn); wireSw('swScreen',()=>{ if(!S.BOn) S.screenOn=!S.screenOn; });
+}
+function renderOpts(){
+  const c=document.getElementById('optsCard');
+  if (mode!=='beam'){ c.innerHTML=''; return; }
+  const item=(k,t)=>swHTML('opt_'+k,opts[k],t);
+  c.innerHTML = `<h2>Display</h2><div class="opts">${item('dots','Time dots')}${item('comps','v components')}${item('force','Force arrow')}${item('rhr','Right-hand rule')}</div>`;
+  for (const k of Object.keys(opts)){ const el=document.getElementById('opt_'+k); el.onclick=()=>{ opts[k]=!opts[k]; renderOpts(); draw(); }; }
+}
+function rows(list){ return list.map(([a,b])=> b===null?`<div class="note">${a}</div>`:`<div>${a}</div><div>${b}</div>`).join(''); }
+function renderReadouts(res){
+  const el=document.getElementById('readouts');
+  if (mode!=='beam'){ el.innerHTML=''; document.getElementById('readoutCard').style.display='none'; return; }
+  document.getElementById('readoutCard').style.display='';
+  if (predict.on && !predict.revealed){ el.innerHTML='<div class="hidden-note">Readouts are hidden until you fire.</div>'; return; }
+  res = res || computeShot(S);
+  const p=res.p; let r=[];
+  r.push(['<b style="color:var(--amber)">Accelerate</b>','']);
+  r.push(['Exit speed v', fu(res.v,'m s⁻¹')],['v / c', `${fmt(res.vc*100,3)} %`],['KE', fu(res.KE,'J')],['KE', fu(res.KEeV,'eV')],['Field in gap', fu(res.Egap,'V m⁻¹')],['Time in gap', fmtTime(res.tGap)]);
+  if (S.particle==='alpha') r.push(['Alpha has charge +2e, so KE in eV is 2 × V<sub>acc</sub>.',null]);
+  if (S.platesOn){
+    r.push(['<b style="color:var(--amber)">Plates</b>','']);
+    r.push(['E = V<sub>p</sub> / d', fu(res.E,'V m⁻¹')],['a<sub>y</sub>', fu(res.ay,'m s⁻²')],['Time between plates', fmtTime(res.tPlates)]);
+    if (res.strike) r.push([`Struck ${res.strike.plate} plate at`, `x = ${fmt(res.strike.x*100,3)} cm`]);
+    else r.push(['y at exit', fu(res.yExit*1000,'mm')],['v<sub>y</sub> at exit', fu(res.vyExit,'m s⁻¹')],['Exit angle θ', `${fmt(res.theta,3)}°`]);
+  }
+  if (S.BOn && !res.strike){
+    r.push(['<b style="color:var(--amber)">Magnetic field</b>','']);
+    r.push(['Radius r', fu(res.r*100,'cm')],['Period T', fmtTime(res.T)],['Frequency', fu(res.freq,'Hz')],['|F| = qvB', fu(res.F,'N')],['Centripetal a', fu(res.ac,'m s⁻²')],['Sense', res.sense],['Time in field', fmtTime(res.tB)]);
+    if (res.detector) r.push(['Lands on detector', `${fmt(res.detector.dist*100,3)} cm from entry`]);
+    else r.push(['Exits field through', res.exitSide],['Exit y', fu(res.exitY*100,'cm')],['Exit angle', `${fmt(res.exitAngle,3)}°`]);
+    r.push(['Work done by B: 0 J, KE unchanged.',null]);
+  }
+  if (!S.BOn && S.screenOn && !res.strike){ r.push(['<b style="color:var(--amber)">Screen</b>',''],['Spot position Y', fu(res.screenY*1000,'mm')]); }
+  el.innerHTML = `<div class="ro">${rows(r)}</div>`;
+}
+function changed(){ if (!predict.on){ fitScale(); shots=[]; renderLegend([]); } renderReadouts(); draw(); }
+
+/* ================= predict-then-fire ================= */
+const predict = { on:false, chId:'y', tol:3, setup:null, answerSI:null, answerRaw:'', unitIdx:0, choice:null, locked:false, fired:false, revealed:false, ghost:null, target:null, log:[] };
+const LEN = [['mm',1e-3],['cm',1e-2],['m',1]];
+function base(){ const st=defaultState(); st.platesOn=false; st.BOn=false; st.screenOn=false; return st; }
+function randParticle(list){ return pick(list||['positron','proton','deuteron','alpha']); }
+function capV(st){ return Math.min(2500, Math.floor(Vcap(particleOf(st))/10)*10); }
+function plateSetup(noStrike=true, forceStrike=false){
+  for (let i=0;i<500;i++){
+    const st=base(); st.particle=randParticle(); st.platesOn=true;
+    st.Vacc=rndStep(500,capV(st),100); st.Vp=rndStep(50,400,10); st.d=rndStep(0.01,0.05,0.005); st.L=rndStep(0.02,0.10,0.01); st.pol=pick([1,-1]);
+    const r=computeShot(st);
+    if (forceStrike && !r.strike) continue;
+    if (noStrike && (r.strike || Math.abs(r.yExit)>0.42*st.d || Math.abs(r.yExit)<0.0005)) continue;
+    return st;
+  }
+  return null;
+}
+function BSetup(){
+  const st=base(); st.particle=randParticle(); st.BOn=true; st.Bdir=pick([1,-1]); st.W=0.30;
+  st.Vacc=rndStep(200,capV(st),100);
+  const p=particleOf(st), v=Math.sqrt(2*p.q*st.Vacc/p.m), r=rndStep(0.03,0.12,0.005);
+  st.B = p3(p.m*v/(p.q*r));
+  return st;
+}
+const pName = st => particleOf(st).name.toLowerCase();
+const givens = arr => `<div class="givens">${arr.join('<br>')}</div>`;
+const gPart = st=> `particle: ${particleOf(st).name} (${particleOf(st).sym})`;
+const gV = st=> `V<sub>acc</sub> = ${fmt(st.Vacc,3)} V`;
+const gPlates = st=> [`V<sub>p</sub> = ${fmt(st.Vp,3)} V (${st.pol>0?'top plate +':'top plate −'})`, `d = ${fmt(st.d*100,3)} cm,  L = ${fmt(st.L*100,3)} cm`];
+const gB = st=> `B = ${fmtB(st.B)}, ${st.Bdir<0?'into the page':'out of the page'}`;
+
+const CHALLENGES = [
+ { id:'v', group:'Accelerate', title:'1 · Exit speed', kind:'num', units:[['m s⁻¹',1],['km s⁻¹',1e3]],
+   setup(){ const st=base(); st.particle=randParticle(); st.Vacc=rndStep(200,capV(st),50); return {st}; },
+   prompt:c=>`Predict the <b>speed</b> of the particle as it leaves the accelerating gap.${givens([gPart(c.st),gV(c.st)])}`,
+   truth:(c,res)=>res.v },
+ { id:'ke', group:'Accelerate', title:'2 · Kinetic energy', kind:'num', units:[['J',1],['eV',C.e],['keV',1e3*C.e]],
+   setup(){ const st=base(); st.particle=Math.random()<0.6?'alpha':randParticle(['positron','proton','deuteron']); st.Vacc=rndStep(200,capV(st),50); return {st}; },
+   prompt:c=>`Predict the <b>kinetic energy</b> gained across the gap. Choose your unit.${givens([gPart(c.st),gV(c.st)])}`,
+   truth:(c,res)=>res.KE },
+ { id:'vrev', group:'Accelerate', title:'3 · Find V_acc for a speed', kind:'num', units:[['V',1],['kV',1e3]], apply:true,
+   setup(){ const st=base(); st.particle=randParticle(); const Vt=rndStep(300,capV(st),10); const p=particleOf(st); const v=p3(Math.sqrt(2*p.q*Vt/p.m)); return {st, vTarget:v, Vtrue:p.m*v*v/(2*p.q)}; },
+   prompt:c=>`What <b>accelerating p.d.</b> gives this exit speed? The sim will fire with your value.${givens([gPart(c.st),`target speed v = ${fmt(c.vTarget,3)} m s⁻¹`])}`,
+   applyAnswer:(c,v)=>{ c.st.Vacc=v; }, truth:c=>c.Vtrue,
+   extra:(c,res)=>`Your p.d. produced v = ${fmt(res.v,3)} m s⁻¹ (target ${fmt(c.vTarget,3)} m s⁻¹).` },
+ { id:'y', group:'Deflecting plates', title:'4 · Deflection at exit', kind:'num', units:LEN, signed:true,
+   setup(){ return {st:plateSetup()}; },
+   prompt:c=>`Predict the <b>vertical displacement y</b> as the particle leaves the plates. Up is positive, down is negative.${givens([gPart(c.st),gV(c.st),...gPlates(c.st)])}`,
+   truth:(c,res)=>res.yExit,
+   ghost:(c,v)=>()=>{ const L=layout(c.st); const pts=[]; for(let i=0;i<=40;i++){ const x=L.xp0+(L.xp1-L.xp0)*i/40; pts.push({t:0,x,y:v*Math.pow(i/40,2)}); } drawPoly(pts,Infinity,COLORS.ghost,2,[5,4]); } },
+ { id:'clear', group:'Deflecting plates', title:'5 · Will it clear the plates?', kind:'choice', choices:['It clears the plates','It strikes the upper plate','It strikes the lower plate'],
+   setup(){ const strike=Math.random()<0.5; return {st: strike? plateSetup(false,true) : plateSetup(true)}; },
+   prompt:c=>`Does the particle get through, or hit a plate?${givens([gPart(c.st),gV(c.st),...gPlates(c.st)])}`,
+   correct:(c,res)=> !res.strike?0: res.strike.plate==='upper'?1:2 },
+ { id:'strike', group:'Deflecting plates', title:'5b · Where does it strike?', kind:'num', units:[['cm',1e-2],['mm',1e-3],['m',1]],
+   setup(){ return {st:plateSetup(false,true)}; },
+   prompt:c=>`This particle strikes a plate. Predict <b>how far from the front edge</b> of the plates it lands.${givens([gPart(c.st),gV(c.st),...gPlates(c.st)])}`,
+   truth:(c,res)=>res.strike.x,
+   ghost:(c,v)=>()=>{ const L=layout(c.st); const r=computeShot(c.st); const yb=r.strike.plate==='upper'?c.st.d/2:-c.st.d/2; const [X,Y]=W2S(L.xp0+v,yb); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X-7,Y-7);ctx.lineTo(X+7,Y+7);ctx.moveTo(X+7,Y-7);ctx.lineTo(X-7,Y+7); ctx.stroke(); label('your prediction',X,Y+(yb>0?-12:22),COLORS.ghost); } },
+ { id:'theta', group:'Deflecting plates', title:'6 · Exit angle', kind:'num', units:[['°',1]], signed:true,
+   setup(){ return {st:plateSetup()}; },
+   prompt:c=>`Predict the <b>angle θ</b> of the velocity to the horizontal as it leaves the plates (negative = below horizontal).${givens([gPart(c.st),gV(c.st),...gPlates(c.st)])}`,
+   truth:(c,res)=>res.theta,
+   ghostAfter:(c,v,res)=>()=>{ const L=layout(c.st); const [X,Y]=W2S(L.xp1,res.yExit); const a=v*Math.PI/180; ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.setLineDash([5,4]); ctx.beginPath(); ctx.moveTo(X,Y); ctx.lineTo(X+140*Math.cos(a),Y-140*Math.sin(a)); ctx.stroke(); ctx.setLineDash([]); } },
+ { id:'target', group:'Deflecting plates', title:'7 · Hit the target on the screen', kind:'num', units:[['V',1],['kV',1e3]], apply:true,
+   setup(){ for(let i=0;i<300;i++){ const st=plateSetup(); if(!st) continue; st.screenOn=true; st.D=rndStep(0.10,0.25,0.01);
+       const r=computeShot(st); if (r.strike || Math.abs(r.screenY)>0.045) continue; const Y=p3(r.screenY);
+       const Vt = Y / (-st.pol*(st.L/(2*st.d*st.Vacc))*(st.L/2+st.D)); st.Vp=0; return {st, Ytarget:Y, Vtrue:Vt}; } },
+   prompt:c=>`A target sits on the screen. Find the <b>plate p.d. V<sub>p</sub></b> that puts the spot on it. The sim fires with your value.${givens([gPart(c.st),gV(c.st),`polarity: ${c.st.pol>0?'top plate +':'top plate −'}`,`d = ${fmt(c.st.d*100,3)} cm,  L = ${fmt(c.st.L*100,3)} cm`,`screen ${fmt(c.st.D*100,3)} cm beyond the plates`,`target: Y = ${fmt(c.Ytarget*1000,3)} mm`])}`,
+   applyAnswer:(c,v)=>{ c.st.Vp=v; }, truth:c=>c.Vtrue, hideGiven:['Vp'],
+   target:c=>()=>{ const L=layout(c.st); const [X,Y]=W2S(L.xs,c.Ytarget); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(X,Y,9,0,7); ctx.moveTo(X-14,Y);ctx.lineTo(X+14,Y);ctx.moveTo(X,Y-14);ctx.lineTo(X,Y+14); ctx.stroke(); },
+   extra:(c,res)=> res.strike? 'Your p.d. drove the particle into a plate.' : `Spot landed at Y = ${fmt(res.screenY*1000,3)} mm (target ${fmt(c.Ytarget*1000,3)} mm).` },
+ { id:'samey', group:'Deflecting plates', title:'8 · Proton vs positron', kind:'choice', choices:['The positron deflects more','The proton deflects more','Both deflect by the same amount'],
+   setup(){ for(let i=0;i<300;i++){ const st=plateSetup(); if(!st) continue; st.particle='positron'; st.Vacc=Math.min(st.Vacc,2500); const r=computeShot(st); if(r.strike||Math.abs(r.yExit)>0.42*st.d) continue; return {st}; } },
+   prompt:c=>`A positron and a proton are each accelerated through the same p.d. and enter the same plates. Which is deflected more?${givens([gV(c.st),...gPlates(c.st)])}`,
+   shots:c=>{ const a={...c.st,particle:'positron'}, b={...c.st,particle:'proton'}; return [{st:a,color:COLORS.beam,label:'positron'},{st:b,color:COLORS.shot2,label:'proton'}]; },
+   correct:()=>2, explain:'y = V<sub>p</sub> L² / (4 d V<sub>acc</sub>): q and m cancel, so every particle follows the same path.' },
+ { id:'double', group:'Deflecting plates', title:'9 · Double V_acc', kind:'choice', choices:['y doubles','y halves','y is unchanged','y becomes four times smaller'],
+   setup(){ for(let i=0;i<300;i++){ const st=plateSetup(); if(!st) continue; st.Vacc=Math.min(st.Vacc, Math.floor(capV(st)/2/10)*10); const r=computeShot(st); if(r.strike||Math.abs(r.yExit)>0.42*st.d) continue; return {st}; } },
+   prompt:c=>`The accelerating p.d. is doubled from ${fmt(c.st.Vacc,3)} V to ${fmt(2*c.st.Vacc,3)} V. What happens to the deflection at the exit?${givens([gPart(c.st),...gPlates(c.st)])}`,
+   shots:c=>[{st:{...c.st},color:COLORS.beam,label:`${fmt(c.st.Vacc,3)} V`},{st:{...c.st,Vacc:2*c.st.Vacc},color:COLORS.shot2,label:`${fmt(2*c.st.Vacc,3)} V`}],
+   correct:()=>1, explain:'Doubling V<sub>acc</sub> doubles KE, so the time between the plates falls by √2 and y = ½at² halves.' },
+ { id:'sense', group:'Magnetic field', title:'10 · Clockwise or anticlockwise?', kind:'choice', choices:['Clockwise','Anticlockwise'],
+   setup(){ return {st:BSetup()}; },
+   prompt:c=>`Which way does the particle curve in the field?${givens([gPart(c.st),gB(c.st)])}`,
+   correct:(c,res)=> res.sense==='clockwise'?0:1 },
+ { id:'r', group:'Magnetic field', title:'11 · Radius', kind:'num', units:[['cm',1e-2],['mm',1e-3],['m',1]],
+   setup(){ return {st:BSetup()}; },
+   prompt:c=>`Predict the <b>radius</b> of the particle's path in the field.${givens([gPart(c.st),gV(c.st),gB(c.st)])}`,
+   truth:(c,res)=>res.r,
+   ghost:(c,v)=>()=>{ const L=layout(c.st); const sg = c.st.Bdir<0?1:-1; const pts=[]; for(let i=0;i<=80;i++){ const ph=Math.PI*i/80; pts.push({t:0,x:L.xb0+v*Math.sin(ph), y:sg*v*(1-Math.cos(ph))}); } drawPoly(pts,Infinity,COLORS.ghost,2,[5,4]); } },
+ { id:'hitB', group:'Magnetic field', title:'12 · Find B to hit the detector', kind:'num', units:[['mT',1e-3],['T',1]], apply:true,
+   setup(){ const st=BSetup(); const p=particleOf(st), v=Math.sqrt(2*p.q*st.Vacc/p.m); const s=rndStep(0.06,0.22,0.005); const Bt=2*p.m*v/(p.q*s); st.B=0; return {st, sTarget:s, Btrue:Bt}; },
+   prompt:c=>`Find the <b>magnetic field strength</b> that lands the particle on the marked detector cell. The sim fires with your value.${givens([gPart(c.st),gV(c.st),`B direction: ${c.st.Bdir<0?'into the page':'out of the page'}`,`target: ${fmt(c.sTarget*100,3)} cm ${c.st.Bdir<0?'above':'below'} the entry hole`])}`,
+   applyAnswer:(c,v)=>{ c.st.B=v; }, truth:c=>c.Btrue, hideGiven:['B'],
+   target:c=>()=>{ const L=layout(c.st); const sg=c.st.Bdir<0?1:-1; const [X,Y]=W2S(L.xb0,sg*c.sTarget); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(X,Y,9,0,7); ctx.moveTo(X-14,Y);ctx.lineTo(X+14,Y);ctx.moveTo(X,Y-14);ctx.lineTo(X,Y+14); ctx.stroke(); },
+   extra:(c,res)=> res.detector? `Landed ${fmt(Math.abs(res.detector.dist)*100,3)} cm from the entry hole (target ${fmt(c.sTarget*100,3)} cm).` : 'The particle left the field without reaching the detector.' },
+ { id:'T', group:'Magnetic field', title:'13 · Period', kind:'num', units:[['ns',1e-9],['µs',1e-6],['s',1]],
+   setup(){ return {st:BSetup()}; },
+   prompt:c=>`Predict the <b>period</b> of the circular motion (the time for one full circle).${givens([gPart(c.st),gV(c.st),gB(c.st)])}`,
+   truth:(c,res)=>res.T, extra:(c,res)=>`The half-circle shown took ${fmtTime(res.tB)}.` },
+ { id:'Tdouble', group:'Magnetic field', title:'13b · Double the speed', kind:'choice', choices:['T doubles','T halves','T is unchanged','T becomes four times larger'],
+   setup(){ for(let i=0;i<100;i++){ const st=BSetup(); const cap=capV(st); st.Vacc=Math.min(st.Vacc, Math.floor(cap/4/10)*10); if (st.Vacc<100) continue; const p=particleOf(st),v=Math.sqrt(2*p.q*4*st.Vacc/p.m); if (p.m*v/(p.q*st.B)>0.12) continue; return {st}; } },
+   prompt:c=>`V<sub>acc</sub> is made four times larger (${fmt(c.st.Vacc,3)} V → ${fmt(4*c.st.Vacc,3)} V), which doubles the speed. What happens to the period?${givens([gPart(c.st),gB(c.st)])}`,
+   shots:c=>[{st:{...c.st},color:COLORS.beam,label:`${fmt(c.st.Vacc,3)} V`},{st:{...c.st,Vacc:4*c.st.Vacc},color:COLORS.shot2,label:`${fmt(4*c.st.Vacc,3)} V`}],
+   correct:()=>2, explain:'T = 2πm / (qB) has no v in it: double the speed and the radius doubles too, so the time per circle is the same. Both particles reach the detector together.' },
+ { id:'exitY', group:'Magnetic field', title:'14 · Exit point (r > region width)', kind:'num', units:[['cm',1e-2],['mm',1e-3]], signed:true,
+   setup(){ const st=base(); st.particle=randParticle(); st.BOn=true; st.Bdir=pick([1,-1]); st.W=rndStep(0.05,0.15,0.01); st.Vacc=rndStep(200,capV(st),100);
+     const p=particleOf(st), v=Math.sqrt(2*p.q*st.Vacc/p.m); const r=st.W*(1.3+Math.random()*2.2); st.B=p3(p.m*v/(p.q*r)); return {st}; },
+   prompt:c=>`The radius is larger than the field region, so the particle exits through the far side. Predict its <b>y position</b> as it leaves the region (up positive).${givens([gPart(c.st),gV(c.st),gB(c.st),`region width = ${fmt(c.st.W*100,3)} cm`])}`,
+   truth:(c,res)=>res.exitY,
+   ghost:(c,v)=>()=>{ const L=layout(c.st); const [X,Y]=W2S(L.xb1,v); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X-8,Y);ctx.lineTo(X+8,Y);ctx.moveTo(X,Y-8);ctx.lineTo(X,Y+8); ctx.stroke(); label('your prediction',X+10,Y-8,COLORS.ghost,'left'); } },
+];
+const chById = id => CHALLENGES.find(c=>c.id===id);
+
+function newSetup(){
+  const ch=chById(predict.chId); let c=null;
+  for (let i=0;i<20 && !c;i++){ c=ch.setup(); if (c && !c.st) c=null; }
+  predict.setup=c; S={...c.st}; predict.answerSI=null; predict.answerRaw=''; predict.choice=null; predict.locked=false; predict.fired=false; predict.revealed=false; predict.result=null;
+  predict.ghost=null; predict.target = ch.target? ch.target(c): null; predict.unitIdx=0;
+  shots=[]; view.z=1; view.panX=0; view.panY=0; fitScale();
+  renderAll();
+}
+function renderPredict(){
+  const card=document.getElementById('predictCard');
+  if (!predict.on || mode!=='beam'){ card.style.display='none'; return; }
+  card.style.display='';
+  const ch=chById(predict.chId), c=predict.setup;
+  const groups=[...new Set(CHALLENGES.map(x=>x.group))];
+  let html = `<h2>Predict, then fire</h2>
+   <div class="ctl"><select id="chSel" style="width:100%">${groups.map(g=>`<optgroup label="${g}">${CHALLENGES.filter(x=>x.group===g).map(x=>`<option value="${x.id}" ${x.id===predict.chId?'selected':''}>${x.title}</option>`).join('')}</optgroup>`).join('')}</select></div>
+   <div class="prompt">${ch.prompt(c)}</div>`;
+  if (ch.kind==='num'){
+    html += `<div class="answer"><input id="ansIn" inputmode="decimal" placeholder="e.g. -6.3e-3" value="${predict.answerRaw}" ${predict.locked?'disabled':''}>
+      <select id="unitSel" ${predict.locked?'disabled':''}>${ch.units.map((u,i)=>`<option value="${i}" ${i===predict.unitIdx?'selected':''}>${u[0]}</option>`).join('')}</select></div>`;
+  } else {
+    html += `<div class="choices">${ch.choices.map((t,i)=>`<button data-i="${i}" class="${predict.choice===i?'on':''}" ${predict.locked?'disabled':''}>${t}</button>`).join('')}</div>`;
+  }
+  html += `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn primary" id="lockBtn" ${predict.locked?'disabled':''}>Lock in prediction</button>
+      <button class="btn" id="newBtn">New setup</button></div>
+      <div id="fbBox">${predict.result||''}</div>
+      <div class="row" style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:8px"><span class="small">Tolerance</span>
+        <select id="tolSel">${[1,2,3,5,10].map(t=>`<option value="${t}" ${t===predict.tol?'selected':''}>±${t}%</option>`).join('')}</select></div>
+      ${predict.log.length? `<div class="log" style="margin-top:10px"><table><tr><th>Challenge</th><th>Yours</th><th>Actual</th><th></th></tr>${predict.log.slice().reverse().map(l=>`<tr><td>${l.title}</td><td class="mono">${l.yours}</td><td class="mono">${l.actual}</td><td>${l.ok?'✓':'✗'}</td></tr>`).join('')}</table></div>
+        <button class="btn" id="logBtn" style="margin-top:8px;min-height:40px;padding:6px 12px">Download log (CSV)</button>`:''}`;
+  card.innerHTML=html;
+  document.getElementById('chSel').onchange=e=>{ predict.chId=e.target.value; newSetup(); };
+  document.getElementById('newBtn').onclick=newSetup;
+  document.getElementById('tolSel').onchange=e=>{ predict.tol=+e.target.value; };
+  if (ch.kind==='num'){ const ai=document.getElementById('ansIn'); ai.oninput=()=>predict.answerRaw=ai.value; document.getElementById('unitSel').onchange=e=>predict.unitIdx=+e.target.value; }
+  else card.querySelectorAll('.choices button').forEach(b=>b.onclick=()=>{ predict.choice=+b.dataset.i; renderPredict(); });
+  document.getElementById('lockBtn').onclick=lockPrediction;
+  const lb=document.getElementById('logBtn'); if (lb) lb.onclick=downloadLog;
+  updateFire();
+}
+function lockPrediction(){
+  const ch=chById(predict.chId), c=predict.setup;
+  if (ch.kind==='num'){
+    const v=parseNum(predict.answerRaw);
+    if (!isFinite(v)){ flash('Enter a number first, e.g. 4.2e6 or -3.1'); return; }
+    predict.answerSI = v*ch.units[predict.unitIdx][1];
+    predict.sf = sigFigs(predict.answerRaw);
+    if (ch.applyAnswer) ch.applyAnswer(c, predict.answerSI);
+    S={...c.st};
+    if (ch.ghost) predict.ghost = ch.ghost(c, predict.answerSI);
+  } else { if (predict.choice===null){ flash('Choose an answer first.'); return; } }
+  predict.locked=true; renderAll();
+}
+function flash(msg){ const b=document.getElementById('fbBox'); b.innerHTML=`<div class="feedback bad">${msg}</div>`; }
+function updateFire(){
+  const f=document.getElementById('fireBtn');
+  f.disabled = mode!=='beam' || (predict.on && (!predict.locked || predict.fired));
+}
+function doFire(){
+  if (mode!=='beam') return;
+  if (!predict.on){ fireShots([{st:{...S},color:COLORS.beam,label:particleOf(S).name}]); renderLegend([{color:COLORS.beam,label:particleOf(S).name}]); renderReadouts(); return; }
+  const ch=chById(predict.chId), c=predict.setup;
+  const list = ch.shots? ch.shots(c) : [{st:{...c.st},color:COLORS.beam,label:particleOf(c.st).name}];
+  shots=[]; const made=fireShots(list); renderLegend(list);
+  predict.fired=true; updateFire();
+  onAnimDone=()=>evaluate(made);
+}
+function evaluate(made){
+  const ch=chById(predict.chId), c=predict.setup, res=made[0].res;
+  let ok, html, yours, actual;
+  if (ch.kind==='num'){
+    const truth = ch.truth(c,res), pred=predict.answerSI, u=ch.units[predict.unitIdx];
+    const diff = (pred-truth)/Math.abs(truth)*100;
+    ok = Math.abs(diff)<=predict.tol;
+    const magOk = Math.abs(Math.abs(pred)-Math.abs(truth))/Math.abs(truth)*100 <= predict.tol;
+    yours = `${fmt(pred/u[1],3)} ${u[0]}`; actual = `${fmt(truth/u[1],3)} ${u[0]}`;
+    html = `<div class="big">${ok?'Within tolerance':'Outside tolerance'}</div>
+      <div class="ro"><div>Your prediction</div><div>${yours}</div><div>Actual</div><div>${actual}</div><div>Difference</div><div>${fmt(diff,2)} %</div></div>`;
+    if (!ok && magOk && Math.sign(pred)!==Math.sign(truth)) html += `<div style="margin-top:6px">Right size, wrong sign. Up and right are positive; down and left are negative.</div>`;
+    if (predict.sf<2 || predict.sf>4) html += `<div class="small" style="margin-top:6px">Sig figs: you gave ${predict.sf}. Data like this usually supports 2–3.</div>`;
+    if (ch.ghostAfter){ predict.ghost = ch.ghostAfter(c, pred, res); }
+  } else {
+    const corr = ch.correct(c,res); ok = predict.choice===corr;
+    yours = ch.choices[predict.choice]; actual = ch.choices[corr];
+    html = `<div class="big">${ok?'Correct':'Not this time'}</div><div>Answer: ${actual}</div>`;
+    if (ch.explain) html += `<div class="small" style="margin-top:6px">${ch.explain}</div>`;
+  }
+  if (ch.extra) html += `<div style="margin-top:6px">${ch.extra(c,res)}</div>`;
+  html += `<button class="btn primary" id="nextBtn" style="margin-top:10px">Next setup</button>`;
+  predict.result = `<div class="feedback ${ok?'ok':'bad'}">${html}</div>`;
+  predict.log.push({title:ch.title, yours, actual, ok});
+  predict.revealed=true;
+  renderPredict(); renderReadouts(res); draw();
+  document.getElementById('nextBtn').onclick=newSetup;
+}
+function downloadLog(){
+  const lines=['challenge,your prediction,actual,within tolerance'].concat(predict.log.map(l=>[l.title,l.yours,l.actual,l.ok?'yes':'no'].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='millikans-basement-predictions.csv'; a.click();
+}
+function renderLegend(list){
+  const lg=document.getElementById('legend');
+  lg.innerHTML = list && list.length>1 ? list.map(o=>`<span><i style="background:${o.color}"></i>${o.label}</span>`).join('') : '';
+}
+
+/* ================= modes ================= */
+const PLACEHOLDERS = {
+  selector:['Velocity selector','Crossed E and B fields in one region. Only particles with v = E/B pass through the exit slit; faster ones curve towards the magnetic force, slower ones towards the electric force. Coming in the next build.'],
+  spectro:['Mass spectrometer','A mixed beam of ions lands on a detector strip. Switch between “accelerate, then B” (r ∝ √(m/q)) and a Bainbridge layout (r ∝ m/q). Coming in the next build.'],
+  millikan:["Millikan's Basement",'Oil drops in real time through a microscope: time the fall with the field off, the rise with the field on, then find r and q with drag and buoyancy. Ionise a drop to watch its charge jump by whole multiples of e. Coming in the next build.']
+};
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode; document.querySelectorAll('#modes button').forEach(x=>x.classList.toggle('on',x===b));
+  const ph=document.getElementById('placeholder');
+  if (mode==='beam'){ ph.style.display='none'; } else { ph.style.display='flex'; document.getElementById('phTitle').textContent=PLACEHOLDERS[mode][0]; document.getElementById('phText').textContent=PLACEHOLDERS[mode][1]; }
+  renderAll();
+});
+const psw=document.getElementById('predictSwitch');
+function togglePredict(){
+  predict.on=!predict.on; psw.classList.toggle('on',predict.on); psw.setAttribute('aria-checked',predict.on);
+  shots=[]; renderLegend([]);
+  if (predict.on){ predict.saved={...S}; newSetup(); }
+  else { if (predict.saved) S=predict.saved; predict.ghost=null; predict.target=null; view.z=1;view.panX=0;view.panY=0; fitScale(); renderAll(); }
+}
+psw.onclick=togglePredict; psw.onkeydown=e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); togglePredict(); } };
+document.getElementById('fireBtn').onclick=doFire;
+document.getElementById('clearBtn').onclick=()=>{ if(predict.on && predict.fired) return; shots=[]; renderLegend([]); draw(); };
+
+function renderAll(){ renderPredict(); renderControls(); renderOpts(); renderReadouts(); updateFire(); draw(); }
+renderAll(); resize();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ draw(); });
+</script>
+</body>
+</html>
