@@ -151,7 +151,13 @@ table.cand{width:100%;border-collapse:collapse;font-size:13px}table.cand td,tabl
 .mkrec{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:10px 0;background:#111417}
 .mkh{display:flex;align-items:center;gap:6px;margin-bottom:4px}.mkh .x{margin-left:auto;background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px}
 .mrow{font-size:13px;margin:5px 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px}.mrow span{color:var(--muted);min-width:100%;font-size:12px}
-input.mi{background:#0f1215;border:1px solid #2a3138;border-radius:4px;padding:5px;color:var(--text);font:600 13px 'JetBrains Mono',monospace}
+input.mi{width:86px;background:#1f262c;border:1.5px solid #8a8f94;border-radius:6px;padding:7px 8px;color:#ffffff;font:700 15px 'JetBrains Mono',monospace}
+input.mi:placeholder-shown{border-color:#f2a541;border-style:dashed;background:#221c12}
+input.mi::placeholder{color:#8a7a5a;font-weight:500;font-size:12px}
+input.mi:focus{outline:none;border-color:#ffd27a;box-shadow:0 0 0 3px rgba(242,165,65,.25)}
+.mf{display:inline-flex;align-items:center;gap:5px;margin:3px 10px 3px 0;font-size:13.5px;color:#e7e3d9;font-weight:600}
+.mgrp{margin:8px 0}.mgt{font-size:13px;font-weight:700;color:#ffd27a;margin-bottom:2px}.mgr{display:flex;flex-wrap:wrap}
+.vars div{margin:3px 0}
 .mksel{margin:10px 0;font-size:14px}.small2{font-size:13px;color:#cfcabe}.mkc{margin:8px 0}
 footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 </style>
@@ -1588,7 +1594,7 @@ function submitItem(id, el){
 const MK = { d:0.006, rhoOil:875, rhoAir:1.20, eta:1.81e-5, g:9.81, kT:1.38e-23*293, e:1.60e-19, div:0.1, Vmax:1500 };
 const mkWp = r => 4/3*Math.PI*r*r*r*(MK.rhoOil-MK.rhoAir)*MK.g;                 // weight − upthrust (N, acts down)
 const mkVbal = (r,n) => n>0? mkWp(r)*MK.d/(n*MK.e) : Infinity;                     // balancing p.d. (V)
-const M = { V:500, pol:1, field:false, speed:1, brown:true, drops:[], sel:null, nextId:0, t:0, last:0,
+const M = { V:500, pol:1, field:false, speed:1, brown:true, swMode:'cum', drops:[], sel:null, nextId:0, t:0, last:0,
             sw:{run:false, t0:0, acc:0, laps:[]}, recs:[], msg:'', loop:false };
 function mkVel(dp){ // vertical terminal velocity, m/s, up positive
   const E = M.field? M.pol*M.V/MK.d : 0;
@@ -1639,34 +1645,76 @@ function mkTick(now){
 
 /* ---- geometry (screen px) ---- */
 function mkGeom(){
-  const R=Math.max(150, Math.min(CH*0.44, (CW-290)/2.35)), ex=R+28, ey=CH/2+8, ppmm=2*R/1.3;
-  const px=ex+R+34, pw=Math.max(240, CW-px-14);
-  return { R, ex, ey, ppmm, px, pw, sy:58 };
+  const R=Math.max(150, Math.min(CH*0.44, (CW-320)/2.35)), ex=R+28, ey=CH/2+4, ppmm=2*R/1.3;
+  const px=ex+R+44, pw=Math.max(270, CW-px-14), w=Math.min(pw-22,310);
+  const y0=16, topY=y0+MOD.h+44, botY=topY+104, xc=px+w*0.58;
+  const swW=Math.min(270, w), swH=Math.round(swW*0.70);
+  return { R, ex, ey, ppmm, px, pw, w, y0, topY, botY, xc, sw:{x:px, y:CH-swH-62, w:swW, h:swH} };
 }
 function mkButtons(){
-  const g=mkGeom(), x=g.px, y=g.sy+150+MOD.h+16, B=[];
-  B.push({id:'field', x:x+MOD.w+10, y:g.sy+150, w:116, h:MOD.h, label:M.field?'FIELD  ON':'FIELD  OFF', on:M.field, big:true, act:()=>{ M.field=!M.field; renderMillikan(); }});
-  B.push({id:'sw', x, y:y+44, w:84, h:34, label:M.sw.run?'STOP':'START', col:M.sw.run?'#ff5a4e':'#36f07a', act:()=>mkSw('toggle')});
-  B.push({id:'lap', x:x+90, y:y+44, w:56, h:34, label:'LAP', act:()=>mkSw('lap')});
-  B.push({id:'reset', x:x+152, y:y+44, w:64, h:34, label:'RESET', act:()=>mkSw('reset')});
-  const y2=y+140;
-  B.push({id:'spray', x, y:y2, w:76, h:34, label:'SPRAY', act:mkSpray});
-  B.push({id:'ionise', x:x+82, y:y2, w:76, h:34, label:'IONISE', act:()=>{ mkIonise(); renderMillikan(); }});
-  B.push({id:'speed', x:x+164, y:y2, w:52, h:34, label:'×'+M.speed, on:M.speed>1, act:()=>{ M.speed=M.speed===1?5:1; }});
-  B.push({id:'brown', x, y:y2+40, w:216, h:28, label:'Brownian motion: '+(M.brown?'on':'off'), on:M.brown, small:true, act:()=>{ M.brown=!M.brown; }});
+  const g=mkGeom(), B=[], sx=g.xc+26, sw=g.sw;
+  B.push({id:'spray',  x:sx, y:g.y0+2,  w:84, h:30, label:'SPRAY', act:mkSpray});
+  B.push({id:'ionise', x:sx, y:g.y0+36, w:40, h:22, label:'IONISE', small:true, act:()=>{ mkIonise(); renderMillikan(); }});
+  B.push({id:'speed',  x:sx+44, y:g.y0+36, w:40, h:22, label:'×'+M.speed, small:true, on:M.speed>1, act:()=>{ M.speed=M.speed===1?5:1; }});
+  B.push({id:'field',  x:g.px+24, y:(g.topY+g.botY)/2-10, w:56, h:20, rocker:true, act:()=>{ M.field=!M.field; renderMillikan(); }});
+  B.push({id:'brown',  x:g.px+16, y:g.botY+18, w:178, h:22, label:'Brownian motion: '+(M.brown?'on':'off'), on:M.brown, small:true, act:()=>{ M.brown=!M.brown; }});
+  // stopwatch keys: red = split/lap/reset, blue = mode, green = start/stop
+  const ky=sw.y+sw.h*0.775, kw=sw.w*0.2, kh=sw.h*0.15;
+  B.push({id:'swRed',   x:sw.x+sw.w*0.12, y:ky, w:kw, h:kh, key:'#e2342b', act:()=>mkSw(M.sw.run?'lap':'reset')});
+  B.push({id:'swBlue',  x:sw.x+sw.w*0.40, y:ky, w:kw, h:kh, key:'#2c3fae', act:()=>{ M.swMode = M.swMode==='lap'?'cum':'lap'; }});
+  B.push({id:'swGreen', x:sw.x+sw.w*0.68, y:ky, w:kw, h:kh, key:'#1fae55', act:()=>mkSw('toggle')});
   return B;
 }
 function mkModules(){
-  const g=mkGeom(), m={key:'Vm', w:MOD.w, h:MOD.h, x:g.px, y:g.sy+150};
+  const g=mkGeom(), m={key:'Vm', w:MOD.w, h:MOD.h, x:g.px, y:g.y0};
   m.disp={x:m.x+26, y:m.y+16, w:60, h:24}; m.knob={x:m.x+m.w-15, y:m.y+28, r:11};
   m.chip={x:m.x+m.w-44, y:m.y+3, w:40, h:11, text:'⇅ POL'};
   return [m];
 }
 function drawBtn(b){
-  ctx.fillStyle = b.on? '#2a2216' : '#1d2328'; roundRect(b.x,b.y,b.w,b.h,7); ctx.fill();
-  ctx.strokeStyle = b.on? '#f2a541' : (b.col||'#4d5761'); ctx.lineWidth = b.big?1.6:1.2; ctx.stroke();
-  if (b.big){ ctx.fillStyle=b.on?'#ffb648':'#3a434c'; ctx.beginPath(); ctx.arc(b.x+16,b.y+b.h/2,6,0,7); ctx.fill(); if (b.on){ ctx.shadowColor='rgba(255,170,60,.9)'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0; } }
-  textSub(b.label, b.big? b.x+b.w/2+8 : b.x+b.w/2, b.y+b.h/2+(b.small?4:5), b.col||(b.on?'#ffd27a':'#e7e3d9'), 'center', b.small?11.5:b.big?13:13, 700, false);
+  if (b.key){ // stopwatch key
+    const gr=ctx.createLinearGradient(0,b.y,0,b.y+b.h); gr.addColorStop(0,'rgba(255,255,255,0.35)'); gr.addColorStop(0.25,b.key); gr.addColorStop(1,b.key);
+    ctx.fillStyle='rgba(0,0,0,0.35)'; roundRect(b.x+1,b.y+3,b.w,b.h,b.h*0.32); ctx.fill();
+    ctx.fillStyle=gr; roundRect(b.x,b.y,b.w,b.h,b.h*0.32); ctx.fill(); return; }
+  if (b.rocker){
+    ctx.fillStyle='#14171a'; roundRect(b.x,b.y,b.w,b.h,b.h/2); ctx.fill(); ctx.strokeStyle=M.field?'#f2a541':'#59636d'; ctx.lineWidth=1.2; ctx.stroke();
+    const kx = M.field? b.x+b.w-b.h/2 : b.x+b.h/2; ctx.fillStyle=M.field?'#ffb648':'#6c757e';
+    if (M.field){ ctx.shadowColor='rgba(255,170,60,.9)'; ctx.shadowBlur=8; } ctx.beginPath(); ctx.arc(kx,b.y+b.h/2,b.h/2-3,0,7); ctx.fill(); ctx.shadowBlur=0;
+    textSub(M.field?'ON':'OFF', M.field? b.x+b.w/2-6 : b.x+b.w/2+6, b.y+b.h/2+3.5, M.field?'#ffd27a':'#9aa4ad','center',9,700,false);
+    textSub('FIELD', b.x+b.w+6, b.y+b.h/2+4, '#cfcabe','left',10.5,700,true); return; }
+  ctx.fillStyle = b.on? '#2a2216' : '#1d2328'; roundRect(b.x,b.y,b.w,b.h,6); ctx.fill();
+  ctx.strokeStyle = b.on? '#f2a541' : '#4d5761'; ctx.lineWidth=1.2; ctx.stroke();
+  textSub(b.label, b.x+b.w/2, b.y+b.h/2+(b.small?3.5:5), b.on?'#ffd27a':'#e7e3d9', 'center', b.small?9.5:13.5, 700, false);
+}
+function fmtSW(t){ const h=Math.floor(t/3600), m=Math.floor(t/60)%60, s=t%60; return `${h}:${String(m).padStart(2,'0')}:${s.toFixed(2).padStart(5,'0')}`; }
+function drawStopwatch(){
+  const g=mkGeom(), {x,y,w,h}=g.sw;
+  // terminals on the top edge
+  [['#c8443c',0.22],['#22262a',0.5],['#2f9a52',0.78]].forEach(([c,f])=>{ ctx.fillStyle=c; roundRect(x+w*f-7,y-6,14,9,2); ctx.fill(); });
+  // body + faceplate
+  ctx.fillStyle='#1b1d20'; roundRect(x,y,w,h,12); ctx.fill();
+  const fp=ctx.createLinearGradient(0,y,0,y+h); fp.addColorStop(0,'#d9dcdf'); fp.addColorStop(1,'#a9aeb3');
+  ctx.fillStyle=fp; roundRect(x+7,y+6,w-14,h*0.70,6); ctx.fill();
+  ctx.strokeStyle='#7c8288'; ctx.lineWidth=1.4;
+  for (let i=0;i<3;i++){ const yy=y+h*0.30+i*4; ctx.beginPath(); ctx.moveTo(x+12,yy); ctx.lineTo(x+w*0.12,yy); ctx.moveTo(x+w*0.88,yy); ctx.lineTo(x+w-12,yy); ctx.stroke(); }
+  // LCD
+  const lx=x+w*0.14, ly=y+h*0.10, lw=w*0.72, lh=h*0.39;
+  ctx.fillStyle='#2b2f33'; roundRect(lx-3,ly-3,lw+6,lh+6,4); ctx.fill();
+  const lg=ctx.createLinearGradient(0,ly,0,ly+lh); lg.addColorStop(0,'#c9d3c3'); lg.addColorStop(1,'#aebaa8'); ctx.fillStyle=lg; ctx.fillRect(lx,ly,lw,lh);
+  const t = (M.swMode==='lap' && M.sw.laps.length)? (M.sw.laps.length>1? M.sw.laps.at(-1)-M.sw.laps.at(-2) : M.sw.laps[0]) : mkSwNow();
+  const txt=fmtSW(t); let fs=lh*0.62; ctx.font=`700 ${fs}px 'JetBrains Mono', monospace`; const tw=ctx.measureText(txt).width; if (tw>lw*0.92){ fs*=lw*0.92/tw; ctx.font=`700 ${fs}px 'JetBrains Mono', monospace`; }
+  ctx.fillStyle='rgba(30,38,32,0.10)'; ctx.textAlign='center'; ctx.fillText(txt.replace(/\d/g,'8'), lx+lw/2, ly+lh*0.80);
+  ctx.fillStyle='#1d2620'; ctx.fillText(txt, lx+lw/2, ly+lh*0.80); ctx.textAlign='left';
+  ctx.font="700 8.5px 'Space Grotesk', sans-serif"; ctx.fillStyle='#1d2620';
+  ctx.fillText(M.swMode==='lap'?'LAP':'CUM', lx+lw*0.42, ly+9); ctx.textAlign='right'; ctx.fillText(M.sw.run?'RUN':'STOP', lx+lw-5, ly+9); ctx.textAlign='left';
+  // brand + key labels
+  textSub('STROTHOFF · LAB TIMER', x+w/2, y+h*0.575, '#3a3f44','center',8.5,700,false);
+  const lbY=y+h*0.68;
+  [['SPLIT/LAP/RESET',0.22],['MODE',0.5],['START/STOP',0.78]].forEach(([s,f])=>textSub(s, x+w*f, lbY, '#2a2e33','center',7.5,700,false));
+  { const L=M.sw.laps, iv=L.map((v,i)=>i? v-L[i-1] : v);
+    ctx.fillStyle='#14171a'; roundRect(x,y+h+8,w,40,6); ctx.fill(); ctx.strokeStyle='#2a3138'; ctx.lineWidth=1; ctx.stroke();
+    textSub('LAP TIMES / s', x+10, y+h+22, '#9aa4ad','left',9,700,false);
+    textSub(L.length? iv.slice(-5).map((v,i,a)=>`${L.length-a.length+i+1}: ${v.toFixed(2)}`).join('   ') : 'press the red key while running to record a lap', x+10, y+h+39, L.length?'#ffd27a':'#6b747c','left',L.length?13:11,700,false); }
 }
 function drawMillikan(){
   const g=mkGeom(), {R,ex,ey,ppmm}=g;
@@ -1676,12 +1724,10 @@ function drawMillikan(){
   ctx.fillStyle='#1b2025'; ctx.beginPath(); ctx.arc(ex,ey,R+14,0,7); ctx.fill();
   ctx.fillStyle=vg; ctx.beginPath(); ctx.arc(ex,ey,R,0,7); ctx.fill();
   ctx.save(); ctx.beginPath(); ctx.arc(ex,ey,R,0,7); ctx.clip();
-  // graticule: 10 divisions of 0.1 mm, numbered from the top
   for (let i=0;i<=10;i++){ const Y=ey-(0.5-i*MK.div)*ppmm, half=Math.sqrt(Math.max(0,R*R-(Y-ey)*(Y-ey)))*0.82;
     ctx.strokeStyle= i%5===0? 'rgba(160,220,255,0.55)':'rgba(160,220,255,0.28)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(ex-half,Y); ctx.lineTo(ex+half,Y); ctx.stroke();
     textSub(String(i), ex-half-6, Y+4, 'rgba(160,220,255,0.75)','right',11,700,false); }
   ctx.strokeStyle='rgba(160,220,255,0.18)'; ctx.beginPath(); ctx.moveTo(ex,ey-R); ctx.lineTo(ex,ey+R); ctx.stroke();
-  // drops
   for (const dp of M.drops){
     const X=ex+dp.x*ppmm, Y=ey-dp.y*ppmm, rad=1.6+dp.r*1e6*1.6;
     const gl=ctx.createRadialGradient(X,Y,0,X,Y,rad*3.2); gl.addColorStop(0,'rgba(255,248,215,1)'); gl.addColorStop(0.35,'rgba(255,225,150,0.65)'); gl.addColorStop(1,'rgba(255,200,120,0)');
@@ -1693,29 +1739,32 @@ function drawMillikan(){
   ctx.restore();
   textSub('MICROSCOPE  ·  1 division = 0.1 mm', ex, ey+R+30, '#9aa4ad','center',11,700,false);
   if (M.speed>1) textSub('×5 SPEED', ex, ey-R-12, '#ffb648','center',13,700,false);
-  // apparatus schematic
-  const x0=g.px, y0=g.sy, w=Math.min(g.pw,260), cTop = M.pol>0? COLORS.minus : COLORS.plus, cBot = M.pol>0? COLORS.plus : COLORS.minus;
-  ctx.fillStyle=cTop; ctx.fillRect(x0+20,y0+30,w-40,6); ctx.fillStyle=cBot; ctx.fillRect(x0+20,y0+112,w-40,6);
-  ctx.fillStyle='#0c0f11'; ctx.fillRect(x0+w/2-4,y0+30,8,6);   // hole in the top plate
-  label(M.pol>0?'−':'+', x0+10, y0+38, cTop,'center',16); label(M.pol>0?'+':'−', x0+10, y0+120, cBot,'center',16);
-  ctx.fillStyle='#59636d'; ctx.beginPath(); ctx.moveTo(x0+w/2-14,y0+4); ctx.lineTo(x0+w/2+14,y0+4); ctx.lineTo(x0+w/2+4,y0+22); ctx.lineTo(x0+w/2-4,y0+22); ctx.closePath(); ctx.fill();
-  textSub('atomiser', x0+w/2+20, y0+16, '#8d969f','left',10.5,600,false);
+
+  // apparatus: supply above the plates, wired to each plate
+  const x0=g.px, w=g.w, pl0=x0+16, pl1=x0+w, cTop = M.pol>0? COLORS.minus : COLORS.plus, cBot = M.pol>0? COLORS.plus : COLORS.minus;
+  const wire=(pts,col)=>{ ctx.lineJoin='round'; for (const [lw,c] of [[5,'#040506'],[2.6,col]]){ ctx.strokeStyle=c; ctx.lineWidth=lw; ctx.beginPath(); pts.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b)); ctx.stroke(); } };
+  const m=mkModules()[0], tA={x:m.x+30, y:m.y+m.h}, tB={x:m.x, y:m.y+m.h/2};
+  wire([[tA.x,tA.y],[tA.x,g.topY]], cTop);
+  wire([[tB.x,tB.y],[x0-10,tB.y],[x0-10,g.botY+3],[pl0,g.botY+3]], cBot);
+  ctx.fillStyle=cTop; ctx.fillRect(pl0,g.topY,pl1-pl0,6); ctx.fillStyle=cBot; ctx.fillRect(pl0,g.botY,pl1-pl0,6);
+  ctx.fillStyle='#0c0f11'; ctx.fillRect(g.xc-4,g.topY,8,6);
+  label(M.pol>0?'−':'+', pl1+10, g.topY+8, cTop,'center',16); label(M.pol>0?'+':'−', pl1+10, g.botY+9, cBot,'center',16);
+  // atomiser + spray
+  ctx.fillStyle='#59636d'; ctx.beginPath(); ctx.moveTo(g.xc-14,g.y0+6); ctx.lineTo(g.xc+14,g.y0+6); ctx.lineTo(g.xc+4,g.y0+26); ctx.lineTo(g.xc-4,g.y0+26); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#3d464f'; ctx.fillRect(g.xc-2,g.y0+26,4,g.topY-g.y0-30);
+  ctx.fillStyle='rgba(255,233,168,0.5)'; for (let i=0;i<5;i++) { ctx.beginPath(); ctx.arc(g.xc+(i%2?3:-3), g.topY-8-i*5, 1.2,0,7); ctx.fill(); }
+  textSub('atomiser', g.xc-7, g.topY-12, '#8d969f','right',10.5,600,false);
   if (M.field){ ctx.strokeStyle='rgba(242,165,65,0.5)'; ctx.fillStyle='rgba(242,165,65,0.5)'; ctx.lineWidth=1;
-    for (let i=1;i<5;i++){ const X=x0+20+(w-40)*i/5; M.pol>0? arrow(X,y0+106,X,y0+44,6) : arrow(X,y0+44,X,y0+106,6); } }
-  ctx.fillStyle='#ffe9a8'; ctx.beginPath(); ctx.arc(x0+w/2,y0+74,2.5,0,7); ctx.fill();
-  textSub(`d = ${(MK.d*1000).toFixed(1)} mm`, x0+w-22, y0+80, '#c58cff','right',11,700,false);
-  textSub(M.field? `E = V/d, ${M.pol>0?'upwards':'downwards'}` : 'field off', x0+22, y0+136, '#9aa4ad','left',11,600,false);
-  // supply module + buttons
-  for (const m of mkModules()) drawModule(m,false);
-  for (const b of mkButtons()) drawBtn(b);
-  // stopwatch display
-  const bx=g.px, by=g.sy+150+MOD.h+16;
-  ctx.fillStyle='#040605'; roundRect(bx,by,216,38,6); ctx.fill(); ctx.strokeStyle='#2c3a2f'; ctx.stroke();
-  ctx.font="700 22px 'JetBrains Mono', monospace"; ctx.textAlign='right'; ctx.fillStyle='#ffb648'; ctx.shadowColor='rgba(255,170,60,.7)'; ctx.shadowBlur=6;
-  ctx.fillText(mkSwNow().toFixed(2)+' s', bx+206, by+27); ctx.shadowBlur=0; ctx.textAlign='left';
-  textSub('STOPWATCH', bx+8, by+13, '#9aa4ad','left',8.5,700,false);
-  if (M.sw.laps.length) textSub('laps: '+M.sw.laps.slice(-4).map(t=>t.toFixed(2)).join('  '), bx, by+96, '#cfcabe','left',11.5,600,false);
-  textSub('Space = start/stop · L = lap · F = field', bx, by+222, '#6b747c','left',10.5,600,false);
+    for (let i=2;i<6;i++){ const X=pl0+(pl1-pl0)*i/6; M.pol>0? arrow(X,g.botY-6,X,g.topY+12,6) : arrow(X,g.topY+12,X,g.botY-6,6); } }
+  ctx.fillStyle='#ffe9a8'; ctx.beginPath(); ctx.arc(g.xc,(g.topY+g.botY)/2+6,2.5,0,7); ctx.fill();
+  textSub(`d = ${(MK.d*1000).toFixed(1)} mm`, pl1-6, g.botY-8, '#c58cff','right',11,700,false);
+  if (M.field) textSub(`E = V/d, ${M.pol>0?'upwards':'downwards'}`, pl1-6, g.topY+22, '#9aa4ad','right',10.5,600,false);
+  for (const mm of mkModules()) drawModule(mm,false);
+  for (const t of [tA,tB]){ ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,5.5,0,7); ctx.fill(); ctx.fillStyle=t===tA?cTop:cBot; ctx.beginPath(); ctx.arc(t.x,t.y,3.8,0,7); ctx.fill(); }
+  for (const b of mkButtons()) if (!b.key) drawBtn(b);
+  drawStopwatch();
+  for (const b of mkButtons()) if (b.key) drawBtn(b);
+  textSub('Keyboard: Space = start/stop · L = lap · F = field', g.px, g.sw.y-14, '#6b747c','left',10.5,600,false);
   if (M.msg) textSub(M.msg, ex, CH-10, '#ffb38a','center',12,600,true);
 }
 function mkSelectAt(x,y){
@@ -1764,12 +1813,13 @@ function mkCheck(i){
   mkSave(); renderMillikan();
 }
 function mkCardHTML(rec,i){
-  const f=(k,ph,w=62)=>`<input class="mi" data-rec="${i}" data-k="${k}" value="${rec[k]}" placeholder="${ph}" style="width:${w}px" inputmode="decimal">`;
+  const f=(k,ph,u)=>`<label class="mf"><input class="mi" data-rec="${i}" data-k="${k}" value="${rec[k]}" placeholder="${ph}" inputmode="decimal"><span>${u}</span></label>`;
   const stale = (()=>{ const dp=M.drops.find(d=>d.id===rec.id); return dp && dp.ver!==rec.ver; })();
   let h=`<div class="mkrec"><div class="mkh"><b>Drop ${rec.label}</b>${stale?'<span class="warnc"> · charge changed since this record started</span>':''}<button class="x" data-del="${i}" title="Delete record">×</button></div>
-    <div class="mrow"><span>Fall (field off)</span>${f('fd','div',48)} div in ${f('ft','s')} s</div>
-    <div class="mrow"><span>Rise (field on)</span>${f('rd','div',48)} div in ${f('rt','s')} s at ${f('V','V',56)} V <button class="linkbtn" data-usev="${i}">use ${M.V} V</button></div>
-    <div class="mrow"><span>Your results</span>r = ${f('r','µm')} µm, q = ${f('q','×10⁻¹⁹',66)} × 10⁻¹⁹ C, n = ${f('n','n',40)}</div>
+    <div class="mgrp"><div class="mgt">1 · Falling, field OFF</div><div class="mgr">${f('fd','e.g. 5','divisions')}${f('ft','e.g. 9.8','s')}</div></div>
+    <div class="mgrp"><div class="mgt">2 · Rising, field ON</div><div class="mgr">${f('rd','e.g. 5','divisions')}${f('rt','e.g. 4.2','s')}${f('V','e.g. 600','V')}</div>
+      <button class="linkbtn" data-usev="${i}">fill in the current p.d. (${M.V} V)</button></div>
+    <div class="mgrp"><div class="mgt">3 · Your results</div><div class="mgr">${f('r','radius','µm')}${f('q','charge','× 10⁻¹⁹ C')}${f('n','n','')}</div></div>
     <button class="btn primary sm" data-check="${i}">Check</button>`;
   const ck=rec.checked;
   if (ck && ck.err) h+=`<div class="nag">${ck.err}</div>`;
@@ -1802,7 +1852,18 @@ function renderMillikan(){
   const dp=M.drops.find(d=>d.id===M.sel);
   const nQ=M.recs.filter(r=>isFinite(parseNum(r.q))&&isFinite(parseNum(r.n))).length;
   card.innerHTML = `<h2>Millikan's oil drops</h2>
-    <div class="intro small2">Spray drops, tap one to select it, then time it falling with the field <b>off</b> and rising with the field <b>on</b>. Count graticule divisions (1 division = 0.100 mm) and use the stopwatch. Work out r, q and n yourself, then press Check.</div>
+    <div class="intro small2">In 1909 Robert Millikan sprayed tiny oil drops between two charged plates. Some drops pick up electric charge. By timing how fast a drop falls with the electric field <b>off</b>, and how fast it rises with the field <b>on</b>, he found the charge on each drop, and showed it is always a whole number of one small charge: the charge of an electron, <b>e</b>.</div>
+    <details class="solbox"${M.recs.length?"":" open"}><summary>What you will find for each drop</summary><div class="small2 vars">
+      <div><b>r</b> = radius of the oil drop (about 1 µm, a millionth of a metre)</div>
+      <div><b>q</b> = electric charge on the drop, in coulombs (C)</div>
+      <div><b>n</b> = number of elementary charges on the drop, so q = ne (n is a whole number)</div>
+      <div><b>V</b> = p.d. across the plates · <b>d</b> = plate separation · <b>E = V/d</b> = field strength</div></div></details>
+    <details class="solbox"${M.recs.length?"":" open"}><summary>How to measure a drop</summary><ol class="steps">
+      <li>Press <b>SPRAY</b>, then tap a drop in the eyepiece to select it. Press <b>Start a record</b> below.</li>
+      <li><b>Field OFF.</b> The drop falls at a steady speed. Start the stopwatch as it crosses a graticule line and stop it a few lines lower. Enter the number of divisions and the time.</li>
+      <li><b>Field ON.</b> Set V so the drop rises steadily. If it falls faster instead, press <b>POL</b>. If it never moves up, it is uncharged: choose another drop. Time it rising and enter divisions, time and V.</li>
+      <li>Use the falling speed to find <b>r</b>, the rising speed to find <b>q</b>, then <b>n = q / e</b>. Enter them and press <b>Check</b>.</li></ol>
+      <div class="small2">1 division = 0.100 mm. Speed = (divisions × 0.100 × 10⁻³ m) / time.</div></details>
     <table class="cand mkc"><tr><td>Plate separation d</td><td class="mono">6.00 × 10⁻³ m</td></tr><tr><td>Density of oil ρ<sub>oil</sub></td><td class="mono">875 kg m⁻³</td></tr>
       <tr><td>Density of air ρ<sub>air</sub></td><td class="mono">1.20 kg m⁻³</td></tr><tr><td>Viscosity of air η</td><td class="mono">1.81 × 10⁻⁵ Pa s</td></tr><tr><td>g</td><td class="mono">9.81 m s⁻²</td></tr></table>
     <div class="mksel">${dp? `Selected: <b>drop ${dp.label}</b> <button class="btn primary sm" data-act="mkrec">Start a record for drop ${dp.label}</button>` : '<span class="small">No drop selected. Tap a drop in the eyepiece.</span>'}</div>
