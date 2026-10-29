@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Millikan's Basement · Tests</title>
+<style>
+  :root{ --bg:#0e1113; --panel:#15191d; --line:#2a3138; --text:#e7e3d9; --muted:#8d969f; --ok:#6bdc8c; --bad:#ff7a6b; --amber:#f2a541; }
+  body{ margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui, sans-serif; }
+  header{ padding:16px 20px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  h1{ margin:0; font-size:20px; }
+  #summary{ font-weight:700; padding:6px 12px; border-radius:6px; background:#22282d; }
+  #summary.ok{ background:#14261a; color:var(--ok); } #summary.bad{ background:#2a1614; color:var(--bad); }
+  button{ background:#2a2216; color:var(--text); border:1px solid var(--amber); border-radius:6px; padding:8px 14px; cursor:pointer; font:inherit; }
+  main{ padding:12px 20px 40px; max-width:1000px; }
+  section{ border:1px solid var(--line); border-radius:8px; margin:12px 0; background:var(--panel); }
+  section h2{ margin:0; padding:10px 14px; font-size:15px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; }
+  .t{ padding:5px 14px; border-bottom:1px solid #20262b; font-family:ui-monospace, monospace; font-size:13px; }
+  .t:last-child{ border-bottom:0; }
+  .p{ color:var(--ok); } .f{ color:var(--bad); } .detail{ color:var(--muted); display:block; margin-left:18px; white-space:pre-wrap; }
+  .note{ color:var(--muted); font-size:13px; }
+  #app{ position:absolute; left:-20000px; top:0; width:1400px; height:860px; border:0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Millikan's Basement · test suite</h1>
+  <span id="summary">Running…</span>
+  <button id="again">Run again</button>
+  <span class="note">Loads index.html from the same folder and checks the physics, the predict challenges, the worked solutions, the Mystery-particle investigation and the Graphical Laboratories export. It never touches saved student progress.</span>
+</header>
+<main id="out"></main>
+<iframe id="app" title="app under test"></iframe>
+<script>
+"use strict";
+/* ---------- tiny test harness ---------- */
+const OUT=document.getElementById('out');
+let groups=[], cur=null;
+function group(name){ cur={name, tests:[]}; groups.push(cur); }
+function check(name, cond, detail=''){ cur.tests.push({name, ok:!!cond, detail: cond? '' : String(detail)}); }
+function near(a,b,rel=1e-9,abs=0){ return isFinite(a)&&isFinite(b)&&Math.abs(a-b)<=Math.max(abs, rel*Math.max(Math.abs(a),Math.abs(b))); }
+function render(){
+  const all=groups.flatMap(g=>g.tests), bad=all.filter(t=>!t.ok);
+  const s=document.getElementById('summary'); s.textContent = bad.length? `${bad.length} of ${all.length} checks FAILED` : `All ${all.length} checks passed`; s.className = bad.length? 'bad':'ok';
+  OUT.innerHTML = groups.map(g=>{ const nb=g.tests.filter(t=>!t.ok).length;
+    return `<section><h2><span>${g.name}</span><span class="${nb?'f':'p'}">${nb? nb+' failed' : g.tests.length+' passed'}</span></h2>${
+      g.tests.map(t=>`<div class="t"><span class="${t.ok?'p':'f'}">${t.ok?'✓':'✗'}</span> ${t.name}${t.detail?`<span class="detail">${t.detail.replace(/</g,'&lt;')}</span>`:''}</div>`).join('')}</section>`; }).join('');
+  window.TEST_RESULTS = { total:all.length, failed:bad.length, failures:bad.map(t=>t.name+(t.detail?' — '+t.detail:'')) };
+  window.TEST_DONE = true;
+}
+
+/* ---------- load the app in a hidden frame ---------- */
+function loadApp(){
+  return new Promise((res,rej)=>{
+    const f=document.getElementById('app');
+    f.onload=()=>setTimeout(()=>{ try{ f.contentWindow.eval('1'); res(f.contentWindow); }catch(e){ rej(e); } }, 400);
+    f.src='index.html?test='+Date.now();
+  });
+}
+
+async function run(){
+  groups=[]; window.TEST_DONE=false; document.getElementById('summary').textContent='Running…'; document.getElementById('summary').className='';
+  let W;
+  try { W = await loadApp(); }
+  catch(e){ group('Loading the app'); check('index.html loads and can be inspected', false,
+    'Could not read the app frame. Open this page from the website (e.g. https://…netlify.app/tests.html) or a local web server, not by double-clicking the file: browsers block file:// frames. '+e); render(); return; }
+  const $ = code => W.eval(code);              // evaluates inside the app's global scope (sees const/let too)
+  const errs=[]; W.addEventListener('error', e=>errs.push(e.message));
+  // keep the student's saved Mystery-particle progress untouched
+  const savedLab = (()=>{ try{ return W.localStorage.getItem('mb.mystery.v1'); }catch(e){ return null; } })();
+
+  try {
+  const C=$('C'), P=$('PARTICLES'), base=()=>$('defaultState()');
+  const shot = st => W.computeShot(st);
+  const pOf = st => W.particleOf(st);
+
+  /* ===== 1. formatting ===== */
+  group('Number formatting and parsing');
+  check('fmt(6.25e-3) → 6.25 × 10⁻³', W.fmt(6.25e-3)==='6.25 × 10⁻³', W.fmt(6.25e-3));
+  check('fmt(-0.05) keeps 3 s.f. and a true minus', W.fmt(-0.05)==='−0.0500', W.fmt(-0.05));
+  check('fmt(1.87e7) → 1.87 × 10⁷', W.fmt(1.87e7)==='1.87 × 10⁷', W.fmt(1.87e7));
+  check('fmt(2.5) → 2.50', W.fmt(2.5)==='2.50', W.fmt(2.5));
+  check('parseNum accepts 4.2e6, 4,2, −3 and 3×10^-2', near(W.parseNum('4.2e6'),4.2e6) && near(W.parseNum('4,2'),4.2) && W.parseNum('−3')===-3 && near(W.parseNum('3×10^-2'),0.03));
+  check('sigFigs("0.00620") = 3', W.sigFigs('0.00620')===3, W.sigFigs('0.00620'));
+
+  /* ===== 2. beam-line physics ===== */
+  group('Beam line physics');
+  for (const k of ['positron','proton','deuteron','alpha']){
+    const r=shot({...base(), particle:k, Vacc:1000, Vp:200, d:0.02, L:0.05, pol:1});
+    check(`${P[k].name}: y at exit = −6.25 mm (q and m cancel)`, near(r.yExit,-0.00625,1e-9), r.yExit);
+  }
+  { const r=shot({...base(), particle:'electron', Vacc:1000, Vp:200, d:0.02, L:0.05, pol:1});
+    check('Electron: deflects the other way, y = +6.25 mm', near(r.yExit,0.00625,1e-9), r.yExit); }
+  { const st={...base(), particle:'proton', Vacc:1500, Vp:300, d:0.03, L:0.06, D:0.18, pol:-1}, r=shot(st);
+    const Y=-st.pol*(st.Vp*st.L/(2*st.d*st.Vacc))*(st.L/2+st.D);
+    check('Screen spot Y = (V_p L / 2dV_acc)(L/2 + D), with sign', near(r.screenY,Y,1e-9), `${r.screenY} vs ${Y}`); }
+  { const st={...base(), particle:'positron', Vacc:500, Vp:400, d:0.01, L:0.1, pol:1}, r=shot(st), p=pOf(st);
+    const v=Math.sqrt(2*p.q*st.Vacc/p.m), a=p.q*(st.Vp/st.d)/p.m, x=v*Math.sqrt(st.d/a);
+    check('Strikes the lower plate at x = v√(d/a)', r.strike && r.strike.plate==='lower' && near(r.strike.x,x,1e-6), JSON.stringify(r.strike)); }
+  { const st={...base(), particle:'proton', Vacc:1000, platesOn:false, screenOn:false, BOn:true, B:0.1, Bdir:-1, W:0.3}, r=shot(st), p=pOf(st);
+    const v=Math.sqrt(2*p.q*st.Vacc/p.m), R=p.m*v/(p.q*st.B);
+    check('Exit speed v = √(2qV/m)', near(r.v,v,1e-12));
+    check('Radius r = mv/(qB)', near(r.r,R,1e-12), `${r.r} vs ${R}`);
+    check('Lands on the detector at 2r', r.detector && near(Math.abs(r.detector.dist),2*R,1e-6), r.detector && r.detector.dist);
+    check('Period T = 2πm/(qB)', near(r.T,2*Math.PI*p.m/(p.q*st.B),1e-12));
+    check('Positive charge, B into page → anticlockwise', r.sense==='anticlockwise', r.sense);
+    const e=shot({...st, particle:'electron', B:0.001});
+    check('Electron, B into page → clockwise, lands below the entry hole', e.sense==='clockwise' && e.detector && e.detector.dist<0, e.sense+' '+(e.detector&&e.detector.dist)); }
+  { const st={...base(), particle:'proton', Vacc:1000, platesOn:false, screenOn:false, BOn:true, B:0.02, Bdir:-1, W:0.08}, r=shot(st);
+    const h=r.r-Math.sqrt(r.r*r.r-st.W*st.W);
+    check('r > W: exits the far side at y = r − √(r² − W²)', r.exitSide==='right' && near(r.exitY,h,1e-6), `${r.exitSide} ${r.exitY} vs ${h}`); }
+  for (const k of ['electron','positron','proton','alpha']){
+    const cap=$('Vcap')(P[k]), r=shot({...base(), particle:k, Vacc:cap, platesOn:false});
+    check(`${P[k].name}: V_acc cap gives v = 0.1c`, near(r.v,0.1*C.c,1e-9), r.v); }
+
+  /* ===== 3. predict challenges + worked solutions ===== */
+  group('Predict-then-fire challenges and worked solutions');
+  const SUPM={'⁻':'-','⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9'};
+  const parseAns = t=>{ t=String(t).replace(/<[^>]+>/g,''); const m=t.match(/(−?\d+(?:\.\d+)?)(?: × 10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+))?/); if(!m) return NaN;
+    let v=parseFloat(m[1].replace('−','-')); if (m[2]) v*=Math.pow(10, parseInt([...m[2]].map(c=>SUPM[c]).join(''))); return v; };
+  const choiceKey = { clear:c=>c.includes('clears')?'clears':c.includes('upper')?'upper':'lower', sense:c=>c, esense:c=>c, samey:()=>'same', double:()=>'halves', Tdouble:()=>'unchanged', epair:()=>'mirror' };
+  const CH=$('CHALLENGES'), N=30;
+  check('Every challenge has a unique id', new Set(CH.map(c=>c.id)).size===CH.length);
+  for (const ch of CH){
+    let made=0, bad=[];
+    for (let i=0;i<N;i++){
+      let c=null; for (let j=0;j<20&&!c;j++){ c=ch.setup(); if (c&&!c.st) c=null; }
+      if (!c){ bad.push('setup failed'); continue; } made++;
+      const st={...c.st}; if (ch.id==='vrev') st.Vacc=c.Vtrue; if (ch.id==='target') st.Vp=c.Vtrue; if (ch.id==='hitB') st.B=c.Btrue;
+      const res=shot(st); let steps;
+      try { steps=W.solutionSteps(ch,c,res); } catch(e){ bad.push('solution threw: '+e.message); continue; }
+      if (!steps || !steps.length){ bad.push('no worked solution'); continue; }
+      const last=steps[steps.length-1].eqs[0];
+      if (ch.kind==='num'){
+        const tr=ch.truth(c,res); if (!isFinite(tr)){ bad.push('truth not finite'); continue; }
+        const v=parseAns(last), ok=[1,1e-2,1e-3,1e-6,1e-9].some(f=>Math.abs(v*f-tr)<=0.006*Math.abs(tr));
+        if (!ok) bad.push(`answer "${last.replace(/<[^>]+>/g,'')}" ≠ truth ${tr}`);
+      } else {
+        const corr=ch.choices[ch.correct(c,res)].toLowerCase(), key=(choiceKey[ch.id]||(x=>x))(corr), a=last.replace(/<[^>]+>/g,'').toLowerCase();
+        if (!a.includes(key)) bad.push(`proof says "${a}", correct option "${corr}"`);
+      }
+    }
+    check(`${ch.title}: ${made}/${N} setups, worked solution matches the sim`, made===N && !bad.length, [...new Set(bad)].slice(0,3).join('\n'));
+  }
+
+  /* ===== 4. drawing and layout smoke tests ===== */
+  group('Layout and drawing (no crashes)');
+  const saveS=$('S'), saveMode=$('mode');
+  const configs = {
+    'plates + screen': {}, 'plates, polarity flipped': {pol:-1}, 'plates + B field': {BOn:true, B:0.1, particle:'proton'},
+    'B field only': {platesOn:false, BOn:true, B:0.001}, 'electron, plates + screen': {particle:'electron'}, 'custom ion': {particle:'custom', customU:35, customQ:1},
+  };
+  for (const [name,over] of Object.entries(configs)){
+    try { $( 'S=' + JSON.stringify({...base(), ...over}) ); W.fitScale(); W.draw();
+      const keys=W.modules().map(m=>m.key).sort().join(',');
+      check(`${name}: draws, modules = ${keys}`, keys.includes('Vacc') && !!W.launcher());
+    } catch(e){ check(`${name}: draws`, false, e.message); }
+  }
+  $('S='+JSON.stringify(saveS)); $(`mode=${JSON.stringify(saveMode)}`); W.fitScale(); W.draw();
+
+  /* ===== 5. Mystery-particle investigation ===== */
+  group('Mystery particle investigation');
+  const SEC=$('SECTIONS'), M=$('MYSTERY'), POOL=$('MYSTERY_POOL'), CAND=$('CANDIDATES');
+  const ids=SEC.flatMap(s=>s.items.map(i=>i.id));
+  check('Every question id is unique', new Set(ids).size===ids.length, ids.join(','));
+  check('Every mystery particle is in the candidate table', POOL.every(k=>CAND.includes(k)));
+  check('Every mystery particle stays below 0.1c at 2500 V', POOL.every(k=>Math.sqrt(2*Math.abs(M[k].q)*2500/M[k].m) < 0.1*C.c));
+  const realLab=$('LAB');
+  for (const k of POOL){
+    $(`LAB={...newLab(), mkey:${JSON.stringify(k)}, V:800}`);
+    const s10=$('sTrue')(800, $('BforS')(800,10));
+    check(`${M[k].name}: s(B) and B(s) are inverses`, near(s10,10,1e-9), s10);
+    const st={...$('labDefaultSt(LAB)'), Vacc:800, B:$('BforS')(800,12)/1000}, r=shot(st);
+    check(`${M[k].name}: sim lands at the s the theory predicts`, r.detector && near(Math.abs(r.detector.dist)*100,12,1e-6), r.detector && r.detector.dist);
+    const ch=SEC.flatMap(s=>s.items).filter(i=>i.type==='choice');
+    const okIdx=ch.every(it=>{ try{ const c=it.correct(); return Number.isInteger(c) && c>=0 && c<it.opts.length; }catch(e){ return it.id==='sense'; } });
+    check(`${M[k].name}: every multiple-choice question has a valid answer`, okIdx);
+  }
+  // gradient + export using a fabricated, exact data set
+  $(`LAB={...newLab(), mkey:'proton', V:1000, res:0.1, resDec:1, Vlocked:true}`);
+  const Bs=[40,50,63,80,100,130], k_true=2*Math.sqrt(2*1000*M.proton.m/M.proton.q)*1e5;   // cm mT
+  $(`LAB.data=${JSON.stringify(Bs.map(B=>{ const s=(k_true/B).toFixed(2); return {B:B.toFixed(1), s:[s,s,s], f:[0,0,0]}; }))}`);
+  check('fitK() recovers the gradient k = 2√(2Vm/q)', near(W.fitK(),k_true,0.002), `${W.fitK()} vs ${k_true}`);
+  const qm=8*1000/Math.pow(W.fitK()*1e-5,2);
+  check('q/m = 8V/k² gives the proton value within 0.5 %', near(qm,M.proton.q/M.proton.m,0.005), qm);
+  try {
+    const url=await W.graphLabURL(), m=url.match(/#g=([zj])([A-Za-z0-9_-]+)$/);
+    check('Export link points at Graphical Laboratories', url.startsWith('https://sisgraphicallaboratory.netlify.app/#g='), url.slice(0,60));
+    let bytes=Uint8Array.from(atob(m[2].replace(/-/g,'+').replace(/_/g,'/')), c=>c.charCodeAt(0));
+    if (m[1]==='z') bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    const g=JSON.parse(new TextDecoder().decode(bytes));
+    check('Export decodes: 6 rows × 3 trials', g.rows.length===6 && g.rows.every(r=>r.y.length===3) && g.trials===3);
+    check('Export: x = B / mT ± 0.1, linearised as 1/x', g.x.sym==='B' && g.x.unit==='mT' && g.x.unc==='0.1' && g.linX==='inv');
+    check('Export: y = s / cm ± 0.05, linear fit with max/min lines, strict precision on', g.y.sym==='s' && g.y.unit==='cm' && g.y.unc==='0.05' && g.fit==='linear' && g.maxmin===true && g.strict===true);
+  } catch(e){ check('Export link builds and decodes', false, e.message); }
+  $('LAB=' + (realLab? JSON.stringify(realLab) : 'null'));
+
+  /* ===== 6. page health ===== */
+  group('Page health');
+  check('No uncaught script errors while testing', errs.length===0, errs.join('\n'));
+  const keep=(()=>{ try{ return W.localStorage.getItem('mb.mystery.v1'); }catch(e){ return null; } })();
+  check('Saved student progress was not changed', keep===savedLab);
+  } catch(e){ group('Test runner'); check('Suite ran to the end', false, e.stack||e.message); }
+  render();
+}
+document.getElementById('again').onclick=run;
+run();
+</script>
+</body>
+</html>
