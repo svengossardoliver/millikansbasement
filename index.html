@@ -148,6 +148,11 @@ table.dt input.cell.flag{border-color:#c77d3a;background:#2a1c14}
 table.dt .x{background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px}
 table.cand{width:100%;border-collapse:collapse;font-size:13px}table.cand td,table.cand th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
 .labfoot{font-size:12.5px;color:var(--muted);margin-top:8px}.linkbtn{background:none;border:0;color:#f6c983;cursor:pointer;padding:0;font-size:12.5px;text-decoration:underline}
+.mkrec{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:10px 0;background:#111417}
+.mkh{display:flex;align-items:center;gap:6px;margin-bottom:4px}.mkh .x{margin-left:auto;background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px}
+.mrow{font-size:13px;margin:5px 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px}.mrow span{color:var(--muted);min-width:100%;font-size:12px}
+input.mi{background:#0f1215;border:1px solid #2a3138;border-radius:4px;padding:5px;color:var(--text);font:600 13px 'JetBrains Mono',monospace}
+.mksel{margin:10px 0;font-size:14px}.small2{font-size:13px;color:#cfcabe}.mkc{margin:8px 0}
 footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 </style>
 </head>
@@ -189,6 +194,7 @@ footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color
   </div>
   <aside id="side">
     <section class="card" id="labCard" style="display:none"></section>
+    <section class="card" id="millikanCard" style="display:none"></section>
     <section class="card" id="predictCard" style="display:none"></section>
     <section class="card" id="readoutCard"><h2>Data</h2><div id="readouts"></div></section>
     <section class="card" id="optsCard"></section>
@@ -438,6 +444,7 @@ const ctlDefs = {
   D:{min:5, max:30, step:0.5, get:()=>S.D*100, set:v=>S.D=v/100},
   W:{min:5, max:30, step:0.5, get:()=>S.W*100, set:v=>S.W=v/100},
   B:{min:0.1, max:1000, log:true, get:()=>S.B*1000, set:v=>S.B=v/1000},
+  Vm:{min:0, max:1500, step:5, get:()=>M.V, set:v=>M.V=v},
 };
 const MODMETA = {
   Vacc:{cap:'ACCELERATING SUPPLY', sym:'V_{acc}', col:'#f2a541', val:()=>String(Math.round(S.Vacc)), unit:'V'},
@@ -447,6 +454,7 @@ const MODMETA = {
   D:{cap:'EXIT TO SCREEN', sym:'D', col:'#2dd4bf', val:()=>fmt(S.D*100,3), unit:'cm'},
   B:{cap:'MAGNETIC FIELD', sym:'B', col:'#a9cbff', val:()=>bDisp(), unit:'mT'},
   W:{cap:'FIELD WIDTH', sym:'W', col:'#a9cbff', val:()=>fmt(S.W*100,3), unit:'cm'},
+  Vm:{cap:'PLATE SUPPLY', sym:'V', col:'#f2a541', val:()=>String(Math.round(M.V)), unit:'V'},
 };
 function maxFor(key){ if (key==='Vacc'){ const cap=Vcap(particleOf(S)); return Math.min(2500, Math.floor(cap/10)*10); } return ctlDefs[key].max; }
 function fracOf(key){ const d=ctlDefs[key], v=d.get(), mx=maxFor(key);
@@ -458,6 +466,7 @@ function setVal(key,v){ const d=ctlDefs[key]; v=Math.max(d.min,Math.min(maxFor(k
   if (mode==='lab' && key==='B' && LAB && LAB.res){ v=+(Math.round(v/LAB.res)*LAB.res).toFixed(LAB.resDec); if (v<LAB.res) v=LAB.res; } if (v===d.get()) return false; d.set(v); shots=[]; renderLegend([]); renderReadouts(); draw(); return true; }
 
 function modules(){
+  if (mode==='millikan') return CW? mkModules() : [];
   if (!(mode==='beam'||mode==='lab') || !CW) return [];
   const L=layout(S), out=[], top=[], bot=[], lab=mode==='lab';
   const [,Yc]=W2S(0,0), [,Ytop]=W2S(0,view.yT), [,Ybot]=W2S(0,view.yB);
@@ -579,11 +588,12 @@ function hit(e){
   return null;
 }
 const knobAngle=(cx,cy,x,y)=> Math.atan2(x-cx, -(y-cy))*180/Math.PI;
-function chipAction(key){ if (key==='Vp') S.pol*=-1; if (key==='B') S.Bdir*=-1; changed(); }
+function chipAction(key){ if (key==='Vm'){ M.pol*=-1; renderMillikan(); draw(); return; } if (key==='Vp') S.pol*=-1; if (key==='B') S.Bdir*=-1; changed(); }
 function launchHit(e){ const g=launcher(); if (!g) return null; const [x,y]=evPos(e);
   if (Math.hypot(x-g.fire.x,y-g.fire.y)<g.fire.r+9) return 'fire'; if (Math.hypot(x-g.clear.x,y-g.clear.y)<g.clear.r+9) return 'clear'; return null; }
 function clearShots(){ if (predict.on && predict.fired) return; shots=[]; renderLegend([]); draw(); }
 cv.addEventListener('pointerdown',e=>{
+  if (mode==='millikan'){ const [x,y]=evPos(e), bt=mkButtons().find(b=>inR(x,y,b)); if (bt){ e.preventDefault(); bt.act(); draw(); return; } if (mkSelectAt(x,y)) return; }
   const lh=launchHit(e); if (lh){ e.preventDefault(); if (lh==='fire'){ if (!document.getElementById('fireBtn').disabled) doFire(); } else clearShots(); return; }
   const h=hit(e);
   if (h){ if (predict.on || h.m.lock) return; e.preventDefault();
@@ -600,6 +610,7 @@ cv.addEventListener('pointermove',e=>{
     let da=a-knobDrag.last; if (da>180) da-=360; if (da<-180) da+=360; knobDrag.last=a;
     knobDrag.frac=Math.max(0,Math.min(1,knobDrag.frac+da/270)); setVal(knobDrag.key, valFromFrac(knobDrag.key,knobDrag.frac)); return; }
   if (pan){ view.panX=pan.px+e.clientX-pan.x; view.panY=pan.py+e.clientY-pan.y; draw(); return; }
+  if (mode==='millikan'){ const [x,y]=evPos(e); if (mkButtons().some(b=>inR(x,y,b))){ cv.style.cursor='pointer'; return; } const g=mkGeom(); if (Math.hypot(x-g.ex,y-g.ey)<g.R){ cv.style.cursor='crosshair'; return; } }
   if (launchHit(e)){ cv.style.cursor='pointer'; return; }
   const h=hit(e); cv.style.cursor = h? (predict.on?'not-allowed': h.part==='disp'?'text': h.part==='body'?'default':'pointer') : (view.z>1.001?'grab':'default');
 });
@@ -661,6 +672,7 @@ function draw(){
   if (!CW) return;
   ctx.clearRect(0,0,CW,CH);
   ctx.fillStyle='#0c0f11'; ctx.fillRect(0,0,CW,CH);
+  if (mode==='millikan'){ document.getElementById('timeLabel').textContent=''; drawMillikan(); return; }
   if (!(mode==='beam'||mode==='lab')){ document.getElementById('timeLabel').textContent=''; return; }
   const L = layout(S), k=pxPerM(), ms=modules();
   drawGrid(k);
@@ -1571,6 +1583,247 @@ function submitItem(id, el){
   LAB.ans[id]=rec; if (it.after) it.after(); saveLab(); renderAll();
 }
 
+
+/* ================= MILLIKAN'S OIL-DROP EXPERIMENT ================= */
+const MK = { d:0.006, rhoOil:875, rhoAir:1.20, eta:1.81e-5, g:9.81, kT:1.38e-23*293, e:1.60e-19, div:0.1, Vmax:1500 };
+const mkWp = r => 4/3*Math.PI*r*r*r*(MK.rhoOil-MK.rhoAir)*MK.g;                 // weight − upthrust (N, acts down)
+const mkVbal = (r,n) => n>0? mkWp(r)*MK.d/(n*MK.e) : Infinity;                     // balancing p.d. (V)
+const M = { V:500, pol:1, field:false, speed:1, brown:true, drops:[], sel:null, nextId:0, t:0, last:0,
+            sw:{run:false, t0:0, acc:0, laps:[]}, recs:[], msg:'', loop:false };
+function mkVel(dp){ // vertical terminal velocity, m/s, up positive
+  const E = M.field? M.pol*M.V/MK.d : 0;
+  return (dp.n*MK.e*E - mkWp(dp.r)) / (6*Math.PI*MK.eta*dp.r);
+}
+function mkLabel(i){ const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ'; return i<26? A[i] : A[Math.floor(i/26)-1]+A[i%26]; }
+function mkSpray(){
+  for (let k=0;k<10;k++){
+    let r, n;
+    for (let tries=0; tries<50; tries++){
+      r = (0.4 + 0.8*Math.random())*1e-6; n = Math.random()<0.15? 0 : 1+Math.floor(Math.random()*8);
+      while (n>0 && mkVbal(r,n)>MK.Vmax && n<12) n++;
+      if (n===0 || mkVbal(r,n)<=MK.Vmax) break;
+    }
+    M.drops.push({ id:M.nextId, label:mkLabel(M.nextId), r, n, ver:0, x:(Math.random()*0.9-0.45), y:(Math.random()*0.65-0.1) });
+    M.nextId++;
+  }
+  mkSave(); mkStart();
+}
+function mkIonise(){
+  const dp=M.drops.find(d=>d.id===M.sel); if (!dp){ M.msg='Select a drop first (tap it in the eyepiece).'; return; }
+  let dn=0; while (dn===0 || dp.n+dn<0) dn = (Math.random()<0.5?-1:1)*(Math.random()<0.7?1:2);
+  dp.n = Math.min(14, dp.n+dn); dp.ver++; M.msg=`Drop ${dp.label} was hit by an X-ray burst. Its charge may have changed: start a new record for it.`;
+}
+function mkSwNow(){ return M.sw.acc + (M.sw.run? M.t-M.sw.t0 : 0); }
+function mkSw(act){
+  if (act==='toggle'){ if (M.sw.run){ M.sw.acc=mkSwNow(); M.sw.run=false; } else { M.sw.t0=M.t; M.sw.run=true; } }
+  if (act==='lap'){ if (M.sw.run || M.sw.acc>0){ M.sw.laps.push(mkSwNow()); if (M.sw.laps.length>8) M.sw.laps.shift(); } }
+  if (act==='reset'){ M.sw={run:false,t0:0,acc:0,laps:[]}; }
+}
+function mkStep(dt){
+  M.t += dt;
+  for (const dp of M.drops){
+    dp.y += mkVel(dp)*dt*1000;
+    if (M.brown){ const D=MK.kT/(6*Math.PI*MK.eta*dp.r), s=Math.sqrt(2*D*dt)*1000; dp.x+=s*gauss(); dp.y+=s*gauss(); }
+  }
+  const before=M.drops.length;
+  M.drops = M.drops.filter(dp=>Math.abs(dp.y)<0.72 && Math.abs(dp.x)<0.7);
+  if (M.sel!==null && !M.drops.some(d=>d.id===M.sel)){ M.msg='The selected drop drifted out of view.'; M.sel=null; renderMillikan(); }
+  return before!==M.drops.length;
+}
+function mkStart(){ if (M.loop) return; M.loop=true; M.last=performance.now(); requestAnimationFrame(mkTick); }
+function mkTick(now){
+  if (mode!=='millikan'){ M.loop=false; return; }
+  const dt=Math.min(0.1,(now-M.last)/1000)*M.speed; M.last=now;
+  mkStep(dt); draw(); requestAnimationFrame(mkTick);
+}
+
+/* ---- geometry (screen px) ---- */
+function mkGeom(){
+  const R=Math.max(150, Math.min(CH*0.44, (CW-290)/2.35)), ex=R+28, ey=CH/2+8, ppmm=2*R/1.3;
+  const px=ex+R+34, pw=Math.max(240, CW-px-14);
+  return { R, ex, ey, ppmm, px, pw, sy:58 };
+}
+function mkButtons(){
+  const g=mkGeom(), x=g.px, y=g.sy+150+MOD.h+16, B=[];
+  B.push({id:'field', x:x+MOD.w+10, y:g.sy+150, w:116, h:MOD.h, label:M.field?'FIELD  ON':'FIELD  OFF', on:M.field, big:true, act:()=>{ M.field=!M.field; renderMillikan(); }});
+  B.push({id:'sw', x, y:y+44, w:84, h:34, label:M.sw.run?'STOP':'START', col:M.sw.run?'#ff5a4e':'#36f07a', act:()=>mkSw('toggle')});
+  B.push({id:'lap', x:x+90, y:y+44, w:56, h:34, label:'LAP', act:()=>mkSw('lap')});
+  B.push({id:'reset', x:x+152, y:y+44, w:64, h:34, label:'RESET', act:()=>mkSw('reset')});
+  const y2=y+140;
+  B.push({id:'spray', x, y:y2, w:76, h:34, label:'SPRAY', act:mkSpray});
+  B.push({id:'ionise', x:x+82, y:y2, w:76, h:34, label:'IONISE', act:()=>{ mkIonise(); renderMillikan(); }});
+  B.push({id:'speed', x:x+164, y:y2, w:52, h:34, label:'×'+M.speed, on:M.speed>1, act:()=>{ M.speed=M.speed===1?5:1; }});
+  B.push({id:'brown', x, y:y2+40, w:216, h:28, label:'Brownian motion: '+(M.brown?'on':'off'), on:M.brown, small:true, act:()=>{ M.brown=!M.brown; }});
+  return B;
+}
+function mkModules(){
+  const g=mkGeom(), m={key:'Vm', w:MOD.w, h:MOD.h, x:g.px, y:g.sy+150};
+  m.disp={x:m.x+26, y:m.y+16, w:60, h:24}; m.knob={x:m.x+m.w-15, y:m.y+28, r:11};
+  m.chip={x:m.x+m.w-44, y:m.y+3, w:40, h:11, text:'⇅ POL'};
+  return [m];
+}
+function drawBtn(b){
+  ctx.fillStyle = b.on? '#2a2216' : '#1d2328'; roundRect(b.x,b.y,b.w,b.h,7); ctx.fill();
+  ctx.strokeStyle = b.on? '#f2a541' : (b.col||'#4d5761'); ctx.lineWidth = b.big?1.6:1.2; ctx.stroke();
+  if (b.big){ ctx.fillStyle=b.on?'#ffb648':'#3a434c'; ctx.beginPath(); ctx.arc(b.x+16,b.y+b.h/2,6,0,7); ctx.fill(); if (b.on){ ctx.shadowColor='rgba(255,170,60,.9)'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0; } }
+  textSub(b.label, b.big? b.x+b.w/2+8 : b.x+b.w/2, b.y+b.h/2+(b.small?4:5), b.col||(b.on?'#ffd27a':'#e7e3d9'), 'center', b.small?11.5:b.big?13:13, 700, false);
+}
+function drawMillikan(){
+  const g=mkGeom(), {R,ex,ey,ppmm}=g;
+  ctx.fillStyle='#0c0f11'; ctx.fillRect(0,0,CW,CH);
+  // eyepiece
+  const vg=ctx.createRadialGradient(ex,ey,R*0.2,ex,ey,R); vg.addColorStop(0,'#0d1418'); vg.addColorStop(1,'#05080a');
+  ctx.fillStyle='#1b2025'; ctx.beginPath(); ctx.arc(ex,ey,R+14,0,7); ctx.fill();
+  ctx.fillStyle=vg; ctx.beginPath(); ctx.arc(ex,ey,R,0,7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(ex,ey,R,0,7); ctx.clip();
+  // graticule: 10 divisions of 0.1 mm, numbered from the top
+  for (let i=0;i<=10;i++){ const Y=ey-(0.5-i*MK.div)*ppmm, half=Math.sqrt(Math.max(0,R*R-(Y-ey)*(Y-ey)))*0.82;
+    ctx.strokeStyle= i%5===0? 'rgba(160,220,255,0.55)':'rgba(160,220,255,0.28)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(ex-half,Y); ctx.lineTo(ex+half,Y); ctx.stroke();
+    textSub(String(i), ex-half-6, Y+4, 'rgba(160,220,255,0.75)','right',11,700,false); }
+  ctx.strokeStyle='rgba(160,220,255,0.18)'; ctx.beginPath(); ctx.moveTo(ex,ey-R); ctx.lineTo(ex,ey+R); ctx.stroke();
+  // drops
+  for (const dp of M.drops){
+    const X=ex+dp.x*ppmm, Y=ey-dp.y*ppmm, rad=1.6+dp.r*1e6*1.6;
+    const gl=ctx.createRadialGradient(X,Y,0,X,Y,rad*3.2); gl.addColorStop(0,'rgba(255,248,215,1)'); gl.addColorStop(0.35,'rgba(255,225,150,0.65)'); gl.addColorStop(1,'rgba(255,200,120,0)');
+    ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(X,Y,rad*3.2,0,7); ctx.fill();
+    if (dp.id===M.sel){ ctx.strokeStyle='#7dffb3'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(X,Y,13,0,7); ctx.moveTo(X-20,Y); ctx.lineTo(X-15,Y); ctx.moveTo(X+15,Y); ctx.lineTo(X+20,Y); ctx.moveTo(X,Y-20); ctx.lineTo(X,Y-15); ctx.moveTo(X,Y+15); ctx.lineTo(X,Y+20); ctx.stroke();
+      textSub(dp.label, X+17, Y-12, '#7dffb3','left',13,700,true); }
+  }
+  if (!M.drops.length) textSub('Press SPRAY to add oil drops', ex, ey+5, '#8d969f','center',15,600,false);
+  ctx.restore();
+  textSub('MICROSCOPE  ·  1 division = 0.1 mm', ex, ey+R+30, '#9aa4ad','center',11,700,false);
+  if (M.speed>1) textSub('×5 SPEED', ex, ey-R-12, '#ffb648','center',13,700,false);
+  // apparatus schematic
+  const x0=g.px, y0=g.sy, w=Math.min(g.pw,260), cTop = M.pol>0? COLORS.minus : COLORS.plus, cBot = M.pol>0? COLORS.plus : COLORS.minus;
+  ctx.fillStyle=cTop; ctx.fillRect(x0+20,y0+30,w-40,6); ctx.fillStyle=cBot; ctx.fillRect(x0+20,y0+112,w-40,6);
+  ctx.fillStyle='#0c0f11'; ctx.fillRect(x0+w/2-4,y0+30,8,6);   // hole in the top plate
+  label(M.pol>0?'−':'+', x0+10, y0+38, cTop,'center',16); label(M.pol>0?'+':'−', x0+10, y0+120, cBot,'center',16);
+  ctx.fillStyle='#59636d'; ctx.beginPath(); ctx.moveTo(x0+w/2-14,y0+4); ctx.lineTo(x0+w/2+14,y0+4); ctx.lineTo(x0+w/2+4,y0+22); ctx.lineTo(x0+w/2-4,y0+22); ctx.closePath(); ctx.fill();
+  textSub('atomiser', x0+w/2+20, y0+16, '#8d969f','left',10.5,600,false);
+  if (M.field){ ctx.strokeStyle='rgba(242,165,65,0.5)'; ctx.fillStyle='rgba(242,165,65,0.5)'; ctx.lineWidth=1;
+    for (let i=1;i<5;i++){ const X=x0+20+(w-40)*i/5; M.pol>0? arrow(X,y0+106,X,y0+44,6) : arrow(X,y0+44,X,y0+106,6); } }
+  ctx.fillStyle='#ffe9a8'; ctx.beginPath(); ctx.arc(x0+w/2,y0+74,2.5,0,7); ctx.fill();
+  textSub(`d = ${(MK.d*1000).toFixed(1)} mm`, x0+w-22, y0+80, '#c58cff','right',11,700,false);
+  textSub(M.field? `E = V/d, ${M.pol>0?'upwards':'downwards'}` : 'field off', x0+22, y0+136, '#9aa4ad','left',11,600,false);
+  // supply module + buttons
+  for (const m of mkModules()) drawModule(m,false);
+  for (const b of mkButtons()) drawBtn(b);
+  // stopwatch display
+  const bx=g.px, by=g.sy+150+MOD.h+16;
+  ctx.fillStyle='#040605'; roundRect(bx,by,216,38,6); ctx.fill(); ctx.strokeStyle='#2c3a2f'; ctx.stroke();
+  ctx.font="700 22px 'JetBrains Mono', monospace"; ctx.textAlign='right'; ctx.fillStyle='#ffb648'; ctx.shadowColor='rgba(255,170,60,.7)'; ctx.shadowBlur=6;
+  ctx.fillText(mkSwNow().toFixed(2)+' s', bx+206, by+27); ctx.shadowBlur=0; ctx.textAlign='left';
+  textSub('STOPWATCH', bx+8, by+13, '#9aa4ad','left',8.5,700,false);
+  if (M.sw.laps.length) textSub('laps: '+M.sw.laps.slice(-4).map(t=>t.toFixed(2)).join('  '), bx, by+96, '#cfcabe','left',11.5,600,false);
+  textSub('Space = start/stop · L = lap · F = field', bx, by+222, '#6b747c','left',10.5,600,false);
+  if (M.msg) textSub(M.msg, ex, CH-10, '#ffb38a','center',12,600,true);
+}
+function mkSelectAt(x,y){
+  const g=mkGeom(); if (Math.hypot(x-g.ex,y-g.ey)>g.R) return false;
+  let best=null, bd=22; for (const dp of M.drops){ const X=g.ex+dp.x*g.ppmm, Y=g.ey-dp.y*g.ppmm, dd=Math.hypot(x-X,y-Y); if (dd<bd){ bd=dd; best=dp; } }
+  M.sel = best? best.id : null; M.msg=''; renderMillikan(); return true;
+}
+
+/* ---- records, checking and worked solutions ---- */
+function mkSave(){ try{ localStorage.setItem('mb.millikan.v1', JSON.stringify({recs:M.recs})); }catch(e){} }
+function mkLoad(){ try{ const r=JSON.parse(localStorage.getItem('mb.millikan.v1')||'null'); if (r && Array.isArray(r.recs)) M.recs=r.recs; }catch(e){} }
+function mkNewRec(){
+  const dp=M.drops.find(d=>d.id===M.sel); if (!dp) return;
+  M.recs.unshift({ id:dp.id, label:dp.label, ver:dp.ver, truth:{r:dp.r, n:dp.n}, fd:'', ft:'', V:'', rd:'', rt:'', r:'', q:'', n:'', checked:null });
+  mkSave(); renderMillikan();
+}
+function mkCalc(rec){ // from the student's own timings
+  const vf=parseNum(rec.fd)*MK.div*1e-3/parseNum(rec.ft), vr=parseNum(rec.rd)*MK.div*1e-3/parseNum(rec.rt), V=parseNum(rec.V);
+  const r=Math.sqrt(9*MK.eta*vf/(2*(MK.rhoOil-MK.rhoAir)*MK.g)), E=V/MK.d, q=6*Math.PI*MK.eta*r*(vr+vf)/E;
+  return { vf, vr, V, r, E, q, Wp:mkWp(r), n:q/MK.e };
+}
+function mkSolution(rec){
+  const c=mkCalc(rec), dr=MK.rhoOil-MK.rhoAir, st=[];
+  st.push(stp('Fall speed (field off). Up is positive, so the velocity is negative; use its size here', `|v<sub>f</sub>| = distance / time = ${rec.fd} × 0.100 × 10⁻³ / ${rec.ft} = ${N4(c.vf)} m s⁻¹`));
+  st.push(stp('At terminal velocity the forces balance: weight − upthrust = drag', `(4/3)πr³(ρ<sub>oil</sub> − ρ<sub>air</sub>)g = 6πηr|v<sub>f</sub>|`));
+  st.push(stp('Rearrange for r', `r = √(9η|v<sub>f</sub>| / (2(ρ<sub>oil</sub> − ρ<sub>air</sub>)g))`));
+  st.push(stp('Substitute', `r = √(9 × ${N4(MK.eta)} × ${N4(c.vf)} / (2 × ${N4(dr)} × ${N4(MK.g)}))`));
+  st.push(stp('Evaluate', `r = √(${N4(9*MK.eta*c.vf/(2*dr*MK.g))}) = ${N4(c.r)} m`));
+  st.push(stp('Rise speed (field on, V = '+rec.V+' V)', `v<sub>r</sub> = ${rec.rd} × 0.100 × 10⁻³ / ${rec.rt} = ${N4(c.vr)} m s⁻¹`));
+  st.push(stp('Rising at terminal velocity: the electric force balances weight − upthrust plus drag (drag now acts down)', `qE = (4/3)πr³(ρ<sub>oil</sub> − ρ<sub>air</sub>)g + 6πηrv<sub>r</sub>`));
+  st.push(stp('The weight term equals 6πηr|v<sub>f</sub>| (from the fall), so', `qE = 6πηr(v<sub>r</sub> + |v<sub>f</sub>|)`));
+  st.push(stp('Field strength between the plates', `E = V / d = ${rec.V} / ${N4(MK.d)} = ${N4(c.E)} V m⁻¹`));
+  st.push(stp('Rearrange for q, substitute and evaluate', `q = 6πηr(v<sub>r</sub> + |v<sub>f</sub>|) / E`,
+    `q = 6π × ${N4(MK.eta)} × ${N4(c.r)} × (${N4(c.vr)} + ${N4(c.vf)}) / ${N4(c.E)}`, `q = ${N4(c.q)} C`));
+  st.push(stp('Number of elementary charges', `n = q / e = ${N4(c.q)} / 1.60 × 10⁻¹⁹ = ${fmt(c.n,3)}`));
+  st.push(ans(`r = ${N3(c.r*1e6)} µm,  q = ${N3(c.q)} C,  n ≈ ${Math.round(c.n)}`));
+  return `<ol class="sol">${st.map(x=>`<li><div class="why">${x.why}</div>${x.eqs.map(e=>`<div class="eq">${e}</div>`).join('')}</li>`).join('')}</ol>`;
+}
+function mkCheck(i){
+  const rec=M.recs[i], c=mkCalc(rec), t=rec.truth;
+  if (![c.vf,c.vr,c.V].every(v=>isFinite(v)&&v>0)){ rec.checked={err:'Fill in the fall and rise measurements (divisions and times) and the p.d. first.'}; mkSave(); renderMillikan(); return; }
+  const sr=parseNum(rec.r)*1e-6, sq=parseNum(rec.q)*1e-19, sn=parseNum(rec.n);
+  const calcOK = isFinite(sr)&&isFinite(sq) && Math.abs(sr-c.r)/c.r<0.03 && Math.abs(sq-c.q)/c.q<0.03;
+  const measR=(c.r-t.r)/t.r*100, measQ=t.n? (c.q-t.n*MK.e)/(t.n*MK.e)*100 : NaN;
+  rec.checked={ calcOK, measR, measQ, nOK: isFinite(sn) && sn===t.n, tn:t.n, tr:t.r };
+  mkSave(); renderMillikan();
+}
+function mkCardHTML(rec,i){
+  const f=(k,ph,w=62)=>`<input class="mi" data-rec="${i}" data-k="${k}" value="${rec[k]}" placeholder="${ph}" style="width:${w}px" inputmode="decimal">`;
+  const stale = (()=>{ const dp=M.drops.find(d=>d.id===rec.id); return dp && dp.ver!==rec.ver; })();
+  let h=`<div class="mkrec"><div class="mkh"><b>Drop ${rec.label}</b>${stale?'<span class="warnc"> · charge changed since this record started</span>':''}<button class="x" data-del="${i}" title="Delete record">×</button></div>
+    <div class="mrow"><span>Fall (field off)</span>${f('fd','div',48)} div in ${f('ft','s')} s</div>
+    <div class="mrow"><span>Rise (field on)</span>${f('rd','div',48)} div in ${f('rt','s')} s at ${f('V','V',56)} V <button class="linkbtn" data-usev="${i}">use ${M.V} V</button></div>
+    <div class="mrow"><span>Your results</span>r = ${f('r','µm')} µm, q = ${f('q','×10⁻¹⁹',66)} × 10⁻¹⁹ C, n = ${f('n','n',40)}</div>
+    <button class="btn primary sm" data-check="${i}">Check</button>`;
+  const ck=rec.checked;
+  if (ck && ck.err) h+=`<div class="nag">${ck.err}</div>`;
+  else if (ck){
+    h+=`<div class="fb ${ck.calcOK?'ok':'bad'}"><b>${ck.calcOK?'Your calculation matches your timings.':'Your r or q does not follow from your timings: compare with the worked solution.'}</b><br>
+      Measurement quality: your timings give r ${ck.measR>=0?'+':''}${fmt(ck.measR,2)} % from the drop's true radius (${N3(ck.tr*1e6)} µm)${isFinite(ck.measQ)?`, and q ${ck.measQ>=0?'+':''}${fmt(ck.measQ,2)} % from its true charge`:''}.<br>
+      The drop carried <b>n = ${ck.tn}</b>${ck.tn===0?' (it was neutral: it never rises)':''}. ${ck.nOK?'Your n is right.':'Check your n.'}</div>
+      <details class="solbox" ${ck.calcOK?'':'open'}><summary>Worked solution with your numbers</summary>${mkSolution(rec)}</details>`;
+  }
+  return h+'</div>';
+}
+function mkExportURL(){
+  const rows=M.recs.filter(r=>isFinite(parseNum(r.q))&&isFinite(parseNum(r.n))).map(r=>({x:String(Math.round(parseNum(r.n))), y:[String(r.q)]}));
+  const st={ v:1, title:'Charge on oil drops against number of elementary charges', showTitle:true,
+    x:{name:'Number of elementary charges', sym:'n', unit:'', unc:'', mode:'abs'}, y:{name:'Charge', sym:'q', unit:'10⁻¹⁹ C', unc:'', mode:'abs'},
+    trials:1, spread:'range', rows, perPoint:false, strict:false, linX:'none', linY:'none', fit:'proportional', maxmin:false, residuals:false, origin:true, tab:'raw' };
+  return encodeGraphLab(st);
+}
+async function encodeGraphLab(st){
+  const bytes=new TextEncoder().encode(JSON.stringify(st));
+  const b64u=u8=>{ let s=''; u8.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+  if (window.CompressionStream){ const cs=new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return GRAPHLAB+'#g=z'+b64u(new Uint8Array(await new Response(cs).arrayBuffer())); }
+  return GRAPHLAB+'#g=j'+b64u(bytes);
+}
+function renderMillikan(){
+  const card=document.getElementById('millikanCard');
+  if (mode!=='millikan'){ card.style.display='none'; return; }
+  card.style.display='';
+  const dp=M.drops.find(d=>d.id===M.sel);
+  const nQ=M.recs.filter(r=>isFinite(parseNum(r.q))&&isFinite(parseNum(r.n))).length;
+  card.innerHTML = `<h2>Millikan's oil drops</h2>
+    <div class="intro small2">Spray drops, tap one to select it, then time it falling with the field <b>off</b> and rising with the field <b>on</b>. Count graticule divisions (1 division = 0.100 mm) and use the stopwatch. Work out r, q and n yourself, then press Check.</div>
+    <table class="cand mkc"><tr><td>Plate separation d</td><td class="mono">6.00 × 10⁻³ m</td></tr><tr><td>Density of oil ρ<sub>oil</sub></td><td class="mono">875 kg m⁻³</td></tr>
+      <tr><td>Density of air ρ<sub>air</sub></td><td class="mono">1.20 kg m⁻³</td></tr><tr><td>Viscosity of air η</td><td class="mono">1.81 × 10⁻⁵ Pa s</td></tr><tr><td>g</td><td class="mono">9.81 m s⁻²</td></tr></table>
+    <div class="mksel">${dp? `Selected: <b>drop ${dp.label}</b> <button class="btn primary sm" data-act="mkrec">Start a record for drop ${dp.label}</button>` : '<span class="small">No drop selected. Tap a drop in the eyepiece.</span>'}</div>
+    ${M.recs.map(mkCardHTML).join('')}
+    <div class="row2" style="margin-top:10px"><button class="btn sm" data-act="mkexport" ${nQ<2?'disabled':''}>Plot q against n in Graphical Laboratories ↗</button></div>
+    <div class="small">${nQ<2?'Complete at least two records with q and n to plot them.':`The gradient of q against n (proportional fit) is your value of e. Accepted value: 1.60 × 10⁻¹⁹ C.`}</div>
+    <details class="solbox"><summary>Teacher note</summary><div class="small2">The sim uses pure Stokes' law so students' calculations match exactly. For real drops of about 1 µm, Stokes' law needs the Cunningham slip correction (≈ 10 %), which Millikan had to apply. Brownian motion (on by default) gives the readings genuine random scatter; switching it off isolates the physics. Drops leave the field of view if ignored, as in the real apparatus.</div></details>`;
+  card.querySelectorAll('input.mi').forEach(inp=>inp.onchange=()=>{ M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim(); M.recs[+inp.dataset.rec].checked=null; mkSave(); });
+  card.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>{ card.querySelectorAll(`input.mi[data-rec="${b.dataset.check}"]`).forEach(inp=>M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim()); mkCheck(+b.dataset.check); });
+  card.querySelectorAll('[data-usev]').forEach(b=>b.onclick=()=>{ M.recs[+b.dataset.usev].V=String(M.V); mkSave(); renderMillikan(); });
+  card.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ M.recs.splice(+b.dataset.del,1); mkSave(); renderMillikan(); });
+  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=async()=>{ if (b.dataset.act==='mkrec') mkNewRec(); if (b.dataset.act==='mkexport'){ const w=window.open('about:blank','_blank'); const u=await mkExportURL(); if (w) w.location.href=u; else location.href=u; } });
+}
+document.addEventListener('keydown',e=>{
+  if (mode!=='millikan' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  if (e.key===' '){ e.preventDefault(); mkSw('toggle'); }
+  if (e.key==='l'||e.key==='L') mkSw('lap');
+  if (e.key==='f'||e.key==='F'){ M.field=!M.field; renderMillikan(); }
+});
+mkLoad();
+
 /* ================= modes ================= */
 const PLACEHOLDERS = {
   selector:['Velocity selector','Crossed E and B fields in one region. Only particles with v = E/B pass through the exit slit; faster ones curve towards the magnetic force, slower ones towards the electric force. Coming in the next build.'],
@@ -1585,9 +1838,11 @@ document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
   shots=[]; renderLegend([]); view.z=1; view.panX=0; view.panY=0;
   mode=next; document.querySelectorAll('#modes button').forEach(x=>x.classList.toggle('on',x===b));
   document.getElementById('predictWrap').style.visibility = mode==='beam'? 'visible':'hidden';
+  document.querySelector('.view-btns').style.display = mode==='millikan'? 'none':'flex';
   fitScale();
   const ph=document.getElementById('placeholder');
-  if (mode==='beam'||mode==='lab'){ ph.style.display='none'; } else { ph.style.display='flex'; document.getElementById('phTitle').textContent=PLACEHOLDERS[mode][0]; document.getElementById('phText').textContent=PLACEHOLDERS[mode][1]; }
+  if (mode==='millikan') mkStart();
+  if (mode==='beam'||mode==='lab'||mode==='millikan'){ ph.style.display='none'; } else { ph.style.display='flex'; document.getElementById('phTitle').textContent=PLACEHOLDERS[mode][0]; document.getElementById('phText').textContent=PLACEHOLDERS[mode][1]; }
   renderAll();
 });
 const psw=document.getElementById('predictSwitch');
@@ -1601,7 +1856,7 @@ psw.onclick=togglePredict; psw.onkeydown=e=>{ if(e.key===' '||e.key==='Enter'){ 
 document.getElementById('fireBtn').onclick=doFire;
 document.getElementById('clearBtn').onclick=clearShots;
 
-function renderAll(){ renderLab(); renderPredict(); renderControls(); renderOpts(); renderReadouts(); updateFire(); draw(); }
+function renderAll(){ renderLab(); renderMillikan(); renderPredict(); renderControls(); renderOpts(); renderReadouts(); updateFire(); draw(); }
 renderAll(); resize();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ draw(); });
 </script>

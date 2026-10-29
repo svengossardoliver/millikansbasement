@@ -195,7 +195,40 @@ async function run(){
   } catch(e){ check('Export link builds and decodes', false, e.message); }
   $('LAB=' + (realLab? JSON.stringify(realLab) : 'null'));
 
-  /* ===== 6. page health ===== */
+
+  /* ===== 6. Millikan oil drops ===== */
+  group("Millikan oil-drop experiment");
+  { const Wp=$('mkWp'), Vbal=$('mkVbal'), MKc=$('MK');
+    check('Balancing p.d. for r = 1.00 µm, n = 3 is about 449 V', near(Vbal(1e-6,3),448.8,0.002), Vbal(1e-6,3));
+    const v=Wp(0.8e-6)/(6*Math.PI*MKc.eta*0.8e-6);
+    check('Fall speed of a 0.80 µm drop ≈ 6.7 × 10⁻⁵ m s⁻¹ (Stokes)', near(v,6.69e-5,0.01), v);
+    const realM = JSON.stringify($('M').recs);
+    $('M.recs=[]'); let worst=0, bad=[];
+    for (let i=0;i<40;i++){
+      const r=(0.4+0.8*Math.random())*1e-6, n=1+Math.floor(Math.random()*8); if (Vbal(r,n)>1400) continue;
+      const V=Math.min(1500, Math.ceil(Vbal(r,n)*1.6/5)*5);
+      const vf=Wp(r)/(6*Math.PI*MKc.eta*r), vr=(n*MKc.e*V/MKc.d - Wp(r))/(6*Math.PI*MKc.eta*r);
+      const rec={fd:'5', ft:String(5e-4/vf), V:String(V), rd:'5', rt:String(5e-4/vr)};
+      const c=W.mkCalc(rec);
+      worst=Math.max(worst, Math.abs(c.r-r)/r, Math.abs(c.q-n*MKc.e)/(n*MKc.e));
+      if (Math.round(c.n)!==n) bad.push(`n ${n} → ${c.n}`);
+      const sol=W.mkSolution({...rec});
+      if (!sol.includes((n*MKc.e).toExponential(2).replace(/e-19/,'')) && !/q = /.test(sol)) bad.push('solution missing q');
+    }
+    check('Timings → r and q recover the true drop (40 random drops)', worst<1e-6 && !bad.length, `worst ${worst} ${bad.join(', ')}`);
+    $('M.recs='+realM);
+    try {
+      $(`M.recs=[{label:'A',q:'3.21',n:'2'},{label:'B',q:'6.38',n:'4'},{label:'C',q:'4.79',n:'3'}]`);
+      const url=await W.mkExportURL(), m=url.match(/#g=([zj])([A-Za-z0-9_-]+)$/);
+      let bytes=Uint8Array.from(atob(m[2].replace(/-/g,'+').replace(/_/g,'/')), c=>c.charCodeAt(0));
+      if (m[1]==='z') bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+      const g=JSON.parse(new TextDecoder().decode(bytes));
+      check('Export: q / 10⁻¹⁹ C against n, proportional fit, 3 rows', g.rows.length===3 && g.fit==='proportional' && g.y.unit==='10⁻¹⁹ C' && g.x.sym==='n');
+    } catch(e){ check('Millikan export builds and decodes', false, e.message); }
+    $('M.recs='+realM);
+  }
+
+  /* ===== 7. page health ===== */
   group('Page health');
   check('No uncaught script errors while testing', errs.length===0, errs.join('\n'));
   const keep=(()=>{ try{ return W.localStorage.getItem('mb.mystery.v1'); }catch(e){ return null; } })();
