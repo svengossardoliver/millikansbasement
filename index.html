@@ -32,7 +32,24 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:calc(100v
 @media (max-width:920px){main{grid-template-columns:1fr}}
 .stage{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0}
 .canvas-wrap{position:relative;flex:1;min-height:440px}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#modInput{position:absolute;display:none;z-index:5;background:#040605;border:1.5px solid var(--amber);border-radius:5px;color:#ffb648;font:700 18px 'JetBrains Mono',monospace;text-align:right;padding:0 8px;outline:none;box-shadow:0 0 0 3px rgba(242,165,65,.25)}
+.setup{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.setup .sep{width:1px;height:30px;background:var(--line);margin:0 4px}
+.fld{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);font-weight:600}
+.fld select,.fld input{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;min-height:40px;color:var(--text);font-weight:600}
+.fld input{width:70px;font-family:'JetBrains Mono',monospace}
+.tog{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--line);border-radius:20px;padding:8px 14px;min-height:40px;cursor:pointer;color:var(--muted);font-weight:600}
+.tog i{width:10px;height:10px;border-radius:50%;background:#3a434c;flex:none}
+.tog.on{color:var(--text);border-color:#6a5530;background:#221c12}
+.tog.on i{background:var(--amber);box-shadow:0 0 8px rgba(242,165,65,.7)}
+.tog:disabled{opacity:.4;cursor:not-allowed}
+.key{display:grid;gap:4px;font-size:13px;margin-bottom:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#111417}
+.key i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.key b{font-size:15px;margin-right:2px}
+.sec{color:var(--amber);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.rhr{display:flex;align-items:center;gap:12px;margin-top:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#111417;font-size:13px;color:var(--muted)}
+.rhr b{color:var(--text)}
 .overlay-tl{position:absolute;top:10px;left:12px;font:600 13px 'JetBrains Mono',monospace;color:var(--amber);pointer-events:none;text-shadow:0 0 4px #000}
 .view-btns{position:absolute;top:8px;right:10px;display:flex;gap:6px}
 .view-btns button{width:40px;height:40px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:600}
@@ -60,12 +77,13 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;p
 .toggle-row{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
 .disabled-block{opacity:.38;pointer-events:none}
 .locked .ctl input,.locked .ctl select,.locked .seg,.locked .switch{pointer-events:none;opacity:.6}
-.ro{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:14px}
-.ro div:nth-child(odd){color:var(--muted)}
-.ro div:nth-child(even){font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
+.ro{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14.5px}
+.ro div:has(> .sec){padding-top:8px}
+.ro .k{color:var(--muted)}
+.ro .v{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
 .ro .note{grid-column:1/-1;color:var(--muted);font-size:12.5px;font-family:inherit;text-align:left}
 .hidden-note{color:var(--muted);font-size:13px;font-style:italic}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
 .prompt{background:#1f1a12;border:1px solid #4a3a1c;border-radius:8px;padding:10px 12px;font-size:14.5px}
 .prompt b{color:var(--amber)}
 .givens{font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:6px;color:#e9d9b8}
@@ -78,6 +96,13 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;p
 .feedback.ok{background:#14261a;border:1px solid #2f6b40}
 .feedback.bad{background:#2a1614;border:1px solid #7a3229}
 .feedback .big{font-weight:700;font-size:16px;margin-bottom:4px}
+.solbox{margin-top:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}
+.solbox summary{cursor:pointer;color:#f6c983;font-weight:600}
+.solhead{color:#f6c983;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+ol.sol{margin:6px 0 0;padding-left:28px;display:grid;gap:7px}
+ol.sol .why{color:#b8b2a6;font-size:13px}
+ol.sol .eq{font-size:14.5px;font-weight:600;color:var(--text);padding-left:2px;overflow-wrap:anywhere}
+ol.sol li:last-child .eq{color:#ffd27a}
 .mono{font-family:'JetBrains Mono',monospace}
 .small{font-size:12.5px;color:var(--muted)}
 .log{max-height:180px;overflow-y:auto;font-size:12.5px}
@@ -86,6 +111,43 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;p
 .placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(14,17,19,.92)}
 .placeholder .box{max-width:520px;border:1px solid var(--line);border-radius:10px;padding:20px 22px;background:var(--panel)}
 .placeholder h3{margin:0 0 8px;color:var(--amber)}
+.labsec{margin:0 0 10px}
+details.labsec{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#111417}
+details.labsec summary{cursor:pointer;color:#8fd6a2;font-weight:600}
+section.labsec.live h3{margin:4px 0 8px;font-size:17px}
+.labsec .intro{font-size:14px;color:#cfcabe;margin-bottom:10px}
+.prog{font:600 12px 'JetBrains Mono',monospace;color:var(--muted);letter-spacing:0}
+.bar{height:4px;background:#22282d;border-radius:2px;margin:-2px 0 12px;overflow:hidden}.bar i{display:block;height:100%;background:var(--amber)}
+.item{border-left:2px solid #4a3a1c;padding:4px 0 8px 10px;margin:10px 0}
+.item.done{border-left-color:#2f6b40}
+.item .q{font-size:14.5px;margin-bottom:6px}
+.item .choices{display:grid;gap:6px;margin:6px 0}
+.item .ch{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:14px}
+.item .ch.on{border-color:var(--amber);background:#2a2216}
+.item .ch.ro{cursor:default}.item .ch.right{border-color:#2f6b40;background:#14261a}.item .ch.wrong{border-color:#7a3229;background:#2a1614}
+.item textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px;color:var(--text);font:inherit;font-size:14px;resize:vertical;margin-bottom:6px}
+.item .ans{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.item .ans input{width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--text);font:600 15px 'JetBrains Mono',monospace}
+.item .ans.two label{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
+.item .u{color:var(--muted);font-size:13px}
+.item .mine{font-size:13.5px;color:#cfcabe;margin:4px 0}
+.fb{margin-top:6px;border-radius:7px;padding:8px 10px;font-size:13.5px;line-height:1.45}
+.fb.ok{background:#14261a;border:1px solid #2f6b40}.fb.bad{background:#2a1c14;border:1px solid #7a5229}.fb.model{background:#16202a;border:1px solid #2d4c6b}
+.nag{color:#ffb38a;font-size:13px;margin-top:6px}
+.btn.sm{min-height:38px;padding:7px 12px;font-size:14px}
+.row2{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.steps{margin:6px 0;padding-left:20px;font-size:13.5px;color:#cfcabe}
+#labRuler{width:100%;height:104px;border-radius:6px;display:block;margin:4px 0 8px}
+.rec{display:flex;gap:8px;align-items:center}.rec input{width:90px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--text);font:700 15px 'JetBrains Mono',monospace}
+.warnc{color:#ffb38a}
+table.dt{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+table.dt th{color:var(--muted);font-weight:600;text-align:left;padding:3px;border-bottom:1px solid var(--line)}
+table.dt td{padding:2px 3px;border-bottom:1px solid #20262b}
+table.dt input.cell{width:58px;background:#0f1215;border:1px solid #2a3138;border-radius:4px;padding:4px;color:var(--text);font:600 13px 'JetBrains Mono',monospace}
+table.dt input.cell.flag{border-color:#c77d3a;background:#2a1c14}
+table.dt .x{background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px}
+table.cand{width:100%;border-collapse:collapse;font-size:13px}table.cand td,table.cand th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
+.labfoot{font-size:12.5px;color:var(--muted);margin-top:8px}.linkbtn{background:none;border:0;color:#f6c983;cursor:pointer;padding:0;font-size:12.5px;text-decoration:underline}
 footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 </style>
 </head>
@@ -99,9 +161,10 @@ footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color
     <button data-mode="beam" class="on">Beam line</button>
     <button data-mode="selector">Velocity selector</button>
     <button data-mode="spectro">Mass spectrometer</button>
+    <button data-mode="lab">Mystery particle</button>
     <button data-mode="millikan">Millikan</button>
   </nav>
-  <div class="predict-switch"><span>Predict</span><div class="switch" id="predictSwitch" role="switch" aria-checked="false" tabindex="0"></div></div>
+  <div class="predict-switch" id="predictWrap"><span>Predict</span><div class="switch" id="predictSwitch" role="switch" aria-checked="false" tabindex="0"></div></div>
 </header>
 
 <main>
@@ -114,18 +177,20 @@ footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color
         <button id="zoomOut" title="Zoom out">−</button>
         <button id="zoomFit" title="Fit view">⤢</button>
       </div>
+      <input id="modInput" inputmode="decimal" autocomplete="off">
       <div class="placeholder" id="placeholder" style="display:none"><div class="box"><h3 id="phTitle"></h3><div id="phText"></div></div></div>
     </div>
     <div class="firebar">
-      <button class="btn fire" id="fireBtn">FIRE</button>
-      <button class="btn" id="clearBtn">Clear shots</button>
+      <button class="btn fire" id="fireBtn" hidden>FIRE</button>
+      <button class="btn" id="clearBtn" hidden>Clear</button>
+      <div class="setup" id="setupBar"></div>
       <div class="legend" id="legend"></div>
     </div>
   </div>
   <aside id="side">
+    <section class="card" id="labCard" style="display:none"></section>
     <section class="card" id="predictCard" style="display:none"></section>
-    <section class="card" id="controlsCard"></section>
-    <section class="card" id="readoutCard"><h2>Readouts</h2><div id="readouts"></div></section>
+    <section class="card" id="readoutCard"><h2>Data</h2><div id="readouts"></div></section>
     <section class="card" id="optsCard"></section>
   </aside>
 </main>
@@ -139,6 +204,7 @@ footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color
 /* ================= constants (IB data booklet values) ================= */
 const C = { e:1.60e-19, me:9.110e-31, mp:1.673e-27, u:1.661e-27, c:3.00e8 };
 const PARTICLES = {
+  electron:{ name:'Electron',  sym:'e⁻',  m:C.me,          q:-C.e },
   positron:{ name:'Positron',  sym:'e⁺',  m:C.me,          q:C.e },
   proton:  { name:'Proton',    sym:'p⁺',  m:C.mp,          q:C.e },
   deuteron:{ name:'Deuteron',  sym:'d⁺',  m:2.014*C.u,     q:C.e },
@@ -196,24 +262,28 @@ let mode = 'beam';
 
 function particleOf(st){
   const p = PARTICLES[st.particle];
+  if (st.particle==='mystery'){ const M=MYSTERY[st.mkey]; return { name:'Mystery particle', sym:'?', m:M.m, q:M.q }; }
   if (st.particle==='custom') return { name:'Custom ion', sym:`${st.customU} u, +${st.customQ}e`, m:st.customU*C.u, q:st.customQ*C.e };
   return p;
 }
-const Vcap = p => p.m*Math.pow(0.1*C.c,2)/(2*p.q);
+const Vcap = p => p.m*Math.pow(0.1*C.c,2)/(2*Math.abs(p.q));
 
 /* ================= physics: layout + analytic trajectory ================= */
 const HH = 0.25; // half-height of B region / view limit (m)
-function layout(st){
+function layout(st, s){
+  s = s || view.s || 2000;
   const L = {};
   L.xg0 = 0.03; L.xg1 = L.xg0 + st.gap; let cur = L.xg1;
   if (st.platesOn){ L.xp0 = cur + 0.03; L.xp1 = L.xp0 + st.L; cur = L.xp1; }
   if (st.BOn){
     let gapB = 0.04;
-    if (!st.platesOn && typeof view!=='undefined' && view.scale>50){ const u=psuU(); gapB = Math.max(gapB, L.xg0 + (PSU.accW*u - 36*u + 18)/view.scale - cur); }
+    if (!st.platesOn) gapB = Math.max(gapB, (MOD.w/2+26)/s - (L.xg1-L.xg0)/2);   // clear the accelerating supply
     L.xb0 = cur + gapB; L.xb1 = L.xb0 + st.W; L.xEnd = L.xb1 + 0.06; }
   else if (st.screenOn){ L.xs = cur + st.D; L.xEnd = L.xs + 0.02; }
-  else L.xEnd = cur + 0.15;
-  L.hw = st.platesOn ? Math.max(st.d/2+0.025, (!st.BOn && st.screenOn)? 0.064 : 0) : 0;
+  else L.xEnd = cur + (st.platesOn? 0.05 : 0.15);
+  // wire height: leaves room for the L / D arrows and labels between plates and wires
+  // wire height: room for the d module above and the L arrow + L module below the plates
+  L.hw = st.platesOn ? Math.max(st.d/2 + Math.max(0.02, (MOD.h+42)/s), (!st.BOn && st.screenOn)? 0.062 : 0) : 0;
   if (st.platesOn) L.xw = L.xp0 + 0.85*st.L;
   return L;
 }
@@ -229,9 +299,10 @@ function computeShot(st){
   let t=0, s0;
   const push = (dur, f, acc, kind)=>{ segs.push({t0:t, t1:t+dur, f, acc, kind}); t+=dur; };
   // Stage 1: accelerate from rest
-  const a = p.q*st.Vacc/(p.m*st.gap), v0 = Math.sqrt(2*p.q*st.Vacc/p.m), tg = v0/a;
+  // the gun polarity is set so the particle always speeds up along +x (grids swap for a negative charge)
+  const Q=Math.abs(p.q), a = Q*st.Vacc/(p.m*st.gap), v0 = Math.sqrt(2*Q*st.Vacc/p.m), tg = v0/a;
   push(tg, s=>({x:L.xg0+0.5*a*s*s, y:0, vx:a*s, vy:0}), ()=>({ax:a, ay:0}), 'gap');
-  res.v = v0; res.KE = p.q*st.Vacc; res.KEeV = res.KE/C.e; res.tGap = tg; res.Egap = st.Vacc/st.gap; res.vc = v0/C.c;
+  res.v = v0; res.KE = Q*st.Vacc; res.KEeV = res.KE/C.e; res.tGap = tg; res.Egap = st.Vacc/st.gap; res.vc = v0/C.c;
   let s = {x:L.xg1, y:0, vx:v0, vy:0};
   const straight = (dur)=>{ const q={...s}; push(dur, u=>({x:q.x+q.vx*u, y:q.y+q.vy*u, vx:q.vx, vy:q.vy}), ()=>({ax:0,ay:0}), 'drift'); s={x:q.x+q.vx*dur, y:q.y+q.vy*dur, vx:q.vx, vy:q.vy}; };
   const straightTo = (xt)=>{ if (s.vx>0 && xt>s.x) straight((xt-s.x)/s.vx); };
@@ -269,8 +340,8 @@ function computeShot(st){
     for (let k=0;k<60;k++){ const mid=(lo+hi)/2; if (inside(f(mid))) lo=mid; else hi=mid; }
     const tB = hi, e = f(tB);
     push(tB, f, u=>{ const v=f(u); return {ax:Om*v.vy, ay:-Om*v.vx}; }, 'B');
-    res.r = p.m*vmag/(p.q*st.B); res.T = 2*Math.PI*p.m/(p.q*st.B); res.freq = 1/res.T;
-    res.F = p.q*vmag*st.B; res.ac = vmag*vmag/res.r; res.tB = tB; res.yEntryB = q.y; res.sense = Om<0?'anticlockwise':'clockwise';
+    res.r = p.m*vmag/(Q*st.B); res.T = 2*Math.PI*p.m/(Q*st.B); res.freq = 1/res.T;
+    res.F = Q*vmag*st.B; res.ac = vmag*vmag/res.r; res.tB = tB; res.yEntryB = q.y; res.sense = Om<0?'anticlockwise':'clockwise';
     let side = e.x<L.xb0+1e-9?'left': e.x>=L.xb1-1e-9?'right': e.y>0?'top':'bottom';
     res.exitSide = side; res.exitY = e.y; res.exitAngle = Math.atan2(e.vy,e.vx)*180/Math.PI;
     s = e;
@@ -298,74 +369,265 @@ function stateAt(res, t){
 
 /* ================= canvas + view ================= */
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-let CW=0, CH=0, DPR=1, view={scale:1, z:1, panX:0, panY:0};
+let CW=0, CH=0, DPR=1;
+const view = { s:2000, ox:80, oy:300, yT:0.07, yB:-0.07, z:1, panX:0, panY:0, tgt:null, from:null, t0:0, anim:false };
+const GH = 0.025;                     // gun grid half-height (m)
+const MOD = { w:116, h:46 };          // knob module size (screen px, never scaled)
+const LAUNCH = { w:104, gap:10 };     // launcher left of the gun (screen px)
+const TOP_PAD = 58, BOT_PAD = 12, ROW_GAP = 12;
 function resize(){
-  const r = cv.getBoundingClientRect(); DPR = window.devicePixelRatio||1;
-  CW=r.width; CH=r.height; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
-  fitScale(); draw();
+  const r = cv.getBoundingClientRect(); if (r.width<10 || r.height<10) return;
+  DPR = window.devicePixelRatio||1; CW=r.width; CH=r.height;
+  cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  closeEditor(true); fitScale(); draw();
 }
-const GH = 0.025;                 // gun grid half-height (m)
-const PSU = { accW:184, accH:112, plW:164, plPad:58 };
-const psuU = ()=> Math.max(0.6, Math.min(1, CW/1000));
-let fitScale = function(){
-  const L=layout(S); let ymax=0.03;
-  if (S.platesOn) ymax=Math.max(ymax, S.d/2+0.012);
-  if (S.BOn){
-    if (predict.on || !(S.B>0)) ymax = HH;
-    else { const r=computeShot(S); for (const P of r.poly) ymax=Math.max(ymax, Math.min(HH, Math.abs(P.y)+0.02)); }
+function worldRight(L){ return S.BOn? L.xEnd : (S.screenOn? L.xs : L.xEnd); }
+function worldBox(st, s){
+  const L=layout(st, s);
+  const xMin=L.xg0-0.004, xMax = st.BOn? L.xEnd : (st.screenOn? L.xs+0.004 : L.xEnd);
+  let yT=GH+0.008, yB=-(GH+0.008);
+  if (st.platesOn){ yT=Math.max(yT,L.hw); yB=Math.min(yB,-L.hw); }
+  if (!st.BOn && st.screenOn){ yT=Math.max(yT,0.058); yB=Math.min(yB,-0.058); }
+  if (st.BOn){
+    if (predict.on || !(st.B>0)){ yT=Math.max(yT,HH); yB=Math.min(yB,-HH); }
+    else { const r=computeShot(st); for (const P of r.poly){ if (P.x<L.xb0-1e-6) continue; yT=Math.max(yT,Math.min(HH,P.y+0.015)); yB=Math.min(yB,Math.max(-HH,P.y-0.015)); }
+      yT=Math.max(yT,0.05); yB=Math.min(yB,-0.05); }
   }
-  const u=psuU(); const rightPx = S.platesOn ? PSU.plW*u + 24 : 24;
-  let s = Math.min((CW-25-rightPx)/L.xEnd, (CH/2-26)/ymax);
-  if (S.platesOn) s = Math.min(s, (CH/2 - PSU.plPad*u - 8)/L.hw);
-  s = Math.min(s, (CH/2 - 18 - PSU.accH*u - 8)/GH);
-  view.scale = Math.max(s, 40);
+  return {xMin, xMax, yT, yB};
 }
-const _fit1 = fitScale;
-fitScale = function(){ _fit1(); _fit1(); _fit1(); };
-function W2B(x,y){ return [25 + x*view.scale, CH/2 - y*view.scale]; }
-function B2S(bx,by){ return [CW/2 + (bx-CW/2)*view.z + view.panX, CH/2 + (by-CH/2)*view.z + view.panY]; }
-function S2B(sx,sy){ return [CW/2 + (sx-CW/2-view.panX)/view.z, CH/2 + (sy-CH/2-view.panY)/view.z]; }
-function W2S(x,y){ const b=W2B(x,y); return B2S(b[0],b[1]); }
-const pxPerM = ()=> view.scale*view.z;
+/* fit: apparatus + its ring of modules, centred in the canvas */
+function computeFit(){
+  let s = view.tgt? view.tgt.s : view.s, box;
+  const leftPx = Math.max(MOD.w/2, LAUNCH.w+LAUNCH.gap)+10, rightPx = S.platesOn? MOD.w+44 : 14;
+  const topPx = (S.BOn || (S.platesOn && !S.BOn && S.screenOn && S.pol>0))? MOD.h+ROW_GAP : 0, botPx = MOD.h+ROW_GAP;
+  for (let i=0;i<4;i++){
+    box=worldBox(S,s);
+    const aw = CW-24-leftPx-rightPx, ah = CH-TOP_PAD-BOT_PAD-topPx-botPx;
+    s = Math.max(60, Math.min(aw/(box.xMax-box.xMin), ah/(box.yT-box.yB)));
+  }
+  box=worldBox(S,s);
+  const totW = leftPx+(box.xMax-box.xMin)*s+rightPx, totH = topPx+(box.yT-box.yB)*s+botPx;
+  return { s, ox:(CW-totW)/2+leftPx-box.xMin*s, oy:TOP_PAD+Math.max(0,(CH-TOP_PAD-BOT_PAD-totH)/2)+topPx+box.yT*s, yT:box.yT, yB:box.yB };
+}
+function fitScale(){ if (!CW) return; const f=computeFit(); Object.assign(view,{s:f.s,ox:f.ox,oy:f.oy,yT:f.yT,yB:f.yB}); view.tgt=null; }
+function refit(){ // glide smoothly to the new fit instead of jumping
+  if (!CW) return;
+  const t=computeFit(); view.from={s:view.s,ox:view.ox,oy:view.oy,yT:view.yT,yB:view.yB}; view.tgt=t; view.t0=performance.now();
+  if (!view.anim){ view.anim=true; requestAnimationFrame(glide); }
+}
+function glide(){
+  const t=view.tgt; if (!t){ view.anim=false; return; }
+  const a=Math.min(1,(performance.now()-view.t0)/300), e=1-Math.pow(1-a,3);
+  for (const k of ['s','ox','oy','yT','yB']) view[k]=view.from[k]+(t[k]-view.from[k])*e;
+  draw();
+  if (a<1) requestAnimationFrame(glide); else { view.tgt=null; view.anim=false; draw(); }
+}
+function W2S(x,y){ return [CW/2+(view.ox+x*view.s-CW/2)*view.z+view.panX, CH/2+(view.oy-y*view.s-CH/2)*view.z+view.panY]; }
+const pxPerM = ()=> view.s*view.z;
 new ResizeObserver(resize).observe(document.getElementById('canvasWrap'));
 document.getElementById('zoomIn').onclick=()=>{view.z=Math.min(view.z*1.6,40);draw();};
-document.getElementById('zoomOut').onclick=()=>{view.z=Math.max(view.z/1.6,0.3);draw();};
+document.getElementById('zoomOut').onclick=()=>{view.z=Math.max(view.z/1.6,1); if(view.z===1){view.panX=0;view.panY=0;} draw();};
 document.getElementById('zoomFit').onclick=()=>{view.z=1;view.panX=0;view.panY=0;fitScale();draw();};
-/* pointer: turn a supply knob, otherwise pan */
-let drag=null, knobDrag=null;
+
+/* ================= knob modules ================= */
+const ctlDefs = {
+  Vacc:{min:100, max:2500, step:10, get:()=>S.Vacc, set:v=>S.Vacc=v},
+  Vp:{min:0, max:500, step:5, get:()=>S.Vp, set:v=>S.Vp=v},
+  d:{min:1, max:5, step:0.1, get:()=>S.d*100, set:v=>S.d=v/100},
+  L:{min:2, max:10, step:0.5, get:()=>S.L*100, set:v=>S.L=v/100},
+  D:{min:5, max:30, step:0.5, get:()=>S.D*100, set:v=>S.D=v/100},
+  W:{min:5, max:30, step:0.5, get:()=>S.W*100, set:v=>S.W=v/100},
+  B:{min:0.1, max:1000, log:true, get:()=>S.B*1000, set:v=>S.B=v/1000},
+};
+const MODMETA = {
+  Vacc:{cap:'ACCELERATING SUPPLY', sym:'V_{acc}', col:'#f2a541', val:()=>String(Math.round(S.Vacc)), unit:'V'},
+  Vp:{cap:'PLATE SUPPLY', sym:'V_{p}', col:'#f2a541', val:()=>String(Math.round(S.Vp)), unit:'V'},
+  d:{cap:'PLATE SEPARATION', sym:'d', col:'#c58cff', val:()=>fmt(S.d*100,3), unit:'cm'},
+  L:{cap:'PLATE LENGTH', sym:'L', col:'#ffd23f', val:()=>fmt(S.L*100,3), unit:'cm'},
+  D:{cap:'EXIT TO SCREEN', sym:'D', col:'#2dd4bf', val:()=>fmt(S.D*100,3), unit:'cm'},
+  B:{cap:'MAGNETIC FIELD', sym:'B', col:'#a9cbff', val:()=>bDisp(), unit:'mT'},
+  W:{cap:'FIELD WIDTH', sym:'W', col:'#a9cbff', val:()=>fmt(S.W*100,3), unit:'cm'},
+};
+function maxFor(key){ if (key==='Vacc'){ const cap=Vcap(particleOf(S)); return Math.min(2500, Math.floor(cap/10)*10); } return ctlDefs[key].max; }
+function fracOf(key){ const d=ctlDefs[key], v=d.get(), mx=maxFor(key);
+  const f = d.log? (v>0? Math.log(v/d.min)/Math.log(mx/d.min) : 0) : (v-d.min)/(mx-d.min); return Math.max(0,Math.min(1,f)); }
+function valFromFrac(key,f){ const d=ctlDefs[key], mx=maxFor(key); f=Math.max(0,Math.min(1,f));
+  if (d.log) return p3(d.min*Math.pow(mx/d.min,f));
+  return +(Math.round((d.min+f*(mx-d.min))/d.step)*d.step).toFixed(6); }
+function setVal(key,v){ const d=ctlDefs[key]; v=Math.max(d.min,Math.min(maxFor(key),v));
+  if (mode==='lab' && key==='B' && LAB && LAB.res){ v=+(Math.round(v/LAB.res)*LAB.res).toFixed(LAB.resDec); if (v<LAB.res) v=LAB.res; } if (v===d.get()) return false; d.set(v); shots=[]; renderLegend([]); renderReadouts(); draw(); return true; }
+
+function modules(){
+  if (!(mode==='beam'||mode==='lab') || !CW) return [];
+  const L=layout(S), out=[], top=[], bot=[], lab=mode==='lab';
+  const [,Yc]=W2S(0,0), [,Ytop]=W2S(0,view.yT), [,Ybot]=W2S(0,view.yB);
+  const mk=(key,cx)=>({key,cx,w:MOD.w,h:MOD.h});
+  bot.push(mk('Vacc', W2S((L.xg0+L.xg1)/2,0)[0]));
+  if (S.platesOn){
+    const [X0,Yt]=W2S(L.xp0,S.d/2), [X1,Yb]=W2S(L.xp1,-S.d/2), th=Math.max(5,0.002*pxPerM()), cx=(X0+X1)/2;
+    const d=mk('d',cx); d.x=cx-MOD.w/2; d.y=Yt-th-8-MOD.h; out.push(d);           // tucked above the top plate
+    const l=mk('L',cx); l.x=cx-MOD.w/2; l.y=Yb+th+22; out.push(l);                 // directly under the plates, below the L arrow
+    if (!S.BOn && S.screenOn){ const [Xs]=W2S(L.xs,0); (S.pol>0?top:bot).push(mk('D',(X1+Xs)/2)); }
+  }
+  if (S.BOn){ const [Xb0]=W2S(L.xb0,0), [Xb1]=W2S(L.xb1,0), cx=(Math.max(Xb0,MOD.w/2)+Math.min(Xb1,CW-MOD.w/2))/2; top.push(mk('B',cx)); if (!lab) bot.push(mk('W',cx)); }
+  const place=(row,y)=>{ row.sort((a,b)=>a.cx-b.cx); row.forEach((m,i)=>{ m.x=m.cx-m.w/2; if (i) m.x=Math.max(m.x,row[i-1].x+MOD.w+10); });
+    for (let i=row.length-1;i>=0;i--){ const lim = i===row.length-1? CW-8-MOD.w : row[i+1].x-MOD.w-10; row[i].x=Math.min(row[i].x, lim); }
+    row.forEach(m=>{ m.x=Math.max(8,m.x); m.y=y; out.push(m); }); };
+  place(top, Ytop-ROW_GAP-MOD.h); place(bot, Ybot+ROW_GAP);
+  if (S.platesOn){ const m=mk('Vp',0); m.x=W2S(worldRight(L),0)[0]+30; m.y=Yc-MOD.h/2; out.push(m); }
+  for (const m of out){
+    m.disp={x:m.x+26, y:m.y+16, w:60, h:24}; m.knob={x:m.x+m.w-15, y:m.y+28, r:11};
+    if (m.key==='Vp') m.chip={x:m.x+m.w-44, y:m.y+3, w:40, h:11, text:'⇅ POL'};
+    if (m.key==='B' && !lab) m.chip={x:m.x+m.w-44, y:m.y+3, w:40, h:11, text:S.Bdir<0?'⊗ IN':'⊙ OUT'};
+    if (m.key==='Vacc'){ const neg=particleOf(S).q<0, cl=x=>Math.max(m.x+12,Math.min(m.x+m.w-12,x)), [g0]=W2S(L.xg0,0), [g1]=W2S(L.xg1,0);
+      if (lab){ m.lock=LAB&&LAB.Vlocked; m.terms=[{x:cl(g0),y:m.y,col:'#9aa4ad',sign:'',gx:g0},{x:cl(g1),y:m.y,col:'#9aa4ad',sign:'',gx:g1}]; }
+      else m.terms=[{x:cl(g0),y:m.y,col:neg?COLORS.minus:COLORS.plus,sign:neg?'−':'+',gx:g0},{x:cl(g1),y:m.y,col:neg?COLORS.plus:COLORS.minus,sign:neg?'+':'−',gx:g1}]; }
+    if (m.key==='Vp'){ const cT=S.pol>0?COLORS.plus:COLORS.minus, cB=S.pol>0?COLORS.minus:COLORS.plus;
+      m.terms=[{x:m.x+18,y:m.y,col:cT,sign:S.pol>0?'+':'−'},{x:m.x+18,y:m.y+m.h,col:cB,sign:S.pol>0?'−':'+'}]; }
+  }
+  return out;
+}
+/* launcher: a laser-pointer style source left of the gun, with FIRE and CLEAR buttons */
+function launcher(){
+  if (!(mode==='beam'||mode==='lab') || !CW) return null;
+  const L=layout(S), [Xg,Yc]=W2S(L.xg0,0), x1=Xg-LAUNCH.gap, x0=x1-LAUNCH.w;
+  return { x0, x1, y:Yc, h:24, fire:{x:x0+LAUNCH.w*0.46, y:Yc, r:8}, clear:{x:x0+LAUNCH.w*0.46, y:Yc+44, r:6} };
+}
+function drawLauncher(){
+  const g=launcher(); if (!g) return;
+  const off=document.getElementById('fireBtn').disabled, {x0,x1,y,h}=g;
+  // body
+  const gr=ctx.createLinearGradient(0,y-h/2,0,y+h/2); gr.addColorStop(0,'#5b636c'); gr.addColorStop(0.45,'#2b3036'); gr.addColorStop(1,'#14171a');
+  ctx.fillStyle=gr; roundRect(x0,y-h/2,x1-x0-12,h,h/2); ctx.fill(); ctx.strokeStyle='#6c757e'; ctx.lineWidth=1; ctx.stroke();
+  // nozzle
+  ctx.fillStyle='#3a4148'; ctx.beginPath(); ctx.moveTo(x1-14,y-h/2+3); ctx.lineTo(x1,y-4); ctx.lineTo(x1,y+4); ctx.lineTo(x1-14,y+h/2-3); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#7dffb3'; ctx.beginPath(); ctx.arc(x1,y,2.2,0,7); ctx.fill();
+  // grip ridges
+  ctx.strokeStyle='rgba(255,255,255,0.10)'; for (let i=0;i<4;i++){ const xx=x0+10+i*5; ctx.beginPath(); ctx.moveTo(xx,y-h/2+5); ctx.lineTo(xx,y+h/2-5); ctx.stroke(); }
+  // fire button
+  const f=g.fire, fg=ctx.createRadialGradient(f.x-2,f.y-3,1,f.x,f.y,f.r+2);
+  fg.addColorStop(0, off?'#4c6b57':'#d6ffe6'); fg.addColorStop(0.5, off?'#2f5a3e':'#36f07a'); fg.addColorStop(1, off?'#1f3a28':'#119944');
+  if (!off){ ctx.shadowColor='rgba(60,255,130,0.85)'; ctx.shadowBlur=12; }
+  ctx.fillStyle=fg; ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,7); ctx.fill(); ctx.shadowBlur=0;
+  textSub('Fire!', f.x, y-h/2-7, off?'#7d7a4c':'#ffe83a','center',16,700,true);
+  // clear
+  textSub('clear', g.clear.x, y+h/2+13, '#cfcabe','center',12,600,true);
+  const c=g.clear, cg=ctx.createRadialGradient(c.x-1,c.y-2,1,c.x,c.y,c.r+1); cg.addColorStop(0,'#ffb0a8'); cg.addColorStop(0.5,'#ff3b30'); cg.addColorStop(1,'#a3170f');
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,7); ctx.fill();
+}
+function drawModule(m, lock){
+  const meta=MODMETA[m.key]; lock = lock || m.lock;
+  const gr=ctx.createLinearGradient(0,m.y,0,m.y+m.h); gr.addColorStop(0,'#2a3036'); gr.addColorStop(1,'#15181c');
+  ctx.fillStyle=gr; roundRect(m.x,m.y,m.w,m.h,7); ctx.fill(); ctx.strokeStyle=lock?'#353d45':'#4d5761'; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.fillStyle=meta.col; roundRect(m.x+1.5,m.y+7,2.5,m.h-14,1.2); ctx.fill();
+  textSub(meta.cap, m.x+8, m.y+11, '#9aa4ad','left',7.5,700,false);
+  textSub(meta.sym, m.x+15, m.y+34, meta.col,'center',m.key.length>1?13:16,700,false);
+  const d=m.disp; ctx.fillStyle='#040605'; roundRect(d.x,d.y,d.w,d.h,4); ctx.fill();
+  ctx.strokeStyle= editing&&editing.key===m.key? '#f2a541' : '#2c3a2f'; ctx.lineWidth=1; ctx.stroke();
+  if (!(editing&&editing.key===m.key)){
+    const val=meta.val(), unit=meta.unit;
+    ctx.font="700 9px 'Space Grotesk', sans-serif"; const uw=ctx.measureText(unit).width;
+    let fs=14; ctx.font=`700 ${fs}px 'JetBrains Mono', monospace`; const vw=ctx.measureText(val).width, room=d.w-uw-11;
+    if (vw>room){ fs=Math.max(9,fs*room/vw); ctx.font=`700 ${fs}px 'JetBrains Mono', monospace`; }
+    const vx=d.x+d.w-uw-7, vy=d.y+d.h/2+fs*0.36;
+    ctx.textAlign='right'; ctx.shadowColor='rgba(255,170,60,0.7)'; ctx.shadowBlur=6; ctx.fillStyle=lock?'#c99a52':'#ffb648'; ctx.fillText(val,vx,vy); ctx.shadowBlur=0; ctx.textAlign='left';
+    ctx.font="700 9px 'Space Grotesk', sans-serif"; ctx.fillText(unit,vx+3,vy);
+  }
+  if (m.chip){ const c=m.chip; ctx.fillStyle='#1c2227'; roundRect(c.x,c.y,c.w,c.h,3); ctx.fill(); ctx.strokeStyle=lock?'#353d45':'#7a6440'; ctx.lineWidth=1; ctx.stroke();
+    textSub(c.text, c.x+c.w/2, c.y+c.h-2.5, lock?'#69737b':'#f6c983','center',7.5,700,false); }
+  const k=m.knob, f=fracOf(m.key);
+  ctx.strokeStyle='#66717c'; ctx.lineWidth=1.1;
+  for (let i=0;i<=10;i++){ const a=(-135+27*i)*Math.PI/180; ctx.beginPath(); ctx.moveTo(k.x+Math.sin(a)*(k.r+2),k.y-Math.cos(a)*(k.r+2)); ctx.lineTo(k.x+Math.sin(a)*(k.r+4.5),k.y-Math.cos(a)*(k.r+4.5)); ctx.stroke(); }
+  const kg=ctx.createRadialGradient(k.x-4,k.y-4,1,k.x,k.y,k.r); kg.addColorStop(0,'#6c757e'); kg.addColorStop(1,'#1a1e22');
+  ctx.fillStyle=kg; ctx.beginPath(); ctx.arc(k.x,k.y,k.r,0,7); ctx.fill(); ctx.strokeStyle=lock?'#3a434c':meta.col; ctx.lineWidth=1.4; ctx.stroke();
+  const a=(-135+270*f)*Math.PI/180; ctx.strokeStyle=lock?'#7a6440':'#ffb648'; ctx.lineWidth=2.4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(k.x+Math.sin(a)*3,k.y-Math.cos(a)*3); ctx.lineTo(k.x+Math.sin(a)*(k.r-2.5),k.y-Math.cos(a)*(k.r-2.5)); ctx.stroke(); ctx.lineCap='butt';
+  if (lock && mode==='lab' && m.key==='Vacc'){ textSub('LOCKED', m.x+m.w-15, m.y+m.h-3, '#c99a52','center',7,700,false); }
+  if (m.terms) for (const t of m.terms){
+    ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,6,0,7); ctx.fill();
+    ctx.fillStyle=t.col; ctx.beginPath(); ctx.arc(t.x,t.y,4.3,0,7); ctx.fill();
+    ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,1.5,0,7); ctx.fill();
+  }
+}
+function drawWires(ms, L){
+  const wire=(pts,col)=>{ ctx.lineJoin='round'; for (const [w,c] of [[6,'#040506'],[3,col]]){ ctx.strokeStyle=c; ctx.lineWidth=w; ctx.beginPath(); pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y)); ctx.stroke(); } };
+  const acc=ms.find(m=>m.key==='Vacc');
+  if (acc){ const [,yg]=W2S(0,-GH);
+    acc.terms.forEach((t,i)=>{ const yj=acc.y-10-6*i;
+      wire(Math.abs(t.gx-t.x)<1? [[t.gx,yg],[t.x,t.y]] : [[t.gx,yg],[t.gx,yj],[t.x,yj],[t.x,t.y]], t.col);
+      if (t.sign) label(t.sign, t.x+(i? 11:-11), t.y-4, t.col,'center',15); }); }
+  const pl=ms.find(m=>m.key==='Vp');
+  if (pl){ const [xw,yT]=W2S(L.xw,S.d/2), [,yB]=W2S(L.xw,-S.d/2), [,yHt]=W2S(0,L.hw), [,yHb]=W2S(0,-L.hw);
+    const [tT,tB]=pl.terms;
+    wire([[xw,yT],[xw,yHt],[tT.x,yHt],[tT.x,tT.y]], tT.col);
+    wire([[xw,yB],[xw,yHb],[tB.x,yHb],[tB.x,tB.y]], tB.col);
+    label(tT.sign, tT.x+11, tT.y-5, tT.col,'center',15); label(tB.sign, tB.x+11, tB.y+15, tB.col,'center',15); }
+}
+
+/* ---- pointer: knobs, displays, chips; pan only when zoomed ---- */
+let knobDrag=null, pan=null, editing=null;
 function evPos(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
-function knobAt(e){
-  if (mode!=='beam' || predict.on) return null;
-  const [bx,by]=S2B(...evPos(e)), g=psuGeom();
-  for (const key of ['acc','pl']){ const q=g[key]; if (!q) continue; const k=q.knob;
-    if (Math.hypot(bx-k.x,by-k.y) < k.r+10) return {ctl:q.ctl, cx:k.x, cy:k.y}; }
+const inR=(x,y,r)=> x>=r.x && x<=r.x+r.w && y>=r.y && y<=r.y+r.h;
+function hit(e){
+  const [x,y]=evPos(e);
+  for (const m of modules()){
+    if (m.chip && inR(x,y,m.chip)) return {m,part:'chip'};
+    if (inR(x,y,m.disp)) return {m,part:'disp'};
+    if (Math.hypot(x-m.knob.x,y-m.knob.y) < m.knob.r+9) return {m,part:'knob'};
+    if (inR(x,y,m)) return {m,part:'body'};
+  }
   return null;
 }
-const knobAngle=(cx,cy,bx,by)=> Math.atan2(bx-cx, -(by-cy))*180/Math.PI;
-function setFromKnob(key, frac){
-  const d=ctlDefs[key], max=maxFor(key);
-  let v = d.min + Math.max(0,Math.min(1,frac))*(max-d.min); v = +(Math.round(v/d.step)*d.step).toFixed(6);
-  if (v!==d.get()){ d.set(v); syncCtl(key); shots=[]; renderLegend([]); renderReadouts(); draw(); }
-}
+const knobAngle=(cx,cy,x,y)=> Math.atan2(x-cx, -(y-cy))*180/Math.PI;
+function chipAction(key){ if (key==='Vp') S.pol*=-1; if (key==='B') S.Bdir*=-1; changed(); }
+function launchHit(e){ const g=launcher(); if (!g) return null; const [x,y]=evPos(e);
+  if (Math.hypot(x-g.fire.x,y-g.fire.y)<g.fire.r+9) return 'fire'; if (Math.hypot(x-g.clear.x,y-g.clear.y)<g.clear.r+9) return 'clear'; return null; }
+function clearShots(){ if (predict.on && predict.fired) return; shots=[]; renderLegend([]); draw(); }
 cv.addEventListener('pointerdown',e=>{
-  const kn=knobAt(e);
-  if (kn){ const [bx,by]=S2B(...evPos(e)), d=ctlDefs[kn.ctl];
-    knobDrag={...kn, last:knobAngle(kn.cx,kn.cy,bx,by), frac:(d.get()-d.min)/(maxFor(kn.ctl)-d.min)};
-    cv.setPointerCapture(e.pointerId); return; }
-  drag={x:e.clientX,y:e.clientY,px:view.panX,py:view.panY};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';
+  const lh=launchHit(e); if (lh){ e.preventDefault(); if (lh==='fire'){ if (!document.getElementById('fireBtn').disabled) doFire(); } else clearShots(); return; }
+  const h=hit(e);
+  if (h){ if (predict.on || h.m.lock) return; e.preventDefault();
+    if (h.part==='chip') return chipAction(h.m.key);
+    if (h.part==='disp') return openEditor(h.m);
+    if (h.part==='knob'){ const [x,y]=evPos(e); closeEditor(false);
+      knobDrag={key:h.m.key, cx:h.m.knob.x, cy:h.m.knob.y, last:knobAngle(h.m.knob.x,h.m.knob.y,x,y), frac:fracOf(h.m.key)};
+      cv.setPointerCapture(e.pointerId); }
+    return; }
+  if (view.z>1.001){ pan={x:e.clientX,y:e.clientY,px:view.panX,py:view.panY}; cv.setPointerCapture(e.pointerId); cv.style.cursor='grabbing'; }
 });
 cv.addEventListener('pointermove',e=>{
-  if (knobDrag){ const [bx,by]=S2B(...evPos(e)); const a=knobAngle(knobDrag.cx,knobDrag.cy,bx,by);
+  if (knobDrag){ const [x,y]=evPos(e), a=knobAngle(knobDrag.cx,knobDrag.cy,x,y);
     let da=a-knobDrag.last; if (da>180) da-=360; if (da<-180) da+=360; knobDrag.last=a;
-    knobDrag.frac=Math.max(0,Math.min(1,knobDrag.frac+da/270)); setFromKnob(knobDrag.ctl,knobDrag.frac); return; }
-  if (!drag){ cv.style.cursor = knobAt(e)?'pointer':'grab'; return; }
-  view.panX=drag.px+e.clientX-drag.x; view.panY=drag.py+e.clientY-drag.y; draw();
+    knobDrag.frac=Math.max(0,Math.min(1,knobDrag.frac+da/270)); setVal(knobDrag.key, valFromFrac(knobDrag.key,knobDrag.frac)); return; }
+  if (pan){ view.panX=pan.px+e.clientX-pan.x; view.panY=pan.py+e.clientY-pan.y; draw(); return; }
+  if (launchHit(e)){ cv.style.cursor='pointer'; return; }
+  const h=hit(e); cv.style.cursor = h? (predict.on?'not-allowed': h.part==='disp'?'text': h.part==='body'?'default':'pointer') : (view.z>1.001?'grab':'default');
 });
-cv.addEventListener('pointerup',()=>{drag=null;knobDrag=null;cv.style.cursor='grab';});
-cv.addEventListener('wheel',e=>{ e.preventDefault();
-  const kn=knobAt(e);
-  if (kn){ const d=ctlDefs[kn.ctl]; const v=d.get()+(e.deltaY<0?1:-1)*d.step; setFromKnob(kn.ctl,(v-d.min)/(maxFor(kn.ctl)-d.min)); return; }
-  const f=e.deltaY<0?1.15:1/1.15; view.z=Math.min(Math.max(view.z*f,0.3),40); draw();},{passive:false});
+const endPtr=()=>{ if (knobDrag){ knobDrag=null; refit(); } pan=null; cv.style.cursor='default'; };
+cv.addEventListener('pointerup',endPtr); cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('wheel',e=>{
+  const h=hit(e);
+  if (h && !predict.on && (h.part==='knob'||h.part==='disp')){ e.preventDefault();
+    const k=h.m.key, d=ctlDefs[k], dir=e.deltaY<0?1:-1;
+    const v = d.log? p3(d.get()*Math.pow(10,dir/20)) : d.get()+dir*d.step;
+    if (setVal(k,v)){ clearTimeout(cv._wt); cv._wt=setTimeout(refit,250); } return; }
+  if (e.ctrlKey){ e.preventDefault(); const f=e.deltaY<0?1.12:1/1.12; view.z=Math.min(Math.max(view.z*f,1),40); if (view.z===1){view.panX=0;view.panY=0;} draw(); }
+},{passive:false});
+
+/* ---- type a value straight into a module display ---- */
+const edIn=document.getElementById('modInput');
+function openEditor(m){
+  editing={key:m.key}; const d=m.disp;
+  Object.assign(edIn.style,{display:'block', left:d.x+'px', top:d.y+'px', width:d.w+'px', height:d.h+'px'});
+  edIn.value = +ctlDefs[m.key].get().toPrecision(4); edIn.focus(); edIn.select(); draw();
+}
+function closeEditor(commit){
+  if (!editing) return; const key=editing.key; editing=null; edIn.style.display='none';
+  if (commit){ const v=parseNum(edIn.value); if (isFinite(v)){ const d=ctlDefs[key]; setVal(key, d.log? p3(v) : +(Math.round(v/d.step)*d.step).toFixed(6)); refit(); } }
+  draw();
+}
+edIn.addEventListener('keydown',e=>{ if (e.key==='Enter'){ e.preventDefault(); closeEditor(true); } if (e.key==='Escape'){ e.preventDefault(); closeEditor(false); } });
+edIn.addEventListener('blur',()=>closeEditor(true));
 
 /* ================= shots + animation ================= */
 let shots=[];           // {res, color, label, start, dur}
@@ -381,7 +643,7 @@ function fireShots(list){ // list of {st,color,label}
   for (const m of made){ m.start=now; m.factor=factor; m.dur=m.res.T_total*factor*1000; m.dotDt = niceStep(Tmax/25); }
   timeInfo = `Slow motion ×${mant>1?mant+' × ':''}10${sup(n)}  ·  dots every ${fmtTime(made[0].dotDt)}`;
   shots.forEach(s=>s.old=true);
-  shots = shots.filter(s=>!s.group || s.group===null).slice(-3).concat(made);
+  shots = shots.slice(-3).concat(made);
   animating=true; requestAnimationFrame(tick);
   return made;
 }
@@ -396,20 +658,16 @@ function tick(){
 
 /* ================= drawing ================= */
 function draw(){
+  if (!CW) return;
   ctx.clearRect(0,0,CW,CH);
   ctx.fillStyle='#0c0f11'; ctx.fillRect(0,0,CW,CH);
-  if (mode!=='beam'){ document.getElementById('timeLabel').textContent=''; return; }
-  const L = layout(S), k=pxPerM();
+  if (!(mode==='beam'||mode==='lab')){ document.getElementById('timeLabel').textContent=''; return; }
+  const L = layout(S), k=pxPerM(), ms=modules();
   drawGrid(k);
+  drawWires(ms, L);
   drawApparatus(L,k);
-  // preview path
-  if (!predict.on){
-    const pr = computeShot(S);
-    drawPoly(pr.poly, Infinity, 'rgba(125,255,179,0.22)', 1.5, [6,5]);
-  }
-  // ghost
+  if (!predict.on){ const pr = computeShot(S); drawPoly(pr.poly, Infinity, 'rgba(125,255,179,0.22)', 1.5, [6,5]); }
   if (predict.on && predict.ghost) predict.ghost(ctx);
-  // target markers
   if (predict.on && predict.target) predict.target(ctx);
   const now=performance.now();
   for (const sh of shots){
@@ -420,13 +678,12 @@ function draw(){
     if (!sh.old) drawParticle(sh, tReal);
     if (!sh.old && tReal>=sh.res.T_total) drawEndMarks(sh);
   }
-  drawKey();
-  if (S.BOn && opts.rhr && (!predict.on || predict.revealed)) drawRHR();
-  document.getElementById('timeLabel').textContent = shots.some(s=>!s.old)? timeInfo : 'Path preview — press FIRE';
-  if (predict.on && !shots.some(s=>!s.old)) document.getElementById('timeLabel').textContent='';
+  drawLauncher();
+  for (const m of ms) drawModule(m, predict.on);
+  const tl=document.getElementById('timeLabel');
+  tl.textContent = shots.some(s=>!s.old)? timeInfo : (predict.on? '' : 'Path preview — press FIRE');
 }
 function drawGrid(k){
-  // 1 cm grid where readable
   let step = 0.01; if (k*step<14) step=0.05; if (k*step<14) step=0.1;
   const [x0,y0]=W2S(0,0);
   ctx.strokeStyle='rgba(255,255,255,0.045)'; ctx.lineWidth=1; ctx.beginPath();
@@ -437,7 +694,7 @@ function drawGrid(k){
   ctx.stroke();
   ctx.strokeStyle='rgba(242,165,65,0.12)'; ctx.setLineDash([3,6]); ctx.beginPath(); ctx.moveTo(0,y0); ctx.lineTo(CW,y0); ctx.stroke(); ctx.setLineDash([]);
   ctx.fillStyle='rgba(141,150,159,0.8)'; ctx.font="600 12px 'JetBrains Mono', monospace";
-  ctx.fillText(`grid: ${step*100} cm`, 12, CH-10);
+  ctx.fillText(`grid: ${fmt(step*100,1)} cm`, 12, CH-10);
 }
 function textSub(str, X, Y, col, align='center', size=13, weight=600, outline=true){
   const parts=[]; const re=/_\{([^}]*)\}/g; let last=0, m;
@@ -455,109 +712,23 @@ function textSub(str, X, Y, col, align='center', size=13, weight=600, outline=tr
 function label(txt,X,Y,col='#e7e3d9',align='center',size=13){ textSub(txt,X,Y,col,align,size,600,true); }
 function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function dblArrow(x1,y1,x2,y2,h=7){ const len=Math.hypot(x2-x1,y2-y1); h=Math.min(h,len/2.5); arrow(x1,y1,x2,y2,h); arrow(x2,y2,x1,y1,h); }
-
-/* power supplies: geometry in base pixels (scaled with zoom) */
-function psuGeom(){
-  const L=layout(S), g={}, u=psuU();
-  const [xa]=W2B(L.xg0,0), [xb]=W2B(L.xg1,0), [,ygb]=W2B(0,-GH);
-  const top=ygb+18*u, left=Math.max(8, xa-36*u), w=Math.max(PSU.accW*u, xb-left+76*u), h=PSU.accH*u;
-  g.acc = { u, ctl:'Vacc', title:'ACCELERATING SUPPLY', sym:'V_{acc}', val:S.Vacc, x:left, y:top, w, h,
-    terms:[{x:xa,y:top,col:COLORS.plus,sign:'+',lx:-14*u,ly:-6*u},{x:xb,y:top,col:COLORS.minus,sign:'−',lx:14*u,ly:-6*u}],
-    disp:{x:left+12*u, y:top+32*u, w:w-84*u, h:44*u}, knob:{x:left+w-38*u, y:top+54*u, r:22*u} };
-  if (S.platesOn){
-    const [xr]=W2B(L.xEnd,0), [,yt]=W2B(0,L.hw), [,yb]=W2B(0,-L.hw);
-    const x=xr+10, y=yt-PSU.plPad*u, H=(yb-yt)+2*PSU.plPad*u, W=PSU.plW*u;
-    const cT=S.pol>0?COLORS.plus:COLORS.minus, cB=S.pol>0?COLORS.minus:COLORS.plus;
-    const dy=Math.max(32*u, H/2-66*u);
-    g.pl = { u, ctl:'Vp', title:'PLATE SUPPLY', sym:'V_{p}', val:S.Vp, x, y, w:W, h:H,
-      terms:[{x,y:yt,col:cT,sign:S.pol>0?'+':'−',lx:-12*u,ly:-12*u},{x,y:yb,col:cB,sign:S.pol>0?'−':'+',lx:-12*u,ly:22*u}],
-      disp:{x:x+16*u, y:y+dy, w:W-32*u, h:44*u}, knob:{x:x+W/2, y:y+dy+(44+64)*u, r:22*u} };
-  }
-  return g;
-}
-function drawPSU(p, locked){
-  const u=p.u;
-  const gr=ctx.createLinearGradient(0,p.y,0,p.y+p.h); gr.addColorStop(0,'#2a3036'); gr.addColorStop(1,'#16191d');
-  ctx.fillStyle=gr; roundRect(p.x,p.y,p.w,p.h,10*u); ctx.fill(); ctx.strokeStyle='#4a545e'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.fillStyle='#3d464f';
-  for (const [sx,sy] of [[p.x+7*u,p.y+7*u],[p.x+p.w-7*u,p.y+7*u],[p.x+7*u,p.y+p.h-7*u],[p.x+p.w-7*u,p.y+p.h-7*u]]){ ctx.beginPath(); ctx.arc(sx,sy,2.2*u,0,7); ctx.fill(); }
-  textSub(p.title, p.x+14*u, p.y+24*u, '#98a2ab','left',10.5*u,700,false);
-  const d=p.disp; ctx.fillStyle='#040605'; roundRect(d.x,d.y,d.w,d.h,5); ctx.fill(); ctx.strokeStyle='#2c3a2f'; ctx.lineWidth=1; ctx.stroke();
-  const vx=d.x+d.w-26*u, vy=d.y+d.h/2+8*u;
-  ctx.font=`700 ${23*u}px 'JetBrains Mono', monospace`; ctx.textAlign='right';
-  ctx.fillStyle='rgba(255,182,72,0.045)'; ctx.fillText('8888', vx, vy);
-  ctx.shadowColor='rgba(255,170,60,0.75)'; ctx.shadowBlur=9; ctx.fillStyle='#ffb648'; ctx.fillText(String(Math.round(p.val)), vx, vy); ctx.shadowBlur=0;
-  ctx.textAlign='left'; ctx.font=`700 ${16*u}px 'Space Grotesk', sans-serif`; ctx.fillText('V', vx+6*u, vy-1*u);
-  textSub(p.sym, d.x+d.w/2, d.y+d.h+19*u, COLORS.amber,'center',15*u,700,false);
-  const k=p.knob, def=ctlDefs[p.ctl], frac=Math.max(0,Math.min(1,(p.val-def.min)/(maxFor(p.ctl)-def.min)));
-  ctx.strokeStyle='#66717c'; ctx.lineWidth=1.5;
-  for (let i=0;i<=10;i++){ const a=(-135+27*i)*Math.PI/180; ctx.beginPath(); ctx.moveTo(k.x+Math.sin(a)*(k.r+4*u),k.y-Math.cos(a)*(k.r+4*u)); ctx.lineTo(k.x+Math.sin(a)*(k.r+8*u),k.y-Math.cos(a)*(k.r+8*u)); ctx.stroke(); }
-  const kg=ctx.createRadialGradient(k.x-7,k.y-8,2,k.x,k.y,k.r); kg.addColorStop(0,'#69727b'); kg.addColorStop(1,'#1b1f23');
-  ctx.fillStyle=kg; ctx.beginPath(); ctx.arc(k.x,k.y,k.r,0,7); ctx.fill(); ctx.strokeStyle=locked?'#3a434c':'#f2a541'; ctx.lineWidth=1.6; ctx.stroke();
-  const a=(-135+270*frac)*Math.PI/180;
-  ctx.strokeStyle='#ffb648'; ctx.lineWidth=3.5; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(k.x+Math.sin(a)*5,k.y-Math.cos(a)*5); ctx.lineTo(k.x+Math.sin(a)*(k.r-4),k.y-Math.cos(a)*(k.r-4)); ctx.stroke(); ctx.lineCap='butt';
-  for (const t of p.terms){
-    ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,9*u,0,7); ctx.fill();
-    ctx.fillStyle=t.col; ctx.beginPath(); ctx.arc(t.x,t.y,6.5*u,0,7); ctx.fill();
-    ctx.fillStyle='#0b0d0f'; ctx.beginPath(); ctx.arc(t.x,t.y,2.2*u,0,7); ctx.fill();
-    textSub(t.sign, t.x+t.lx, t.y+t.ly, t.col,'center',17*u,700,true);
-  }
-}
 function drawApparatus(L,k){
-  const g=psuGeom(), locked=predict.on;
-  /* wires + supplies, drawn in base pixels so they zoom with the scene */
-  ctx.save(); ctx.translate(CW/2+view.panX, CH/2+view.panY); ctx.scale(view.z,view.z); ctx.translate(-CW/2,-CH/2);
-  const wire=(pts,col)=>{ ctx.lineJoin='round'; for (const [w,c] of [[6,'#040506'],[3,col]]){ ctx.strokeStyle=c; ctx.lineWidth=w; ctx.beginPath(); pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y)); ctx.stroke(); } };
-  { const a=g.acc, [,yg]=W2B(0,-GH); for (const t of a.terms) wire([[t.x,yg],[t.x,a.y]], t.col); drawPSU(a,locked); }
-  if (g.pl){ const p=g.pl, [xw,yT]=W2B(L.xw,S.d/2), [,yB]=W2B(L.xw,-S.d/2);
-    wire([[xw,yT],[xw,p.terms[0].y],[p.terms[0].x,p.terms[0].y]], p.terms[0].col);
-    wire([[xw,yB],[xw,p.terms[1].y],[p.terms[1].x,p.terms[1].y]], p.terms[1].col);
-    drawPSU(p,locked); }
-  ctx.restore();
   /* accelerating grids */
-  for (const [x,col,sg] of [[L.xg0,COLORS.plus,'+'],[L.xg1,COLORS.minus,'−']]){
+  const neg=particleOf(S).q<0;
+  if (mode==='lab'){ const [Xa,Ya]=W2S(L.xg0,GH+0.004), [Xb,Yb]=W2S(L.xg1,-GH-0.004), [,Yc]=W2S(0,0), pad=7;
+    ctx.fillStyle='#22272c'; roundRect(Xa-pad,Ya,Xb-Xa+2*pad,Yb-Ya,5); ctx.fill(); ctx.strokeStyle='#59636d'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.fillStyle='#0c0f11'; ctx.fillRect(Xb+pad-3,Yc-2,4,4);
+    textSub('SOURCE', (Xa+Xb)/2, Ya-7, '#9aa4ad','center',10,700,true); textSub('?', (Xa+Xb)/2, Yc+6, '#ffe83a','center',16,700,false);
+    const [Xd]=W2S(L.xb0,0);
+    for (let c=1;c<=24;c++) for (const sg of [1,-1]){ const [,Y]=W2S(0,sg*c/100); const big=c%5===0;
+      ctx.strokeStyle= big? 'rgba(255,230,160,0.9)':'rgba(255,230,160,0.45)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(Xd-4,Y); ctx.lineTo(Xd-4-(big?12:6),Y); ctx.stroke();
+      if (big) textSub(String(c), Xd-19, Y+4, '#ffe6a0','right',11,700,true); }
+    textSub('cm', Xd-19, W2S(0,0.255)[1]+4, '#ffe6a0','right',10,600,true);
+  } else
+  for (const [x,col,sg] of neg? [[L.xg0,COLORS.minus,'−'],[L.xg1,COLORS.plus,'+']] : [[L.xg0,COLORS.plus,'+'],[L.xg1,COLORS.minus,'−']]){
     const [X,Ya]=W2S(x,GH), [,Yb]=W2S(x,-GH), [,Yh1]=W2S(x,0.0015), [,Yh2]=W2S(x,-0.0015);
     ctx.strokeStyle=col; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(X,Ya); ctx.lineTo(X,Yh1); ctx.moveTo(X,Yh2); ctx.lineTo(X,Yb); ctx.stroke();
     label(sg, X, Ya-8, col, 'center', 18);
-  }
-  if (S.platesOn){
-    const top=S.d/2, bot=-S.d/2, th=Math.max(5, 0.002*k);
-    const [X0,Yt]=W2S(L.xp0,top), [X1,Yb]=W2S(L.xp1,bot), [,Yc]=W2S(0,0);
-    const cTop = S.pol>0?COLORS.plus:COLORS.minus, cBot = S.pol>0?COLORS.minus:COLORS.plus;
-    // field arrows
-    if (S.Vp>0){ ctx.strokeStyle='rgba(242,165,65,0.35)'; ctx.fillStyle='rgba(242,165,65,0.35)'; ctx.lineWidth=1;
-      const n=Math.max(2,Math.floor((X1-X0)/40)); for (let i=1;i<n;i++){ const X=X0+(X1-X0)*i/n; const ya=Yt+6, yb=Yb-6;
-        const from = S.pol>0?ya:yb, to=S.pol>0?yb:ya; arrow(X,from,X,to,6); } }
-    // centre line + exit plane
-    ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.34)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
-    ctx.beginPath(); ctx.moveTo(X0-18,Yc); ctx.lineTo(X1+4,Yc); ctx.moveTo(X1,Yt); ctx.lineTo(X1,Yb); ctx.stroke(); ctx.restore();
-    // plates
-    ctx.fillStyle=cTop; ctx.fillRect(X0,Yt-th,X1-X0,th); ctx.fillStyle=cBot; ctx.fillRect(X0,Yb,X1-X0,th);
-    label(S.pol>0?'+':'−', X0-12, Yt+2, cTop,'center',18); label(S.pol>0?'−':'+', X0-12, Yb+th+6, cBot,'center',18);
-    // y indicator
-    const rev=revealedPlateShot();
-    ctx.strokeStyle=COLORS.yind; ctx.fillStyle=COLORS.yind;
-    if (rev){ const [,Yy]=W2S(0,rev.yExit), xb=X1-7; ctx.lineWidth=2;
-      ctx.beginPath(); ctx.arc(xb,Yc,2.5,0,7); ctx.fill();
-      if (Math.abs(Yy-Yc)>8) arrow(xb,Yc,xb,Yy,Math.min(7,Math.abs(Yy-Yc)/2.5)); else { ctx.beginPath(); ctx.moveTo(xb-5,Yc); ctx.lineTo(xb+5,Yc); ctx.stroke(); }
-      const [xwS]=W2S(L.xw,0); textSub(`y = ${fmt(rev.yExit*1000,3)} mm`, Math.min(X1, xwS-8), Yt-th-9, COLORS.yind,'right',14,700);
-    } else { // sign convention marker: both arrows start on the centre line
-      const xb=X1-9, len=Math.max(10, Math.min(42, (Yb-Yt)/2-6)), h=Math.min(7,len/2.5);
-      ctx.lineWidth=2; arrow(xb,Yc,xb,Yc-len,h); arrow(xb,Yc,xb,Yc+len,h);
-      ctx.beginPath(); ctx.arc(xb,Yc,2.5,0,7); ctx.fill();
-      textSub('+y', xb-7, Yc-len+11, COLORS.yind,'right',16,700);
-      textSub('−y', xb-7, Yc+len-1, COLORS.yind,'right',16,700); }
-    // d: separation, right side
-    const xd=X1+18; ctx.strokeStyle=COLORS.dim; ctx.fillStyle=COLORS.dim; ctx.lineWidth=1; ctx.setLineDash([2,3]);
-    ctx.beginPath(); ctx.moveTo(X1+2,Yt); ctx.lineTo(xd+6,Yt); ctx.moveTo(X1+2,Yb); ctx.lineTo(xd+6,Yb); ctx.stroke(); ctx.setLineDash([]);
-    ctx.lineWidth=2.2; dblArrow(xd,Yt,xd,Yb,8);
-    textSub('d', xd+9, (Yt+Yb)/2-2, COLORS.dim,'left',19,700);
-    textSub(`${fmt(S.d*100,3)} cm`, xd+9, (Yt+Yb)/2+14, COLORS.dim,'left',13,700);
-    // L: length, below
-    const yL=Yb+th+24; ctx.strokeStyle=COLORS.len; ctx.fillStyle=COLORS.len; ctx.lineWidth=1; ctx.setLineDash([2,3]);
-    ctx.beginPath(); ctx.moveTo(X0,Yb+th+3); ctx.lineTo(X0,yL+6); ctx.moveTo(X1,Yb+th+3); ctx.lineTo(X1,yL+6); ctx.stroke(); ctx.setLineDash([]);
-    ctx.lineWidth=2.2; dblArrow(X0,yL,X1,yL,8);
-    const cx=(X0+X1)/2; textSub('L', cx-3, yL+22, COLORS.len,'right',19,700); textSub(` = ${fmt(S.L*100,3)} cm`, cx-3, yL+22, COLORS.len,'left',14,700);
   }
   if (S.BOn){
     const [X0,Y0]=W2S(L.xb0,HH), [X1,Y1]=W2S(L.xb1,-HH);
@@ -569,21 +740,50 @@ function drawApparatus(L,k){
     ctx.textAlign='left';
     ctx.fillStyle='rgba(242,165,65,0.6)'; const [,Yh1]=W2S(L.xb0,0.004),[,Yh2]=W2S(L.xb0,-0.004);
     ctx.fillRect(X0-3,Y0,4,Yh1-Y0); ctx.fillRect(X0-3,Yh2,4,Y1-Yh2);
-    label(`B = ${fmtB(S.B)} ${S.Bdir<0?'into page':'out of page'}`, (X0+X1)/2, Math.max(Y0,0)+22, '#a9cbff','center',15);
+  }
+  if (S.platesOn){
+    const top=S.d/2, bot=-S.d/2, th=Math.max(5, 0.002*k);
+    const [X0,Yt]=W2S(L.xp0,top), [X1,Yb]=W2S(L.xp1,bot), [,Yc]=W2S(0,0);
+    const cTop = S.pol>0?COLORS.plus:COLORS.minus, cBot = S.pol>0?COLORS.minus:COLORS.plus;
+    if (S.Vp>0){ ctx.strokeStyle='rgba(242,165,65,0.35)'; ctx.fillStyle='rgba(242,165,65,0.35)'; ctx.lineWidth=1;
+      const n=Math.max(2,Math.floor((X1-X0)/40)); for (let i=1;i<n;i++){ const X=X0+(X1-X0)*i/n; const ya=Yt+6, yb=Yb-6;
+        const from = S.pol>0?ya:yb, to=S.pol>0?yb:ya; arrow(X,from,X,to,6); } }
+    ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.34)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+    ctx.beginPath(); ctx.moveTo(X0-18,Yc); ctx.lineTo(X1+4,Yc); ctx.moveTo(X1,Yt); ctx.lineTo(X1,Yb); ctx.stroke(); ctx.restore();
+    ctx.fillStyle=cTop; ctx.fillRect(X0,Yt-th,X1-X0,th); ctx.fillStyle=cBot; ctx.fillRect(X0,Yb,X1-X0,th);
+    label(S.pol>0?'+':'−', X0-12, Yt+2, cTop,'center',18); label(S.pol>0?'−':'+', X0-12, Yb+th+6, cBot,'center',18);
+    const rev=revealedPlateShot();
+    ctx.strokeStyle=COLORS.yind; ctx.fillStyle=COLORS.yind;
+    if (rev){ const [,Yy]=W2S(0,rev.yExit), xb=X1-7; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(xb,Yc,2.5,0,7); ctx.fill();
+      if (Math.abs(Yy-Yc)>8) arrow(xb,Yc,xb,Yy,Math.min(7,Math.abs(Yy-Yc)/2.5)); else { ctx.beginPath(); ctx.moveTo(xb-5,Yc); ctx.lineTo(xb+5,Yc); ctx.stroke(); }
+      textSub(`y = ${fmt(rev.yExit*1000,3)} mm`, xb-9, (Yc+Yy)/2+5, COLORS.yind,'right',14,700);
+    } else {
+      const xb=X1-9, len=Math.max(10, Math.min(42, (Yb-Yt)/2-6)), h=Math.min(7,len/2.5);
+      ctx.lineWidth=2; arrow(xb,Yc,xb,Yc-len,h); arrow(xb,Yc,xb,Yc+len,h);
+      ctx.beginPath(); ctx.arc(xb,Yc,2.5,0,7); ctx.fill();
+      if (len>=16){ textSub('+y', xb-7, Yc-len+11, COLORS.yind,'right',16,700); textSub('−y', xb-7, Yc+len-1, COLORS.yind,'right',16,700); }
+      else textSub('±y', xb-8, Yc+5, COLORS.yind,'right',15,700); }
+    const xd=X1+18; ctx.strokeStyle=COLORS.dim; ctx.fillStyle=COLORS.dim; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(X1+2,Yt); ctx.lineTo(xd+6,Yt); ctx.moveTo(X1+2,Yb); ctx.lineTo(xd+6,Yb); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth=2.2; dblArrow(xd,Yt,xd,Yb,8);
+    textSub('d', xd+9, (Yt+Yb)/2+6, COLORS.dim,'left',19,700);
+    const yL=Yb+th+11; ctx.strokeStyle=COLORS.len; ctx.fillStyle=COLORS.len; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(X0,Yb+th+3); ctx.lineTo(X0,yL+6); ctx.moveTo(X1,Yb+th+3); ctx.lineTo(X1,yL+6); ctx.stroke(); ctx.setLineDash([]);
+    ctx.lineWidth=2.2; dblArrow(X0,yL,X1,yL,8);
   }
   if (!S.BOn && S.screenOn){
     const [X,Ya]=W2S(L.xs,0.05), [,Yb]=W2S(L.xs,-0.05);
     ctx.strokeStyle='#3d5245'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(X,Ya); ctx.lineTo(X,Yb); ctx.stroke();
-    label('screen', X, Yb+18, '#8fae99','center',13);
-    if (S.platesOn){ // D: plate exit to screen, in line with L
-      // drawn on the side the beam is NOT deflected towards, so it never crosses the path
+    label('screen', X, Ya-10, '#8fae99','center',13);
+    if (S.platesOn){ // D on the side the beam is NOT deflected towards
       const th=Math.max(5, 0.002*k), [X1,Ybp]=W2S(L.xp1,-S.d/2), [,Ytp]=W2S(L.xp1,S.d/2);
-      const above = S.pol>0, yD = above? Ytp-th-26 : Ybp+th+24, ly = above? yD-10 : yD+22;
+      const above = S.pol>0, yD = above? Ytp-th-8-MOD.h/2 : Ybp+th+22+MOD.h/2, ly = above? yD-8 : yD+21;
       ctx.strokeStyle=COLORS.dist; ctx.fillStyle=COLORS.dist; ctx.lineWidth=1; ctx.setLineDash([2,3]);
       ctx.beginPath(); ctx.moveTo(X1, above? Ytp-th-3 : Ybp+th+3); ctx.lineTo(X1, above? yD-6 : yD+6);
       ctx.moveTo(X, above? Ya-2 : Yb+2); ctx.lineTo(X, above? yD-6 : yD+6); ctx.stroke(); ctx.setLineDash([]);
       ctx.lineWidth=2.2; dblArrow(X1+3,yD,X-3,yD,8);
-      const cx=(X1+X)/2; textSub('D', cx-3, ly, COLORS.dist,'right',19,700); textSub(` = ${fmt(S.D*100,3)} cm`, cx-3, ly, COLORS.dist,'left',14,700);
+      textSub('D', (X1+X)/2, ly, COLORS.dist,'center',19,700);
     }
   }
 }
@@ -592,16 +792,6 @@ function revealedPlateShot(){
   const now=performance.now();
   for (let i=shots.length-1;i>=0;i--){ const sh=shots[i]; if (sh.old) continue; if (now-sh.start < sh.dur) return null; if (sh.res.yExit!==undefined) return sh.res; }
   return null;
-}
-function drawKey(){
-  if (!S.platesOn) return;
-  const narrow=CW<640;
-  const items=[[COLORS.dim,'d','plate separation'],[COLORS.len,'L','plate length'],...(S.screenOn&&!S.BOn?[[COLORS.dist,'D','plate exit to screen']]:[]),[COLORS.yind,'y', narrow?'exit displacement from centre line (up +)':'displacement at plate exit, from centre line (up +)']];
-  ctx.font="600 12.5px 'Space Grotesk', sans-serif"; let w=0; for (const it of items) w=Math.max(w, ctx.measureText(it[2]).width);
-  const bw=w+58, bh=items.length*21+12, x=10, y=CH-30-bh;
-  ctx.fillStyle='rgba(10,12,14,0.88)'; roundRect(x,y,bw,bh,8); ctx.fill(); ctx.strokeStyle='#2a3138'; ctx.lineWidth=1; ctx.stroke();
-  items.forEach(([c,sy,t],i)=>{ const yy=y+22+i*21; ctx.strokeStyle=c; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(x+10,yy-5); ctx.lineTo(x+24,yy-5); ctx.stroke();
-    textSub(sy,x+30,yy,c,'left',15,700,false); textSub(t,x+46,yy,'#cfcabe','left',12.5,600,false); });
 }
 function fmtB(B){ return B<1e-2 ? `${fmt(B*1000,3)} mT` : `${fmt(B,3)} T`; }
 function arrow(x1,y1,x2,y2,h=7){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
@@ -617,11 +807,11 @@ function drawParticle(sh,tReal){
   const g=ctx.createRadialGradient(X,Y,0,X,Y,14); g.addColorStop(0,sh.color); g.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=g; ctx.beginPath(); ctx.arc(X,Y,14,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(X,Y,3,0,7); ctx.fill();
   const v=Math.hypot(P.vx,P.vy);
-  if (opts.comps && v>0){ ctx.lineWidth=2; ctx.strokeStyle='#8ff0ff'; ctx.fillStyle='#8ff0ff'; const Lx=46*P.vx/v, Ly=46*P.vy/v;
-    if (Math.abs(Lx)>3){ arrow(X,Y,X+Lx,Y,6); label('v_{x}',X+Lx+8,Y+4,'#8ff0ff','left',11); }
-    if (Math.abs(Ly)>3){ arrow(X,Y,X,Y-Ly,6); label('v_{y}',X+4,Y-Ly-4,'#8ff0ff','left',11); } }
+  if (opts.comps && v>0){ ctx.lineWidth=2; ctx.strokeStyle=COLORS.vcomp; ctx.fillStyle=COLORS.vcomp; const Lx=46*P.vx/v, Ly=46*P.vy/v;
+    if (Math.abs(Lx)>3){ arrow(X,Y,X+Lx,Y,6); label('v_{x}',X+Lx+8,Y+4,COLORS.vcomp,'left',13); }
+    if (Math.abs(Ly)>3){ arrow(X,Y,X,Y-Ly,6); label('v_{y}',X+4,Y-Ly-4,COLORS.vcomp,'left',13); } }
   const am=Math.hypot(P.ax,P.ay);
-  if (opts.force && am>0){ ctx.lineWidth=2; ctx.strokeStyle='#ff9a5a'; ctx.fillStyle='#ff9a5a'; const fx=40*P.ax/am, fy=40*P.ay/am; arrow(X,Y,X+fx,Y-fy,7); label('F',X+fx*1.25,Y-fy*1.25+4,'#ff9a5a','center',12); }
+  if (opts.force && am>0){ ctx.lineWidth=2; ctx.strokeStyle='#ff9a5a'; ctx.fillStyle='#ff9a5a'; const fx=40*P.ax/am, fy=40*P.ay/am; arrow(X,Y,X+fx,Y-fy,7); label('F',X+fx*1.25,Y-fy*1.25+4,'#ff9a5a','center',13); }
 }
 function drawEndMarks(sh){
   const r=sh.res;
@@ -629,117 +819,81 @@ function drawEndMarks(sh){
   if (r.end==='screen'){ const [X,Y]=W2S(r.L.xs, r.screenY); const g=ctx.createRadialGradient(X,Y,0,X,Y,12); g.addColorStop(0,'rgba(125,255,179,0.95)'); g.addColorStop(1,'rgba(125,255,179,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(X,Y,12,0,7); ctx.fill(); }
   if (r.end==='detector'){ const [X,Y]=W2S(r.L.xb0, r.detector.y); ctx.fillStyle='#ffd27a'; ctx.fillRect(X-6,Y-2,8,4); }
 }
-function drawRHR(){
-  const x=CW-150, y=CH-120, w=136, h=104;
-  ctx.fillStyle='rgba(21,25,29,0.9)'; ctx.strokeStyle='#2a3138'; ctx.lineWidth=1; ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h);
-  label('F = qv × B  (q > 0)', x+w/2, y+15, '#8d969f','center',10.5);
-  const cx=x+46, cy=y+62;
-  ctx.lineWidth=2; ctx.strokeStyle='#8ff0ff'; ctx.fillStyle='#8ff0ff'; arrow(cx,cy,cx+40,cy,6); label('v',cx+48,cy+4,'#8ff0ff','center',12);
-  label(S.Bdir<0?'⊗':'⊙', cx, cy+5, '#9ec4ff','center',18); label('B',cx-16,cy+20,'#9ec4ff','center',11);
-  const up = S.Bdir<0; ctx.strokeStyle='#ff9a5a'; ctx.fillStyle='#ff9a5a'; arrow(cx,cy,cx,cy+(up?-34:34),6); label('F',cx+10,cy+(up?-28:38),'#ff9a5a','center',12);
-  label(up?'anticlockwise':'clockwise', x+w-6, y+h-8, '#8d969f','right',10.5);
-}
 
-/* ================= controls UI ================= */
-const ctlDefs = {
-  Vacc:{label:'Accelerating p.d. V<sub>acc</sub>', min:100, max:2500, step:10, unit:'V', get:()=>S.Vacc, set:v=>S.Vacc=v},
-  gap:{label:'Gap width', min:1, max:5, step:0.5, unit:'cm', get:()=>S.gap*100, set:v=>S.gap=v/100},
-  Vp:{label:'Plate p.d. V<sub>p</sub>', min:0, max:500, step:5, unit:'V', get:()=>S.Vp, set:v=>S.Vp=v},
-  d:{label:'Plate separation d', min:1, max:5, step:0.5, unit:'cm', get:()=>S.d*100, set:v=>S.d=v/100},
-  L:{label:'Plate length L', min:2, max:10, step:1, unit:'cm', get:()=>S.L*100, set:v=>S.L=v/100},
-  D:{label:'Screen distance D', min:5, max:30, step:1, unit:'cm', get:()=>S.D*100, set:v=>S.D=v/100},
-  W:{label:'Field region width', min:5, max:30, step:1, unit:'cm', get:()=>S.W*100, set:v=>S.W=v/100},
-  B:{label:'Magnetic field B', min:0.1, max:1000, log:true, unit:'mT', get:()=>S.B*1000, set:v=>S.B=v/1000},
-  customU:{label:'Ion mass', min:1, max:250, step:1, unit:'u', get:()=>S.customU, set:v=>S.customU=v},
-};
-function syncCtl(key){ const d=ctlDefs[key], r=document.getElementById('r_'+key), n=document.getElementById('n_'+key); if(!r) return; const v=d.get(); n.value=+v.toPrecision(4); r.value = d.log? Math.round(1000*Math.log10(v/d.min)/Math.log10(d.max/d.min)) : v; }
-function ctlHTML(key){
-  const d=ctlDefs[key], val=d.get();
-  const rng = d.log ? `<input type="range" id="r_${key}" min="0" max="1000" step="1" value="${val>0?Math.round(1000*Math.log10(val/d.min)/Math.log10(d.max/d.min)):0}">`
-                    : `<input type="range" id="r_${key}" min="${d.min}" max="${maxFor(key)}" step="${d.step}" value="${val}">`;
-  return `<div class="ctl"><div class="row"><label for="n_${key}">${d.label}</label><span><input type="number" id="n_${key}" value="${+val.toPrecision(4)}" step="any"> <span class="unit">${d.unit}</span></span></div>${rng}</div>`;
-}
-function maxFor(key){ if (key==='Vacc'){ const cap=Vcap(particleOf(S)); return Math.min(2500, Math.floor(cap/10)*10); } return ctlDefs[key].max; }
-function wireCtl(key){
-  const d=ctlDefs[key], r=document.getElementById('r_'+key), n=document.getElementById('n_'+key); if(!r) return;
-  r.oninput=()=>{ let v = d.log? d.min*Math.pow(d.max/d.min, r.value/1000) : +r.value; if (d.log) v=p3(v); d.set(v); n.value=+v.toPrecision(4); changed(); };
-  n.onchange=()=>{ let v=parseNum(n.value); if(!isFinite(v)) { n.value=+d.get().toPrecision(4); return; } v=Math.max(d.min, Math.min(maxFor(key), v)); d.set(v); n.value=+v.toPrecision(4);
-    r.value = d.log? Math.round(1000*Math.log10(v/d.min)/Math.log10(d.max/d.min)) : v; changed(); };
-}
-function segHTML(id, opts, cur){ return `<div class="seg" id="${id}">${opts.map(([v,t])=>`<button data-v="${v}" class="${String(v)===String(cur)?'on':''}">${t}</button>`).join('')}</div>`; }
-function wireSeg(id, fn){ const el=document.getElementById(id); if(!el) return; el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ fn(b.dataset.v); renderControls(); changed(); }); }
-function swHTML(id,on,text){ return `<div class="toggle-row" id="${id}"><div class="switch ${on?'on':''}"></div><span>${text}</span></div>`; }
-function wireSw(id,fn){ const el=document.getElementById(id); if(el) el.onclick=()=>{ fn(); renderControls(); changed(); }; }
-
+/* ================= setup bar (under the canvas) ================= */
 function renderControls(){
-  const card=document.getElementById('controlsCard');
-  if (mode!=='beam'){ card.innerHTML=''; return; }
-  const p=particleOf(S);
-  card.className = 'card' + (predict.on?' locked':'');
-  card.innerHTML = `
-    <h2>Stage 1 · Accelerate</h2>
-    <div class="ctl"><div class="row"><label>Particle</label>
-      <select id="particleSel">${Object.entries(PARTICLES).map(([k,v])=>`<option value="${k}" ${k===S.particle?'selected':''}>${v.name} (${v.sym})</option>`).join('')}</select></div></div>
-    ${S.particle==='custom'? ctlHTML('customU') + `<div class="ctl"><div class="row"><label>Ion charge</label>${segHTML('segQ',[[1,'+1e'],[2,'+2e'],[3,'+3e']],S.customQ)}</div></div>`:''}
-    ${ctlHTML('Vacc')}
-    <div class="small" style="margin:-6px 0 8px">Cap for this particle (v = 0.1c): ${fmt(Vcap(p),3)} V</div>
-    ${ctlHTML('gap')}
-    <h2 style="margin-top:14px">Stage 2 · Deflecting plates ${swHTML('swPlates',S.platesOn,'')}</h2>
-    <div class="${S.platesOn?'':'disabled-block'}">
-      ${ctlHTML('Vp')}
-      <div class="ctl"><div class="row"><label>Polarity</label>${segHTML('segPol',[[1,'Top +'],[-1,'Top −']],S.pol)}</div></div>
-      ${ctlHTML('d')}${ctlHTML('L')}
-    </div>
-    <h2 style="margin-top:14px">Stage 3 · Magnetic field ${swHTML('swB',S.BOn,'')}</h2>
-    <div class="${S.BOn?'':'disabled-block'}">
-      ${ctlHTML('B')}
-      <div class="ctl"><div class="row"><label>Direction</label>${segHTML('segBdir',[[-1,'⊗ Into page'],[1,'⊙ Out of page']],S.Bdir)}</div></div>
-      ${ctlHTML('W')}
-    </div>
-    <h2 style="margin-top:14px">Screen ${swHTML('swScreen',S.screenOn && !S.BOn,'')}</h2>
-    <div class="${S.screenOn && !S.BOn?'':'disabled-block'}">${ctlHTML('D')}
-      ${S.BOn?'<div class="small">The screen is replaced by the detector strip while the B field is on.</div>':''}</div>`;
-  document.getElementById('particleSel').onchange=e=>{ S.particle=e.target.value; const cap=Vcap(particleOf(S)); if (S.Vacc>cap) S.Vacc=Math.floor(cap/10)*10; renderControls(); changed(); };
-  ['Vacc','gap','Vp','d','L','D','W','B','customU'].forEach(wireCtl);
-  wireSeg('segQ',v=>{S.customQ=+v; const cap=Vcap(particleOf(S)); if(S.Vacc>cap)S.Vacc=Math.floor(cap/10)*10;});
-  wireSeg('segPol',v=>S.pol=+v); wireSeg('segBdir',v=>S.Bdir=+v);
-  wireSw('swPlates',()=>S.platesOn=!S.platesOn); wireSw('swB',()=>S.BOn=!S.BOn); wireSw('swScreen',()=>{ if(!S.BOn) S.screenOn=!S.screenOn; });
+  const bar=document.getElementById('setupBar');
+  if (mode!=='beam'){ bar.innerHTML=''; return; }
+  const lk=predict.on?'disabled':'';
+  const tog=(id,on,t,dis)=>`<button class="tog ${on?'on':''}" id="${id}" ${lk||dis?'disabled':''}><i></i>${t}</button>`;
+  bar.innerHTML = `
+    <label class="fld">Particle <select id="particleSel" ${lk}>${Object.entries(PARTICLES).map(([k,v])=>`<option value="${k}" ${k===S.particle?'selected':''}>${v.name} (${v.sym})</option>`).join('')}</select></label>
+    ${S.particle==='custom'?`<label class="fld">m <input id="ionU" type="number" min="1" max="250" step="1" value="${S.customU}" ${lk}> u</label>
+      <label class="fld">q <select id="ionQ" ${lk}>${[1,2,3].map(n=>`<option value="${n}" ${n===S.customQ?'selected':''}>+${n}e</option>`).join('')}</select></label>`:''}
+    <span class="sep"></span>
+    ${tog('togPlates',S.platesOn,'Plates')}${tog('togB',S.BOn,'B field')}${tog('togScreen',S.screenOn&&!S.BOn,'Screen',S.BOn)}`;
+  const capFix=()=>{ const cap=maxFor('Vacc'); if (S.Vacc>cap) S.Vacc=cap; };
+  document.getElementById('particleSel').onchange=e=>{ S.particle=e.target.value; capFix(); renderControls(); changed(); };
+  const iu=document.getElementById('ionU'); if (iu) iu.onchange=()=>{ const v=Math.round(parseNum(iu.value)); if (isFinite(v)) S.customU=Math.max(1,Math.min(250,v)); capFix(); renderControls(); changed(); };
+  const iq=document.getElementById('ionQ'); if (iq) iq.onchange=()=>{ S.customQ=+iq.value; capFix(); changed(); };
+  document.getElementById('togPlates').onclick=()=>{ S.platesOn=!S.platesOn; renderControls(); changed(); };
+  document.getElementById('togB').onclick=()=>{ S.BOn=!S.BOn; renderControls(); changed(); };
+  document.getElementById('togScreen').onclick=()=>{ S.screenOn=!S.screenOn; renderControls(); changed(); };
 }
 function renderOpts(){
   const c=document.getElementById('optsCard');
   if (mode!=='beam'){ c.innerHTML=''; return; }
-  const item=(k,t)=>swHTML('opt_'+k,opts[k],t);
+  const item=(k,t)=>`<button class="tog ${opts[k]?'on':''}" id="opt_${k}"><i></i>${t}</button>`;
   c.innerHTML = `<h2>Display</h2><div class="opts">${item('dots','Time dots')}${item('comps','v components')}${item('force','Force arrow')}${item('rhr','Right-hand rule')}</div>`;
-  for (const k of Object.keys(opts)){ const el=document.getElementById('opt_'+k); el.onclick=()=>{ opts[k]=!opts[k]; renderOpts(); draw(); }; }
+  for (const k of Object.keys(opts)) document.getElementById('opt_'+k).onclick=()=>{ opts[k]=!opts[k]; renderOpts(); renderReadouts(); draw(); };
 }
-function rows(list){ return list.map(([a,b])=> b===null?`<div class="note">${a}</div>`:`<div>${a}</div><div>${b}</div>`).join(''); }
+function rows(list){ return list.map(([a,b])=> b===null?`<div class="note">${a}</div>`:`<div class="k">${a}</div><div class="v">${b}</div>`).join(''); }
+function keyHTML(){
+  if (!S.platesOn) return '';
+  const it=[['#c58cff','d','plate separation'],['#ffd23f','L','plate length']];
+  if (S.screenOn&&!S.BOn) it.push(['#2dd4bf','D','plate exit to screen']);
+  it.push(['#ffffff','y','displacement at plate exit, from the centre line (up +)']);
+  return `<div class="key">${it.map(([c,s,t])=>`<div><i style="background:${c}"></i><b style="color:${c}">${s}</b> ${t}</div>`).join('')}</div>`;
+}
+function rhrHTML(){
+  const upPos=S.Bdir<0, neg=particleOf(S).q<0, up = neg? !upPos : upPos, sym=upPos?'⊗':'⊙', y0=60;
+  const fy = up? 14 : 106, gy = upPos? 14 : 106;
+  return `<div class="rhr"><svg viewBox="0 0 120 120" width="112" height="112" aria-label="right-hand rule">
+    <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="context-stroke"/></marker></defs>
+    <line x1="34" y1="${y0}" x2="86" y2="${y0}" stroke="#8ff0ff" stroke-width="2.5" marker-end="url(#ah)"/><text x="92" y="${y0+4}" fill="#8ff0ff" font-weight="700" font-size="14">v</text>
+    ${neg? `<line x1="34" y1="${y0}" x2="34" y2="${gy}" stroke="#8d969f" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ah)"/><text x="40" y="${upPos?22:104}" fill="#8d969f" font-weight="700" font-size="11">v×B</text>`:''}
+    <line x1="${neg?28:34}" y1="${y0}" x2="${neg?28:34}" y2="${fy}" stroke="#ff9a5a" stroke-width="2.5" marker-end="url(#ah)"/><text x="${neg?6:40}" y="${up?22:104}" fill="#ff9a5a" font-weight="700" font-size="14">F</text>
+    <text x="34" y="${y0+5}" fill="#a9cbff" font-size="17" text-anchor="middle">${sym}</text><text x="12" y="${upPos?y0+22:y0-12}" fill="#a9cbff" font-weight="700" font-size="13">B</text></svg>
+    <div><b>F = qv × B</b><br>B ${upPos?'into':'out of'} the page<br>${neg? `q &lt; 0, so F is <b>opposite</b> to v × B<br>` : 'q &gt; 0<br>'}→ <b>${up?'anticlockwise':'clockwise'}</b></div></div>`;
+}
 function renderReadouts(res){
   const el=document.getElementById('readouts');
   if (mode!=='beam'){ el.innerHTML=''; document.getElementById('readoutCard').style.display='none'; return; }
   document.getElementById('readoutCard').style.display='';
-  if (predict.on && !predict.revealed){ el.innerHTML='<div class="hidden-note">Readouts are hidden until you fire.</div>'; return; }
+  if (predict.on && !predict.revealed){ el.innerHTML=keyHTML()+'<div class="hidden-note">Data is hidden until you fire.</div>'; return; }
   res = res || computeShot(S);
-  const p=res.p; let r=[];
-  r.push(['<b style="color:var(--amber)">Accelerate</b>','']);
-  r.push(['Exit speed v', fu(res.v,'m s⁻¹')],['v / c', `${fmt(res.vc*100,3)} %`],['KE', fu(res.KE,'J')],['KE', fu(res.KEeV,'eV')],['Field in gap', fu(res.Egap,'V m⁻¹')],['Time in gap', fmtTime(res.tGap)]);
+  let r=[];
+  r.push(['<b class="sec">Accelerate</b>','']);
+  r.push(['Exit speed v', fu(res.v,'m s⁻¹')],['v / c', `${fmt(res.vc*100,3)} %`],['KE', fu(res.KE,'J')],['KE', fu(res.KEeV,'eV')],['V<sub>acc</sub> limit (v = 0.1c)', `${fmt(maxFor('Vacc'),4)} V`]);
   if (S.particle==='alpha') r.push(['Alpha has charge +2e, so KE in eV is 2 × V<sub>acc</sub>.',null]);
+  if (particleOf(S).q<0) r.push(['Negative charge: it accelerates towards the + grid, bends towards the + plate, and curves the opposite way to a positive charge in B.',null]);
   if (S.platesOn){
-    r.push(['<b style="color:var(--amber)">Plates</b>','']);
+    r.push(['<b class="sec">Plates</b>','']);
     r.push(['E = V<sub>p</sub> / d', fu(res.E,'V m⁻¹')],['a<sub>y</sub>', fu(res.ay,'m s⁻²')],['Time between plates', fmtTime(res.tPlates)]);
     if (res.strike) r.push([`Struck ${res.strike.plate} plate at`, `x = ${fmt(res.strike.x*100,3)} cm`]);
     else r.push(['y at exit', fu(res.yExit*1000,'mm')],['v<sub>y</sub> at exit', fu(res.vyExit,'m s⁻¹')],['Exit angle θ', `${fmt(res.theta,3)}°`]);
   }
   if (S.BOn && !res.strike){
-    r.push(['<b style="color:var(--amber)">Magnetic field</b>','']);
+    r.push(['<b class="sec">Magnetic field</b>','']);
     r.push(['Radius r', fu(res.r*100,'cm')],['Period T', fmtTime(res.T)],['Frequency', fu(res.freq,'Hz')],['|F| = qvB', fu(res.F,'N')],['Centripetal a', fu(res.ac,'m s⁻²')],['Sense', res.sense],['Time in field', fmtTime(res.tB)]);
     if (res.detector) r.push(['Lands on detector', `${fmt(res.detector.dist*100,3)} cm from entry`]);
     else r.push(['Exits field through', res.exitSide],['Exit y', fu(res.exitY*100,'cm')],['Exit angle', `${fmt(res.exitAngle,3)}°`]);
     r.push(['Work done by B: 0 J, KE unchanged.',null]);
   }
-  if (!S.BOn && S.screenOn && !res.strike){ r.push(['<b style="color:var(--amber)">Screen</b>',''],['Spot position Y', fu(res.screenY*1000,'mm')]); }
-  el.innerHTML = `<div class="ro">${rows(r)}</div>`;
+  if (!S.BOn && S.screenOn && !res.strike){ r.push(['<b class="sec">Screen</b>',''],['Spot position Y', fu(res.screenY*1000,'mm')]); }
+  el.innerHTML = keyHTML() + `<div class="ro">${rows(r)}</div>` + (S.BOn && opts.rhr ? rhrHTML() : '');
 }
-function changed(){ if (!predict.on){ fitScale(); shots=[]; renderLegend([]); } renderReadouts(); draw(); }
+function changed(){ shots=[]; renderLegend([]); renderReadouts(); if (!predict.on) refit(); draw(); }
 
 /* ================= predict-then-fire ================= */
 const predict = { on:false, chId:'y', tol:3, setup:null, answerSI:null, answerRaw:'', unitIdx:0, choice:null, locked:false, fired:false, revealed:false, ghost:null, target:null, log:[] };
@@ -747,9 +901,9 @@ const LEN = [['mm',1e-3],['cm',1e-2],['m',1]];
 function base(){ const st=defaultState(); st.platesOn=false; st.BOn=false; st.screenOn=false; return st; }
 function randParticle(list){ return pick(list||['positron','proton','deuteron','alpha']); }
 function capV(st){ return Math.min(2500, Math.floor(Vcap(particleOf(st))/10)*10); }
-function plateSetup(noStrike=true, forceStrike=false){
+function plateSetup(noStrike=true, forceStrike=false, plist){
   for (let i=0;i<500;i++){
-    const st=base(); st.particle=randParticle(); st.platesOn=true;
+    const st=base(); st.particle=randParticle(plist); st.platesOn=true;
     st.Vacc=rndStep(500,capV(st),100); st.Vp=rndStep(50,400,10); st.d=rndStep(0.01,0.05,0.005); st.L=rndStep(0.02,0.10,0.01); st.pol=pick([1,-1]);
     const r=computeShot(st);
     if (forceStrike && !r.strike) continue;
@@ -758,11 +912,11 @@ function plateSetup(noStrike=true, forceStrike=false){
   }
   return null;
 }
-function BSetup(){
-  const st=base(); st.particle=randParticle(); st.BOn=true; st.Bdir=pick([1,-1]); st.W=0.30;
+function BSetup(plist){
+  const st=base(); st.particle=randParticle(plist); st.BOn=true; st.Bdir=pick([1,-1]); st.W=0.30;
   st.Vacc=rndStep(200,capV(st),100);
-  const p=particleOf(st), v=Math.sqrt(2*p.q*st.Vacc/p.m), r=rndStep(0.03,0.12,0.005);
-  st.B = p3(p.m*v/(p.q*r));
+  const p=particleOf(st), Q=Math.abs(p.q), v=Math.sqrt(2*Q*st.Vacc/p.m), r=rndStep(0.03,0.12,0.005);
+  st.B = p3(p.m*v/(Q*r));
   return st;
 }
 const pName = st => particleOf(st).name.toLowerCase();
@@ -813,6 +967,13 @@ const CHALLENGES = [
    applyAnswer:(c,v)=>{ c.st.Vp=v; }, truth:c=>c.Vtrue, hideGiven:['Vp'],
    target:c=>()=>{ const L=layout(c.st); const [X,Y]=W2S(L.xs,c.Ytarget); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(X,Y,9,0,7); ctx.moveTo(X-14,Y);ctx.lineTo(X+14,Y);ctx.moveTo(X,Y-14);ctx.lineTo(X,Y+14); ctx.stroke(); },
    extra:(c,res)=> res.strike? 'Your p.d. drove the particle into a plate.' : `Spot landed at Y = ${fmt(res.screenY*1000,3)} mm (target ${fmt(c.Ytarget*1000,3)} mm).` },
+ { id:'Yscreen', group:'Deflecting plates', title:'7b · Spot position on the screen', kind:'num', units:[['mm',1e-3],['cm',1e-2],['m',1]], signed:true,
+   setup(){ for(let i=0;i<300;i++){ const st=plateSetup(); if(!st) continue; st.screenOn=true; st.D=rndStep(0.08,0.25,0.01);
+       const r=computeShot(st); if (r.strike || Math.abs(r.screenY)>0.045 || Math.abs(r.screenY)<0.004) continue; return {st}; } },
+   prompt:c=>`The particle leaves the plates and travels in a straight line to the screen. Predict the <b>vertical position Y of the spot</b> on the screen, measured from the centre line (up positive).${givens([gPart(c.st),gV(c.st),...gPlates(c.st),`screen D = ${fmt(c.st.D*100,3)} cm beyond the plates`])}`,
+   truth:(c,res)=>res.screenY,
+   ghost:(c,v)=>()=>{ const L=layout(c.st); const [X,Y]=W2S(L.xs,v); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X-9,Y-9);ctx.lineTo(X+9,Y+9);ctx.moveTo(X+9,Y-9);ctx.lineTo(X-9,Y+9); ctx.stroke(); label('your prediction',X-14,Y+5,COLORS.ghost,'right'); },
+   extra:(c,res)=>`At the plate exit: y = ${fmt(res.yExit*1000,3)} mm, v<sub>y</sub> = ${fmt(res.vyExit,3)} m s⁻¹, θ = ${fmt(res.theta,3)}°.` },
  { id:'samey', group:'Deflecting plates', title:'8 · Proton vs positron', kind:'choice', choices:['The positron deflects more','The proton deflects more','Both deflect by the same amount'],
    setup(){ for(let i=0;i<300;i++){ const st=plateSetup(); if(!st) continue; st.particle='positron'; st.Vacc=Math.min(st.Vacc,2500); const r=computeShot(st); if(r.strike||Math.abs(r.yExit)>0.42*st.d) continue; return {st}; } },
    prompt:c=>`A positron and a proton are each accelerated through the same p.d. and enter the same plates. Which is deflected more?${givens([gV(c.st),...gPlates(c.st)])}`,
@@ -853,8 +1014,155 @@ const CHALLENGES = [
    prompt:c=>`The radius is larger than the field region, so the particle exits through the far side. Predict its <b>y position</b> as it leaves the region (up positive).${givens([gPart(c.st),gV(c.st),gB(c.st),`region width = ${fmt(c.st.W*100,3)} cm`])}`,
    truth:(c,res)=>res.exitY,
    ghost:(c,v)=>()=>{ const L=layout(c.st); const [X,Y]=W2S(L.xb1,v); ctx.strokeStyle=COLORS.ghost; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X-8,Y);ctx.lineTo(X+8,Y);ctx.moveTo(X,Y-8);ctx.lineTo(X,Y+8); ctx.stroke(); label('your prediction',X+10,Y-8,COLORS.ghost,'left'); } },
+ { id:'ey', group:'Negative charges', title:'E1 · Electron through the plates', kind:'num', units:LEN, signed:true,
+   setup(){ return {st:plateSetup(true,false,['electron'])}; },
+   prompt:c=>`An <b>electron</b> is fired through the plates. Predict its <b>vertical displacement y</b> at the exit (up positive). Watch the sign: the charge is negative.${givens([gPart(c.st),gV(c.st),...gPlates(c.st)])}`,
+   truth:(c,res)=>res.yExit,
+   ghost:(c,v)=>()=>{ const L=layout(c.st); const pts=[]; for(let i=0;i<=40;i++){ const x=L.xp0+(L.xp1-L.xp0)*i/40; pts.push({t:0,x,y:v*Math.pow(i/40,2)}); } drawPoly(pts,Infinity,COLORS.ghost,2,[5,4]); } },
+ { id:'epair', group:'Negative charges', title:'E2 · Electron vs positron in the plates', kind:'choice', choices:['They follow the same path','Mirror-image paths: same size of deflection, opposite directions','The electron deflects more','The positron deflects more'],
+   setup(){ for(let i=0;i<300;i++){ const st=plateSetup(true,false,['positron']); if(!st) continue; return {st}; } },
+   prompt:c=>`An electron and a positron are accelerated through the same p.d. and enter the same plates. How do their paths compare?${givens([gV(c.st),...gPlates(c.st)])}`,
+   shots:c=>[{st:{...c.st,particle:'positron'},color:COLORS.beam,label:'positron'},{st:{...c.st,particle:'electron'},color:COLORS.shot2,label:'electron'}],
+   correct:()=>1 },
+ { id:'esense', group:'Negative charges', title:'E3 · Electron: clockwise or anticlockwise?', kind:'choice', choices:['Clockwise','Anticlockwise'],
+   setup(){ return {st:BSetup(['electron'])}; },
+   prompt:c=>`An <b>electron</b> enters the field. Which way does it curve?${givens([gPart(c.st),gB(c.st)])}`,
+   correct:(c,res)=> res.sense==='clockwise'?0:1 },
 ];
 const chById = id => CHALLENGES.find(c=>c.id===id);
+/* ================= worked solutions (equation → rearrange → substitute → evaluate) ================= */
+const N4 = x=>fmt(x,4), N3 = x=>fmt(x,3);
+const VX='v<sub>x</sub>', VY='v<sub>y</sub>', AY='a<sub>y</sub>', VA='V<sub>acc</sub>', VPp='V<sub>p</sub>';
+function stp(why, ...eqs){ return {why, eqs}; }
+function qNote(p){
+  if (p.q<0) return stp('Charge of the particle: q = −e. Use its size |q| for energies, forces and radii; the sign only sets the direction', `|q| = 1.60 × 10⁻¹⁹ C`);
+  return Math.abs(p.q-C.e)/C.e<1e-9? null : stp(`Charge of the particle: q = ${Math.round(p.q/C.e)}e`, `q = ${Math.round(p.q/C.e)} × 1.60 × 10⁻¹⁹ = ${N4(p.q)} C`); }
+const qS = p=> p.q<0? '|q|' : 'q';
+function accS(st){
+  const p=particleOf(st), Q=Math.abs(p.q), q=qS(p), v=Math.sqrt(2*Q*st.Vacc/p.m), out=[];
+  const qn=qNote(p); if (qn) out.push(qn);
+  out.push(stp('Work done by the accelerating p.d. becomes kinetic energy', `${q}V<sub>acc</sub> = ½m${VX}²`));
+  out.push(stp(`Rearrange for ${VX}`, `${VX} = √(2${q}${VA} / m)`));
+  out.push(stp('Substitute', `${VX} = √(2 × ${N4(Q)} × ${N4(st.Vacc)} / ${N4(p.m)})`));
+  out.push(stp('Evaluate', `${VX} = √(${N4(2*Q*st.Vacc/p.m)})`, `${VX} = ${N4(v)} m s⁻¹`));
+  return {steps:out, v, p};
+}
+function plateS(st, v, p, upToY=true){
+  const Q=Math.abs(p.q), neg=p.q<0, E=st.Vp/st.d, a=-st.pol*p.q*E/p.m, t=st.L/v, y=0.5*a*t*t, out=[];
+  const down = a<0, q=qS(p);
+  out.push(stp('Field strength between the plates', `E = ${VPp} / d`, `E = ${N4(st.Vp)} / ${N4(st.d)} = ${N4(E)} V m⁻¹`));
+  out.push(stp(neg? `Force on a <b>negative</b> charge points towards the + plate: top plate ${st.pol>0?'+':'−'}, so the force is <b>${down?'downwards (negative)':'upwards (positive)'}</b>`
+                   : `Force on a positive charge points from + to −: top plate ${st.pol>0?'+':'−'}, so the force is <b>${down?'downwards (negative)':'upwards (positive)'}</b>`,
+    `${AY} = ${down?'−':'+'}${q}E / m`, `${AY} = ${down?'−':''}(${N4(Q)} × ${N4(E)}) / ${N4(p.m)} = ${N4(a)} m s⁻²`));
+  if (upToY){
+    out.push(stp(`Horizontal velocity is constant between the plates`, `t = L / ${VX}`, `t = ${N4(st.L)} / ${N4(v)} = ${N4(t)} s`));
+    out.push(stp(`Vertically: u<sub>y</sub> = 0 and ${AY} is constant, so s = ut + ½at²`, `y = ½${AY}t²`, `y = ½ × (${N4(a)}) × (${N4(t)})²`, `y = ${N4(y)} m`));
+  }
+  return {steps:out, E, a, t, y, vy:a*t};
+}
+const ans = (txt)=> stp('<b>Answer</b>', txt);
+function solutionSteps(ch, c, res){
+  const st=c.st;
+  switch (ch.id){
+    case 'v': { const A=accS(st); return [...A.steps, ans(`${VX} = ${N3(A.v)} m s⁻¹`)]; }
+    case 'ke': { const p=particleOf(st), KE=Math.abs(p.q)*st.Vacc, n=Math.round(Math.abs(p.q)/C.e); const out=[]; const qn=qNote(p); if (qn) out.push(qn);
+      out.push(stp('Work done on a charge moved through a p.d.', `E<sub>k</sub> = qV<sub>acc</sub>`));
+      out.push(stp('Substitute and evaluate', `E<sub>k</sub> = ${N4(Math.abs(p.q))} × ${N4(st.Vacc)} = ${N4(KE)} J`));
+      out.push(stp('In electronvolts: a charge of '+n+'e through V volts gains '+n+'V eV', `E<sub>k</sub> = ${n} × ${N4(st.Vacc)} = ${N4(n*st.Vacc)} eV`));
+      return [...out, ans(`E<sub>k</sub> = ${N3(KE)} J = ${N3(n*st.Vacc)} eV`)]; }
+    case 'vrev': { const p=particleOf(st), v=c.vTarget, V=p.m*v*v/(2*Math.abs(p.q)); const out=[]; const qn=qNote(p); if (qn) out.push(qn);
+      out.push(stp('Work done by the p.d. becomes kinetic energy', `qV<sub>acc</sub> = ½mv²`), stp(`Rearrange for ${VA}`, `${VA} = mv² / (2q)`),
+        stp('Substitute', `${VA} = ${N4(p.m)} × (${N4(v)})² / (2 × ${N4(p.q)})`), stp('Evaluate', `${VA} = ${N4(p.m*v*v)} / ${N4(2*p.q)} = ${N4(V)} V`));
+      return [...out, ans(`${VA} = ${N3(V)} V`)]; }
+    case 'y': case 'ey': { const A=accS(st), P=plateS(st,A.v,A.p); return [...A.steps, ...P.steps, ans(`y = ${N3(P.y)} m = ${N3(P.y*1000)} mm`)]; }
+    case 'theta': { const A=accS(st), P=plateS(st,A.v,A.p), th=Math.atan2(P.vy,A.v)*180/Math.PI;
+      return [...A.steps, ...P.steps.slice(0,3),
+        stp(`Vertical velocity at the exit: v = u + at with u<sub>y</sub> = 0`, `${VY} = ${AY}t`, `${VY} = (${N4(P.a)}) × ${N4(P.t)} = ${N4(P.vy)} m s⁻¹`),
+        stp('Angle of the velocity to the horizontal', `tan θ = ${VY} / ${VX}`, `θ = tan⁻¹(${N4(P.vy)} / ${N4(A.v)})`, `θ = tan⁻¹(${N4(P.vy/A.v)}) = ${N4(th)}°`),
+        ans(`θ = ${N3(th)}° (${th<0?'below':'above'} the horizontal)`)]; }
+    case 'clear': case 'strike': {
+      const A=accS(st), P=plateS(st,A.v,A.p,false), out=[...A.steps, ...P.steps];
+      const tP=st.L/A.v, yP=0.5*P.a*tP*tP;
+      if (ch.id==='clear'){
+        out.push(stp('Time to cross the plates (constant horizontal velocity)', `t = L / ${VX} = ${N4(st.L)} / ${N4(A.v)} = ${N4(tP)} s`));
+        out.push(stp('Vertical displacement if it got that far', `y = ½${AY}t² = ½ × (${N4(P.a)}) × (${N4(tP)})² = ${N4(yP)} m`));
+        out.push(stp('Compare with the half-gap', `d / 2 = ${N4(st.d/2)} m`));
+        return [...out, ans(Math.abs(yP)<st.d/2? `|y| < d/2, so it <b>clears the plates</b>` : `|y| ≥ d/2, so it <b>strikes the ${P.a>0?'upper':'lower'} plate</b>`)];
+      }
+      const tH=Math.sqrt(st.d/Math.abs(P.a)), x=A.v*tH;
+      out.push(stp('It strikes a plate when it has moved d/2 vertically from the centre line', `d/2 = ½|${AY}|t²`));
+      out.push(stp('Rearrange for t', `t = √(d / |${AY}|)`, `t = √(${N4(st.d)} / ${N4(Math.abs(P.a))}) = ${N4(tH)} s`));
+      out.push(stp('Horizontal distance travelled in that time', `x = ${VX}t = ${N4(A.v)} × ${N4(tH)} = ${N4(x)} m`));
+      return [...out, ans(`x = ${N3(x*100)} cm from the front edge`)]; }
+    case 'Yscreen': { const A=accS(st), P=plateS(st,A.v,A.p), t2=st.D/A.v, y2=P.vy*t2, Y=P.y+y2;
+      return [...A.steps, ...P.steps,
+        stp(`Vertical velocity at the exit`, `${VY} = ${AY}t = (${N4(P.a)}) × ${N4(P.t)} = ${N4(P.vy)} m s⁻¹`),
+        stp('After the plates there is no force, so the velocity is constant (a = 0)', `t₂ = D / ${VX} = ${N4(st.D)} / ${N4(A.v)} = ${N4(t2)} s`),
+        stp('Extra vertical displacement on the way to the screen', `y₂ = ${VY}t₂ = (${N4(P.vy)}) × ${N4(t2)} = ${N4(y2)} m`),
+        stp('Total displacement on the screen', `Y = y + y₂ = (${N4(P.y)}) + (${N4(y2)}) = ${N4(Y)} m`),
+        ans(`Y = ${N3(Y*1000)} mm`)]; }
+    case 'target': { const Ym=Math.abs(c.Ytarget), V=2*st.d*st.Vacc*Ym/(st.L*(st.L/2+st.D));
+      return [
+        stp('Deflection between the plates (q and m cancel once v<sub>x</sub>² = 2qV<sub>acc</sub>/m is substituted)', `y = ${VPp}L² / (4d${VA})`),
+        stp('Direction of the exit velocity', `tan θ = ${VY}/${VX} = ${VPp}L / (2d${VA})`),
+        stp('Straight line to the screen: Y = y + D tan θ', `|Y| = (${VPp}L / 2d${VA}) × (L/2 + D)`),
+        stp(`Rearrange for ${VPp}`, `${VPp} = 2d${VA}|Y| / (L(L/2 + D))`),
+        stp('Substitute', `${VPp} = 2 × ${N4(st.d)} × ${N4(st.Vacc)} × ${N4(Ym)} / (${N4(st.L)} × (${N4(st.L/2)} + ${N4(st.D)}))`),
+        stp('Evaluate', `${VPp} = ${N4(2*st.d*st.Vacc*Ym)} / ${N4(st.L*(st.L/2+st.D))} = ${N4(V)} V`),
+        stp('Check the direction', `top plate ${st.pol>0?'+ pushes the beam down':'− pulls the beam up'}, which matches the target being ${c.Ytarget<0?'below':'above'} the centre line`),
+        ans(`${VPp} = ${N3(V)} V`)]; }
+    case 'samey': return [
+      stp('Speed from the accelerating p.d.', `${VX}² = 2q${VA} / m`),
+      stp('Deflection between the plates', `y = ½${AY}t² = ½ (qE/m)(L/${VX})²`),
+      stp(`Substitute ${VX}²`, `y = ½ (qE/m) × L²m / (2q${VA})`),
+      stp('q and m cancel', `y = EL² / (4${VA}) = ${VPp}L² / (4d${VA})`),
+      ans('Neither q nor m appears: <b>both deflect by the same amount</b>')];
+    case 'double': return [
+      stp('Deflection between the plates', `y = ${VPp}L² / (4d${VA})`),
+      stp(`Only ${VA} changes, so y ∝ 1/${VA}`, `y<sub>new</sub> = y × ${VA} / (2${VA}) = y / 2`),
+      ans('<b>y halves</b>')];
+    case 'sense': case 'esense': { const p=particleOf(st), neg=p.q<0, upPos=st.Bdir<0, up=neg? !upPos : upPos; const out=[
+      stp('Magnetic force on a moving charge', 'F = qv × B'),
+      stp('On entry v points right (+x) and B points '+(upPos?'into the page (−z)':'out of the page (+z)'), `v × B: x̂ × ${upPos?'(−ẑ) = +ŷ (up)':'(+ẑ) = −ŷ (down)'}`)];
+      if (neg) out.push(stp('The charge is negative, so F = qv × B points the <b>opposite</b> way to v × B', `F points <b>${up?'up':'down'}</b>`));
+      out.push(stp('The force is the centripetal force, so the path bends towards it', `F points <b>${up?'up':'down'}</b> at the entry point`));
+      out.push(ans(`Moving right and turning ${up?'up':'down'}: <b>${up?'anticlockwise':'clockwise'}</b>`)); return out; }
+    case 'epair': return [
+      stp('Deflection between the plates for any charge', `y = ½${AY}t²  with  ${AY} = qE/m  and  t = L/${VX}`),
+      stp(`Both are accelerated through the same p.d., so ${VX}² = 2|q|${VA}/m`, `|y| = ${VPp}L² / (4d${VA})`),
+      stp('q and m cancel in the size of y, and |q| = e for both', 'the size of the deflection is the same'),
+      stp('The sign of q decides the direction of qE', 'positron: towards the − plate;  electron: towards the + plate'),
+      ans('<b>Mirror-image paths</b>: same size of deflection, opposite directions')];
+    case 'r': { const A=accS(st), B=st.B, Q=Math.abs(A.p.q), r=A.p.m*A.v/(Q*B);
+      return [...A.steps, stp('Magnetic force provides the centripetal force', `qvB = mv² / r`), stp('Rearrange for r', `r = mv / (${qS(A.p)}B)`),
+        stp('Substitute', `r = ${N4(A.p.m)} × ${N4(A.v)} / (${N4(Q)} × ${N4(B)})`), stp('Evaluate', `r = ${N4(A.p.m*A.v)} / ${N4(Q*B)} = ${N4(r)} m`), ans(`r = ${N3(r*100)} cm`)]; }
+    case 'hitB': { const A=accS(st), Q=Math.abs(A.p.q), s=c.sTarget, r=s/2, B=A.p.m*A.v/(Q*r);
+      return [...A.steps, stp('A semicircle lands one diameter from the entry hole', `s = 2r  →  r = s/2 = ${N4(s)} / 2 = ${N4(r)} m`),
+        stp('Magnetic force provides the centripetal force', `qvB = mv² / r`), stp('Rearrange for B', `B = mv / (qr)`),
+        stp('Substitute', `B = ${N4(A.p.m)} × ${N4(A.v)} / (${N4(Q)} × ${N4(r)})`), stp('Evaluate', `B = ${N4(A.p.m*A.v)} / ${N4(Q*r)} = ${N4(B)} T`),
+        ans(`B = ${N3(B*1000)} mT`)]; }
+    case 'T': { const p=particleOf(st), B=st.B, Q=Math.abs(p.q), T=2*Math.PI*p.m/(Q*B), out=[]; const qn=qNote(p); if (qn) out.push(qn);
+      return [...out, stp('Time for one circle at constant speed', `T = 2πr / v`), stp('Substitute r = mv/(qB): v cancels', `T = 2πm / (qB)`),
+        stp('Substitute', `T = 2π × ${N4(p.m)} / (${N4(Q)} × ${N4(B)})`), stp('Evaluate', `T = ${N4(2*Math.PI*p.m)} / ${N4(Q*B)} = ${N4(T)} s`),
+        ans(`T = ${N3(T)} s`)]; }
+    case 'Tdouble': return [
+      stp('Period of circular motion in a magnetic field', 'T = 2πr / v = 2πm / (qB)'),
+      stp('v does not appear: doubling v doubles r, and the longer path takes the same time', 'r = mv/(qB) ∝ v,  T = 2πr/v unchanged'),
+      ans('<b>T is unchanged</b>')];
+    case 'exitY': { const A=accS(st), B=st.B, Q=Math.abs(A.p.q), r=A.p.m*A.v/(Q*B), W=st.W, up=(st.Bdir<0)!==(A.p.q<0), h=r-Math.sqrt(r*r-W*W);
+      return [...A.steps, stp('Radius of the path', `r = mv/(${qS(A.p)}B) = ${N4(A.p.m)} × ${N4(A.v)} / (${N4(Q)} × ${N4(B)}) = ${N4(r)} m`),
+        stp(`The circle's centre is r ${up?'above':'below'} the entry point (the force points ${up?'up':'down'}). At the far edge x = W:`, `W² + (r − |y|)² = r²`),
+        stp('Rearrange for |y|', `|y| = r − √(r² − W²)`),
+        stp('Substitute', `|y| = ${N4(r)} − √((${N4(r)})² − (${N4(W)})²)`), stp('Evaluate', `|y| = ${N4(r)} − ${N4(Math.sqrt(r*r-W*W))} = ${N4(h)} m`),
+        stp('Apply the sign convention (up +)', `y = ${up?'+':'−'}${N4(h)} m`), ans(`y = ${N3((up?1:-1)*h*100)} cm`)]; }
+  }
+  return null;
+}
+function solutionHTML(ch,c,res){
+  const s=solutionSteps(ch,c,res); if (!s) return '';
+  return `<ol class="sol">${s.map(x=>`<li><div class="why">${x.why}</div>${x.eqs.map(e=>`<div class="eq">${e}</div>`).join('')}</li>`).join('')}</ol>`;
+}
+
 
 function newSetup(){
   const ch=chById(predict.chId); let c=null;
@@ -913,9 +1221,11 @@ function lockPrediction(){
 function flash(msg){ const b=document.getElementById('fbBox'); b.innerHTML=`<div class="feedback bad">${msg}</div>`; }
 function updateFire(){
   const f=document.getElementById('fireBtn');
-  f.disabled = mode!=='beam' || (predict.on && (!predict.locked || predict.fired));
+  setTimeout(draw,0);
+  f.disabled = mode==='lab'? !labCanFire() : (mode!=='beam' || (predict.on && (!predict.locked || predict.fired)));
 }
 function doFire(){
+  if (mode==='lab'){ if (labCanFire()) labFire(); return; }
   if (mode!=='beam') return;
   if (!predict.on){ fireShots([{st:{...S},color:COLORS.beam,label:particleOf(S).name}]); renderLegend([{color:COLORS.beam,label:particleOf(S).name}]); renderReadouts(); return; }
   const ch=chById(predict.chId), c=predict.setup;
@@ -934,7 +1244,7 @@ function evaluate(made){
     const magOk = Math.abs(Math.abs(pred)-Math.abs(truth))/Math.abs(truth)*100 <= predict.tol;
     yours = `${fmt(pred/u[1],3)} ${u[0]}`; actual = `${fmt(truth/u[1],3)} ${u[0]}`;
     html = `<div class="big">${ok?'Within tolerance':'Outside tolerance'}</div>
-      <div class="ro"><div>Your prediction</div><div>${yours}</div><div>Actual</div><div>${actual}</div><div>Difference</div><div>${fmt(diff,2)} %</div></div>`;
+      <div class="ro">${rows([['Your prediction',yours],['Actual',actual],['Difference',`${fmt(diff,2)} %`]])}</div>`;
     if (!ok && magOk && Math.sign(pred)!==Math.sign(truth)) html += `<div style="margin-top:6px">Right size, wrong sign. Up and right are positive; down and left are negative.</div>`;
     if (predict.sf<2 || predict.sf>4) html += `<div class="small" style="margin-top:6px">Sig figs: you gave ${predict.sf}. Data like this usually supports 2–3.</div>`;
     if (ch.ghostAfter){ predict.ghost = ch.ghostAfter(c, pred, res); }
@@ -945,6 +1255,10 @@ function evaluate(made){
     if (ch.explain) html += `<div class="small" style="margin-top:6px">${ch.explain}</div>`;
   }
   if (ch.extra) html += `<div style="margin-top:6px">${ch.extra(c,res)}</div>`;
+  const solH = solutionHTML(ch,c,res);
+  // multiple-choice answers can be guessed from the picture, so the proof is always shown
+  if (solH) html += (ok && ch.kind==='num') ? `<details class="solbox"><summary>Show the worked solution</summary>${solH}</details>`
+                       : `<div class="solbox open"><div class="solhead">${ok?'Why this is right':'Worked solution'}</div>${solH}</div>`;
   html += `<button class="btn primary" id="nextBtn" style="margin-top:10px">Next setup</button>`;
   predict.result = `<div class="feedback ${ok?'ok':'bad'}">${html}</div>`;
   predict.log.push({title:ch.title, yours, actual, ok});
@@ -961,6 +1275,302 @@ function renderLegend(list){
   lg.innerHTML = list && list.length>1 ? list.map(o=>`<span><i style="background:${o.color}"></i>${o.label}</span>`).join('') : '';
 }
 
+
+/* ================= MYSTERY PARTICLE: guided investigation ================= */
+const MYSTERY = {
+  electron:{name:'Electron', sym:'e⁻', m:9.110e-31, q:-1.60e-19},
+  positron:{name:'Positron', sym:'e⁺', m:9.110e-31, q:1.60e-19},
+  muon:{name:'Muon', sym:'μ⁻', m:1.884e-28, q:-1.60e-19},
+  proton:{name:'Proton', sym:'p⁺', m:1.673e-27, q:1.60e-19},
+  deuteron:{name:'Deuteron', sym:'d⁺', m:3.345e-27, q:1.60e-19},
+  helion:{name:'Helion (helium-3 nucleus)', sym:'³He²⁺', m:5.008e-27, q:3.20e-19},
+  alpha:{name:'Alpha particle', sym:'α²⁺', m:6.645e-27, q:3.20e-19},
+};
+const MYSTERY_POOL = ['electron','positron','muon','proton','helion','alpha'];
+const CANDIDATES = ['electron','positron','muon','proton','deuteron','helion','alpha'];
+const LAB_KEY = 'mb.mystery.v1', GRAPHLAB = 'https://sisgraphicallaboratory.netlify.app/';
+let LAB = null, BEAM_S = null;
+const qmOf = k => MYSTERY[k].q/MYSTERY[k].m;
+function newLab(){ return { v:1, mkey:pick(MYSTERY_POOL), sec:0, ans:{}, Vlocked:false, res:null, resDec:3, range:null, data:[], last:null, shots:0, bShots:[], exported:false, st:null }; }
+function labDefaultSt(L){ return {...defaultState(), particle:'mystery', mkey:L.mkey, platesOn:false, screenOn:false, BOn:true, Bdir:-1, W:0.30, Vacc:500, B:0.002}; }
+function loadLab(){ try{ const r=JSON.parse(localStorage.getItem(LAB_KEY)||'null'); if (r && r.v===1 && MYSTERY[r.mkey]) return r; }catch(e){} return null; }
+function saveLab(){ if (!LAB) return; if (mode==='lab') LAB.st={...S}; try{ localStorage.setItem(LAB_KEY, JSON.stringify(LAB)); }catch(e){} }
+function ensureLab(){ if (!LAB) LAB = loadLab() || newLab(); if (!LAB.st) LAB.st = labDefaultSt(LAB); }
+const gauss=()=>{ let u=0; while(!u) u=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random()); };
+function bDisp(){ return (mode==='lab' && LAB && LAB.res)? (S.B*1000).toFixed(LAB.resDec) : fmt(S.B*1000,3); }
+const Mq = ()=> MYSTERY[LAB.mkey];
+const sTrue = (Vv,BmT)=> 2/(BmT*1e-3)*Math.sqrt(2*Vv*Mq().m/Math.abs(Mq().q))*100;      // cm
+const BforS = (Vv,scm)=> 2/(scm/100)*Math.sqrt(2*Vv*Mq().m/Math.abs(Mq().q))*1000;     // mT
+
+function labFire(){
+  const st={...S, Vacc:S.Vacc*(1+0.004*gauss()), B:S.B*(1+0.002*gauss())};
+  const made=fireShots([{st, color:COLORS.beam, label:'mystery particle'}]); renderLegend([]);
+  const r=made[0].res; LAB.shots++; LAB.bShots.push(S.B);
+  LAB.last = { s: r.detector? +(Math.abs(r.detector.dist)*100).toFixed(4) : null, Btxt:bDisp(), sense:r.sense };
+  updateFire();
+  onAnimDone=()=>{ if (!LAB.firstSense) LAB.firstSense=r.sense; saveLab(); renderLab(); };
+}
+function labCanFire(){ return LAB && LAB.sec>=1; }
+
+/* ---------- the walkthrough ---------- */
+const meanS = row => { const v=row.s.map(parseFloat).filter(isFinite); return v.length? v.reduce((a,b)=>a+b,0)/v.length : NaN; };
+const fullRows = ()=> LAB.data.filter(r=>r.s.filter(x=>isFinite(parseFloat(x))).length>=3);
+function fitK(){ const pts=fullRows().map(r=>[1/parseFloat(r.B), meanS(r)]); if (pts.length<2) return NaN;
+  const n=pts.length, sx=pts.reduce((a,p)=>a+p[0],0), sy=pts.reduce((a,p)=>a+p[1],0), sxx=pts.reduce((a,p)=>a+p[0]*p[0],0), sxy=pts.reduce((a,p)=>a+p[0]*p[1],0);
+  return (n*sxy-sx*sy)/(n*sxx-sx*sx); }
+const A = id => LAB.ans[id];
+const num = id => A(id)? parseFloat(A(id).v) : NaN;
+
+const SECTIONS = [
+ { id:'brief', title:'The task', intro:()=>`A source accelerates an unknown particle through a p.d. <b>V</b> and fires it into a uniform magnetic field <b>B</b>, at right angles to the field. The particle curves round and lands on a detector strip.<br><br><b>Your goal:</b> measure the particle's charge-to-mass ratio <b>q/m</b>, with an uncertainty, and use it to identify the particle.<br><br>Each question must be attempted before the next one opens. A wrong answer is fine: read the explanation and carry on.`,
+   items:[
+   { id:'speed', type:'choice', q:'Before you fire anything: a magnetic field pushes on a moving charge. What do you expect it to do to the particle\'s <b>speed</b>?',
+     opts:['Speed it up','Slow it down','Leave the speed unchanged','It depends on the sign of the charge'], correct:()=>2,
+     why:()=>'The magnetic force F = qv × B is always at right angles to the velocity, so it does no work on the particle. It changes the <b>direction</b> of motion but not the speed. That is why the path is a circle.' } ]},
+ { id:'look', title:'First look', intro:()=>'The field points <b>into the page</b> (⊗). The source is sealed, so you cannot see which grid is positive.',
+   items:[
+   { id:'fire1', type:'task', q:'Press <b>FIRE</b> and watch the beam.', done:()=>LAB.shots>0, doneText:()=>'Fired.' },
+   { id:'sense', type:'choice', q:'Which way did the beam curve?', opts:['Clockwise','Anticlockwise'], correct:()=>LAB.firstSense==='clockwise'?0:1,
+     why:()=>`The particle moved right, then turned ${LAB.firstSense==='clockwise'?'down':'up'}: <b>${LAB.firstSense}</b>.` },
+   { id:'sign', type:'choice', q:'The field is into the page. For a <b>positive</b> charge moving right, F = qv × B points <b>up</b>. What is the sign of this particle\'s charge?',
+     opts:['Positive','Negative','You cannot tell from this'], correct:()=>Mq().q>0?0:1,
+     why:()=> Mq().q>0? 'It curved <b>up</b> (anticlockwise), the same direction as qv × B for a positive charge, so <b>q &gt; 0</b>.' : 'It curved <b>down</b> (clockwise), opposite to qv × B for a positive charge. The force is reversed, so <b>q &lt; 0</b>.' },
+   { id:'tryB', type:'task', q:'Now <b>double B</b> (turn the B knob, or tap its display and type a value) and fire again.', done:()=>{ const b=LAB.bShots; return b.length>=2 && Math.max(...b)/Math.min(...b)>=1.8; }, doneText:()=>'Done: you fired at two values of B.' },
+   { id:'doubleB', type:'choice', q:'What happened to the size of the circle when B doubled?', opts:['It doubled','It halved','It stayed the same','It became four times smaller'], correct:()=>1,
+     why:()=>'r = mv / (qB). The speed v has not changed, so doubling B <b>halves</b> r.' } ]},
+ { id:'physics', title:'The physics', intro:()=>'Build the equation you will test, one step at a time.',
+   items:[
+   { id:'ke', type:'choice', q:'The particle starts from rest and is accelerated through a p.d. V. How much kinetic energy does it gain?', opts:['qV','½qV','qV²','q / V'], correct:()=>0,
+     why:()=>'The work done on a charge moved through a p.d. is W = qV, and it all becomes kinetic energy: <b>½mv² = qV</b>.' },
+   { id:'cent', type:'choice', q:'In the field the particle moves in a circle. Which equation describes the force that keeps it on the circle?', opts:['mg = mv²/r','qE = mv²/r','qvB = mv²/r','qvB = mv'], correct:()=>2,
+     why:()=>'The magnetic force qvB is the only significant force (gravity is about 10¹⁵ times smaller) and it points to the centre: <b>qvB = mv²/r</b>.' },
+   { id:'rexp', type:'choice', q:'Combine ½mv² = qV and qvB = mv²/r. Which expression for r is correct?', opts:['r = (1/B)√(2Vm/q)','r = (1/B)√(2Vq/m)','r = B√(2Vm/q)','r = 2Vm / (qB)'], correct:()=>0,
+     why:()=>'From qvB = mv²/r: r = mv / (qB).<br>From ½mv² = qV: v = √(2qV/m).<br>Substitute: r = (m / qB)·√(2qV/m) = <b>(1/B)√(2Vm/q)</b>.' },
+   { id:'sr', type:'choice', q:'The detector measures <b>s</b>, the distance from the entry hole to where the particle lands. How is s related to r?', opts:['s = r','s = 2r','s = πr','s = r / 2'], correct:()=>1,
+     why:()=>'The particle travels a semicircle, so it lands one diameter from the hole: <b>s = 2r = (2/B)√(2Vm/q)</b>.' } ]},
+ { id:'plan', title:'Plan the experiment', intro:()=>'Your equation: <b>s = (2/B)√(2Vm/q)</b>.',
+   items:[
+   { id:'vars', type:'choice', q:'Which plan tests this relationship most cleanly?', opts:['Change B, measure s, keep V constant','Change V and B together, measure s','Change s, measure B','Change V, measure s, and let B drift'], correct:()=>0,
+     why:()=>'Change one thing (<b>independent: B</b>), measure one thing (<b>dependent: s</b>) and hold everything else constant (<b>control: V</b>, and the particle).' },
+   { id:'graph', type:'choice', q:'With V constant, s = 2√(2Vm/q) × (1/B). What should you plot to get a straight line through the origin?', opts:['s against B','s against 1/B','s against B²','s² against B'], correct:()=>1,
+     why:()=>'s is proportional to 1/B, so <b>s against 1/B</b> is a straight line through the origin with gradient <b>k = 2√(2Vm/q)</b>.' },
+   { id:'qm', type:'choice', q:'If the gradient of s against 1/B is k, which expression gives q/m?', opts:['q/m = 8V / k²','q/m = 2V / k²','q/m = k² / (8V)','q/m = 8Vk²'], correct:()=>0,
+     why:()=>'k = 2√(2Vm/q)  →  k² = 4 × 2Vm/q = 8Vm/q  →  <b>q/m = 8V / k²</b>.' },
+   { id:'rq', type:'text', q:'Write a research question for this investigation.',
+     model:()=>'<i>"How does the landing distance s of the mystery particles depend on the magnetic field strength B, for a fixed accelerating p.d. V, and what is the particles\' charge-to-mass ratio q/m?"</i><br>Check yours: does it name the independent and dependent variables, say what is kept constant, and say what will be determined?' },
+   { id:'whygraph', type:'text', q:'Why measure s for several values of B and draw a graph, instead of calculating q/m from a single shot?',
+     model:()=>'A graph uses all the data, so random errors partly cancel. It tests whether s really is proportional to 1/B. An intercept that is not zero reveals a systematic error (for example a zero error in where s is measured from). And the max/min lines give an uncertainty in the gradient.' } ]},
+ { id:'prelim', title:'Preliminary trials', intro:()=>'Real investigations start with quick trial runs to find a sensible range.',
+   items:[
+   { id:'lockV', type:'task', q:'Choose an accelerating p.d. between 100 V and 2500 V with the knob on the source supply, then <b>lock it</b>. It is your control variable: it must not change from now on.',
+     ui:()=> LAB.Vlocked? '' : `<button class="btn primary sm" data-act="lockV">Lock V<sub>acc</sub> at ${Math.round(S.Vacc)} V</button>`,
+     done:()=>LAB.Vlocked, doneText:()=>`V<sub>acc</sub> locked at <b>${Math.round(LAB.V)} V</b>.` },
+   { id:'range', type:'num2', q:'Fire at different values of B to find the range that lands the particle <b>between 3 cm and 22 cm</b> from the entry hole (the detector has cm marks). Enter the smallest and largest B that work.',
+     labels:['smallest B','largest B'], unit:'mT',
+     check:(a,b)=>{ const lo=BforS(LAB.V,22), hi=BforS(LAB.V,3); const ok=Math.abs(Math.min(a,b)-lo)/lo<0.25 && Math.abs(Math.max(a,b)-hi)/hi<0.25; return {ok}; },
+     why:()=>{ const lo=BforS(LAB.V,22), hi=BforS(LAB.V,3); return `With V = ${Math.round(LAB.V)} V, the particle lands between 3 cm and 22 cm for B from about <b>${fmt(lo,2)} mT</b> to <b>${fmt(hi,2)} mT</b>.<br>Your Hall probe is now set to the 0–${LAB.res>=1?'1000':LAB.res>=0.1?'100':'10'} mT range: it reads B to <b>${LAB.res} mT</b>, and the B knob moves in steps of ${LAB.res} mT.`; },
+     after:()=>{ const hi=BforS(LAB.V,3); LAB.res = hi<9.5? 0.01 : hi<95? 0.1 : 1; LAB.resDec = LAB.res===0.01?2:LAB.res===0.1?1:0; LAB.range=[BforS(LAB.V,22), hi];
+       S.B = Math.round(S.B*1000/LAB.res)*LAB.res/1000; } },
+   { id:'spacing', type:'choice', q:'You will plot <b>1/B</b> on the x-axis. How should you choose about six values of B?', opts:['Evenly spaced in B','Evenly spaced in 1/B, across the whole range','All near the top of the range','It does not matter'], correct:()=>1,
+     why:()=>{ const [lo,hi]=LAB.range, a=1/hi, b=1/lo, vals=[...Array(6)].map((_,i)=>1/(a+(b-a)*i/5)).map(v=>(Math.round(v/LAB.res)*LAB.res).toFixed(LAB.resDec));
+       return `Points spread evenly along the x-axis pin down the gradient best. Values evenly spaced in 1/B crowd together at low B. For your range, something like: <b>${vals.join(', ')} mT</b>.`; } } ]},
+ { id:'unc', title:'Uncertainties', intro:()=>'Decide the uncertainty of each measurement <b>before</b> you collect data.',
+   items:[
+   { id:'ds', type:'num', unit:'cm', q:'The detector ruler has <b>1 mm</b> divisions. What absolute uncertainty will you give each reading of s, in cm?',
+     check:x=>({ok: x>=0.04 && x<=0.105}), why:()=>'Half the smallest division: ±0.5 mm = <b>±0.05 cm</b> (±0.1 cm is also defensible if the spot is hard to centre). Write every reading to 2 decimal places in cm, e.g. 8.35 cm, so it matches its uncertainty.' },
+   { id:'dB', type:'num', unit:'mT', q:()=>`The Hall probe shows B to <b>${LAB.res} mT</b> (its last digit). What uncertainty will you give B, in mT?`,
+     check:x=>({ok: Math.abs(x-LAB.res)/LAB.res<0.01 || Math.abs(x-LAB.res/2)/LAB.res<0.01}), why:()=>`For a digital meter, use ± one unit in the last digit: <b>±${LAB.res} mT</b>.` },
+   { id:'trials', type:'choice', q:'Why take <b>three trials</b> of s at each value of B?', opts:['To reduce the effect of random errors on the mean','To remove systematic errors','To make the uncertainty bigger','Because a graph needs three points'], correct:()=>0,
+     why:()=>'Repeats average out <b>random</b> errors (the readings scatter slightly from shot to shot). They cannot remove a systematic error, which shifts every reading the same way.' } ]},
+ { id:'collect', title:'Collect your data', intro:()=>`For each value of B: set B, press <b>FIRE</b>, read s on the magnified ruler, type it in and press <b>Record</b>. Take <b>3 trials</b> at <b>at least 5</b> values of B, spread across ${LAB.range? fmt(LAB.range[0],2)+'–'+fmt(LAB.range[1],2):'your'} mT.`,
+   items:[
+   { id:'data', type:'task', q:'', ui:()=>collectUI(), wire:()=>wireCollect(), done:()=>fullRows().length>=5, doneText:()=>`${fullRows().length} complete rows recorded. You can keep adding or editing rows.` } ]},
+ { id:'process', title:'Process and graph', intro:()=>'',
+   items:[
+   { id:'invB', type:'num', unit:'mT⁻¹', q:()=>`Calculate <b>1/B</b> for your first value of B (${fullRows()[0]?fullRows()[0].B:'—'} mT), in mT⁻¹, to 3 s.f.`,
+     check:x=>{ const t=1/parseFloat(fullRows()[0].B); return {ok:Math.abs(x-t)/t<0.01}; }, why:()=>{ const B=parseFloat(fullRows()[0].B); return `1/B = 1 / ${fullRows()[0].B} = <b>${fmt(1/B,3)} mT⁻¹</b>. Graphical Laboratories does this for every row when you choose <b>1/x</b> as the x linearisation.`; } },
+   { id:'export', type:'task', q:'Open your data in Strothoff Graphical Laboratories. The link fills in the axis cards (B in mT ±'+'<span class="lres"></span>, s in cm ±0.05), all three trials, the 1/x linearisation and a linear fit with max/min lines.',
+     ui:()=>`<div class="row2"><button class="btn primary sm" data-act="openGL">Open in Graphical Laboratories ↗</button><button class="btn sm" data-act="copyGL">Copy data</button></div>
+       <ol class="steps"><li>Check the axis cards and the raw data table.</li><li>Fix any cell highlighted by strict precision.</li><li>Read the gradient <b>k</b> and its uncertainty from the max/min lines.</li><li>Look at the intercept: is it close to zero?</li></ol>`,
+     done:()=>LAB.exported, doneText:()=>'Opened.' },
+   { id:'k', type:'num2', labels:['gradient k','uncertainty Δk'], unit:'cm mT', q:'Enter your gradient <b>k</b> and its uncertainty <b>Δk</b> from Graphical Laboratories.',
+     check:(k,dk)=>{ const f=fitK(); return {ok: Math.abs(k-f)/f<0.03 && dk>0}; },
+     why:(k,dk)=>{ const f=fitK(); return `A best-fit line through your means gives k ≈ <b>${fmt(f,3)} cm mT</b>${Math.abs(k-f)/f<0.03?', which matches yours.':'. Check you plotted s against 1/B and read the gradient, not the intercept.'} Your percentage uncertainty: Δk/k = ${fmt(dk/k*100,2)} %.`; } } ]},
+ { id:'calc', title:'Calculate q/m', intro:()=>`Use your own values: k = ${A('k')?A('k').v:'—'} cm mT, V = ${LAB.V?Math.round(LAB.V):'—'} V (±1 %).`,
+   items:[
+   { id:'kSI', type:'num', unit:'m T', q:'Convert k to SI units (m T). Hint: 1 cm = 10⁻² m and 1 mT = 10⁻³ T.',
+     check:x=>{ const t=num('k')*1e-5; return {ok:Math.abs(x-t)/t<0.01}; }, why:()=>`k = ${A('k').v} × 10⁻² × 10⁻³ = <b>${fmt(num('k')*1e-5,3)} m T</b>.` },
+   { id:'qmv', type:'num', unit:'C kg⁻¹', q:'Calculate the size of q/m using q/m = 8V / k².',
+     check:x=>{ const t=8*LAB.V/Math.pow(num('k')*1e-5,2); return {ok:Math.abs(Math.abs(x)-t)/t<0.02}; },
+     why:()=>{ const k=num('k')*1e-5, t=8*LAB.V/(k*k); return `q/m = 8 × ${Math.round(LAB.V)} / (${fmt(k,3)})² = ${fmt(8*LAB.V,4)} / ${fmt(k*k,4)} = <b>${fmt(t,3)} C kg⁻¹</b>.`; } },
+   { id:'pct', type:'num', unit:'%', q:'What is the percentage uncertainty in q/m? (V is known to ±1 %.)',
+     check:x=>{ const t=2*num('k_d')/num('k')*100+1; return {ok:Math.abs(x-t)/t<0.15}; },
+     why:()=>{ const pk=num('k_d')/num('k')*100, t=2*pk+1, qm=8*LAB.V/Math.pow(num('k')*1e-5,2); return `q/m = 8V/k², so the percentage uncertainties add, and k is squared:<br>%Δ(q/m) = %ΔV + 2 × %Δk = 1 % + 2 × ${fmt(pk,2)} % = <b>${fmt(t,2)} %</b>.<br>Result: q/m = (${fmt(qm,3)} ± ${fmt(qm*t/100,1)}) C kg⁻¹, with the sign you found in section 2.`; } } ]},
+ { id:'identify', title:'Identify the particle', intro:()=>`<table class="cand"><tr><th>Particle</th><th>q/m / C kg⁻¹</th></tr>${CANDIDATES.map(k=>`<tr><td>${MYSTERY[k].name} (${MYSTERY[k].sym})</td><td class="mono">${fmt(qmOf(k),3)}</td></tr>`).join('')}</table>`,
+   items:[
+   { id:'which', type:'choice', q:'Use your value of q/m and the sign of the charge. Which particle is it?', opts:CANDIDATES.map(k=>MYSTERY[k].name),
+     correct:()=>CANDIDATES.indexOf(LAB.mkey), alsoOk:()=> LAB.mkey==='alpha'? [CANDIDATES.indexOf('deuteron')] : [],
+     why:()=>{ const t=Math.abs(qmOf(LAB.mkey)), mine=Math.abs(num('qmv')), pd=(mine-t)/t*100, pct=num('pct');
+       return `It was the <b>${MYSTERY[LAB.mkey].name} (${MYSTERY[LAB.mkey].sym})</b>, with q/m = ${fmt(qmOf(LAB.mkey),3)} C kg⁻¹.<br>Your value differs from it by <b>${fmt(pd,2)} %</b>; your uncertainty was ±${fmt(pct,2)} %, so the accepted value <b>${Math.abs(pd)<=pct?'lies within':'lies outside'}</b> your uncertainty.${LAB.mkey==='alpha'?'<br>The deuteron\'s q/m is only 0.7 % different from the alpha\'s, so either answer is consistent with your data.':''}`; } } ]},
+ { id:'evaluate', title:'Evaluate', intro:()=>'This is where an IA earns its marks. Write in full sentences.',
+   items:[
+   { id:'intercept', type:'text', q:'Theory says your line should pass through the origin. Did it? Give one reason the intercept might not be zero.',
+     model:()=>'Possible causes: a zero error in s (measuring from the edge of the entry hole rather than its centre); a non-uniform field near the edge of the field region, so the path is not a perfect semicircle; particles entering slightly off perpendicular. A small intercept within the max/min range is consistent with zero.' },
+   { id:'errors', type:'text', q:'Identify one <b>random</b> and one <b>systematic</b> source of error in this experiment, and suggest a realistic improvement for each.',
+     model:()=>'Random: judging the centre of the spot on the ruler, and small shot-to-shot fluctuations in V and B. Improve with more trials or a finer scale (a travelling microscope or a position-sensitive detector).<br>Systematic: a miscalibrated Hall probe or voltmeter, or a zero error in s. Improve by calibrating the probe against a known field, and by checking the intercept.' },
+   { id:'limits', type:'text', q:'Look at the candidate table. Which two particles would this experiment struggle to tell apart, and why?',
+     model:()=>'The <b>deuteron</b> (4.78 × 10⁷ C kg⁻¹) and the <b>alpha particle</b> (4.82 × 10⁷ C kg⁻¹) differ by under 1 %, which is smaller than a typical uncertainty here. Telling them apart needs a much more precise measurement, or a different one (e.g. measuring the charge separately).' } ]},
+];
+
+/* ---------- collect-data UI ---------- */
+function collectUI(){
+  const rows=LAB.data.map((r,i)=>`<tr><td class="mono">${r.B}</td>${[0,1,2].map(j=>`<td><input class="cell ${r.f&&r.f[j]?'flag':''}" data-r="${i}" data-t="${j}" value="${r.s[j]||''}" inputmode="decimal"></td>`).join('')}<td><button class="x" data-del="${i}" title="Delete row">×</button></td></tr>`).join('');
+  return `<canvas id="labRuler" height="104"></canvas>
+    <div class="rec"><label>s = <input id="labRead" inputmode="decimal" placeholder="e.g. 8.35"> cm</label><button class="btn primary sm" data-act="record">Record</button></div>
+    <div id="recMsg" class="small"></div>
+    <table class="dt"><tr><th>B / mT ± ${LAB.res}</th><th colspan="3">s / cm ± 0.05<br><span class="small">trial 1 · 2 · 3</span></th><th></th></tr>${rows || '<tr><td colspan="5" class="small">No data yet.</td></tr>'}</table>`;
+}
+function wireCollect(){
+  drawRuler();
+  const rd=document.getElementById('labRead'); if (rd) rd.addEventListener('keydown',e=>{ if (e.key==='Enter'){ e.preventDefault(); labAction('record'); } });
+  document.querySelectorAll('#labCard input.cell').forEach(inp=>inp.onchange=()=>{ const r=LAB.data[+inp.dataset.r]; r.s[+inp.dataset.t]=inp.value.trim(); saveLab(); renderLab(); });
+  document.querySelectorAll('#labCard button[data-del]').forEach(b=>b.onclick=()=>{ LAB.data.splice(+b.dataset.del,1); saveLab(); renderLab(); });
+}
+function drawRuler(){
+  const c=document.getElementById('labRuler'); if (!c) return;
+  const W=c.clientWidth||320, H=104, d=window.devicePixelRatio||1; c.width=W*d; c.height=H*d; const g=c.getContext('2d'); g.setTransform(d,0,0,d,0,0);
+  g.fillStyle='#e9e2cf'; g.fillRect(0,0,W,H);
+  const L=LAB.last;
+  if (!L || L.s===null){ g.fillStyle='#3a3226'; g.font="600 13px 'Space Grotesk', sans-serif"; g.textAlign='center';
+    g.fillText(L? 'The particle missed the detector: change B.' : 'Fire to see where the particle lands.', W/2, H/2+4); g.textAlign='left'; return; }
+  const start=Math.max(0,Math.floor(L.s)-1), span=3, ppc=(W-24)/span, X=v=>12+(v-start)*ppc, base=58;
+  // spot (drawn under the ticks, like a phosphor strip behind a scale)
+  const sx=X(L.s), gr=g.createRadialGradient(sx,base-30,0,sx,base-30,ppc*0.09+4);
+  gr.addColorStop(0,'rgba(30,200,120,0.95)'); gr.addColorStop(0.55,'rgba(30,200,120,0.55)'); gr.addColorStop(1,'rgba(30,200,120,0)');
+  g.fillStyle=gr; g.beginPath(); g.ellipse(sx,base-30,ppc*0.09+4,22,0,0,7); g.fill();
+  g.strokeStyle='#2a2318'; g.fillStyle='#2a2318'; g.lineWidth=1; g.font="700 13px 'JetBrains Mono', monospace"; g.textAlign='center';
+  for (let i=start*10;i<=(start+span)*10;i++){ const x=X(i/10), len=i%10===0?26:i%5===0?18:11; g.beginPath(); g.moveTo(x,base); g.lineTo(x,base-len); g.stroke(); if (i%10===0) g.fillText(String(i/10), x, base+16); }
+  g.beginPath(); g.moveTo(8,base); g.lineTo(W-8,base); g.stroke();
+  g.font="600 11px 'Space Grotesk', sans-serif"; g.fillText('distance from entry hole / cm', W/2, base+34); g.textAlign='left';
+  g.fillStyle='#5a4e3a'; g.fillText(`fired at B = ${L.Btxt} mT`, 8, 14);
+}
+function labAction(act){
+  if (act==='lockV'){ LAB.Vlocked=true; LAB.V=S.Vacc; }
+  if (act==='record'){
+    const m=document.getElementById('recMsg'), v=parseNum(document.getElementById('labRead').value), raw=document.getElementById('labRead').value.trim();
+    if (!LAB.last || LAB.last.s===null){ m.textContent='Fire a particle onto the detector first.'; return; }
+    if (LAB.last.Btxt!==bDisp()){ m.textContent='B has changed since that shot. Fire again at this B.'; return; }
+    if (!isFinite(v)){ m.textContent='Type your reading of s in cm first.'; return; }
+    if (LAB.last.used){ m.textContent='That shot is already recorded. Fire again for the next trial.'; return; }
+    let row=LAB.data.find(r=>r.B===LAB.last.Btxt); if (!row){ row={B:LAB.last.Btxt, s:['','',''], f:[0,0,0]}; LAB.data.push(row); LAB.data.sort((a,b)=>parseFloat(a.B)-parseFloat(b.B)); }
+    const j=row.s.findIndex(x=>!x); if (j<0){ m.textContent='Three trials are already recorded for this B. Choose another value.'; return; }
+    row.s[j]=raw.replace(',','.'); row.f=row.f||[0,0,0]; row.f[j]= Math.abs(v-LAB.last.s)>0.08? 1:0; LAB.last.used=true;
+    const dp=(raw.split(/[.,]/)[1]||'').length;
+    saveLab(); renderLab();
+    const m2=document.getElementById('recMsg');
+    if (m2) m2.innerHTML = (row.f[j]? '<span class="warnc">That reading is more than 1 mm from the centre of the spot. Check it (you can edit the cell).</span> ' : '') + (dp!==2? 'Tip: write s to 2 decimal places (e.g. 8.35) to match ±0.05 cm.' : '');
+    return;
+  }
+  if (act==='openGL' || act==='copyGL'){
+    LAB.exported=true; saveLab();
+    if (act==='copyGL'){ const tsv=['B / mT\ts1 / cm\ts2 / cm\ts3 / cm', ...fullRows().map(r=>[r.B,...r.s].join('\t'))].join('\n');
+      navigator.clipboard && navigator.clipboard.writeText(tsv); }
+    else { const w=window.open('about:blank','_blank'); graphLabURL().then(u=>{ if (w) w.location.href=u; else location.href=u; }); }
+  }
+  if (act==='restart'){ if (!confirm('Start a new investigation with a new mystery particle? Your answers and data will be cleared.')) return;
+    LAB=newLab(); LAB.st=labDefaultSt(LAB); S={...LAB.st}; shots=[]; fitScale(); }
+  if (act==='report'){ downloadReport(); return; }
+  saveLab(); renderAll();
+}
+async function graphLabURL(){
+  const rows=fullRows().map(r=>({x:r.B, y:r.s.slice(0,3)}));
+  const st={ v:1, title:'Landing distance against magnetic field strength for the mystery particle', showTitle:true,
+    x:{name:'Magnetic field strength', sym:'B', unit:'mT', unc:String(LAB.res), mode:'abs'},
+    y:{name:'Landing distance', sym:'s', unit:'cm', unc:'0.05', mode:'abs'},
+    trials:3, spread:'range', rows, perPoint:false, strict:true, linX:'inv', linY:'none', fit:'linear', maxmin:true, residuals:false, origin:true, tab:'raw' };
+  const bytes=new TextEncoder().encode(JSON.stringify(st));
+  const b64u=u8=>{ let s=''; u8.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+  if (window.CompressionStream){ const cs=new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return GRAPHLAB+'#g=z'+b64u(new Uint8Array(await new Response(cs).arrayBuffer())); }
+  return GRAPHLAB+'#g=j'+b64u(bytes);
+}
+function downloadReport(){
+  const strip=h=>String(h).replace(/<br>/g,'\n').replace(/<[^>]+>/g,'').replace(/&gt;/g,'>').replace(/&lt;/g,'<');
+  const out=['Millikan\'s Basement — Mystery particle investigation',''];
+  SECTIONS.forEach((sec,si)=>{ out.push(`${si+1}. ${sec.title}`); sec.items.forEach(it=>{ const a=LAB.ans[it.id]; if (!a || it.type==='task') return;
+    const q=strip(typeof it.q==='function'? it.q(): it.q); let v=a.v; if (it.type==='choice') v=it.opts[a.v]; if (it.type==='num2') v=`${a.v} ; ${a.v2}`;
+    out.push('  Q: '+q, '  A: '+v+(a.ok===true?'  (correct)':a.ok===false?'  (check)':''), ''); }); });
+  out.push('Data (B / mT, s / cm × 3):', ...LAB.data.map(r=>`  ${r.B}\t${r.s.join('\t')}`));
+  const blob=new Blob([out.join('\n')],{type:'text/plain'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mystery-particle-answers.txt'; a.click();
+}
+
+/* ---------- render ---------- */
+function itemDone(it){ return it.type==='task'? it.done() : !!LAB.ans[it.id]; }
+function qText(it){ return typeof it.q==='function'? it.q() : it.q; }
+function itemHTML(it, live){
+  const a=LAB.ans[it.id]; let h=`<div class="item ${itemDone(it)?'done':''}" data-item="${it.id}">`;
+  if (it.type==='task'){
+    if (qText(it)) h+=`<div class="q">${qText(it)}</div>`;
+    if (it.ui && live) h+=it.ui();
+    if (it.done()) h+=`<div class="fb ok">✓ ${it.doneText? it.doneText():'Done.'}</div>`;
+    return h+'</div>';
+  }
+  h+=`<div class="q">${qText(it)}</div>`;
+  if (it.type==='choice'){
+    if (!a) h+=`<div class="choices">${it.opts.map((o,i)=>`<button class="ch" data-pick="${i}">${o}</button>`).join('')}</div><button class="btn primary sm" data-submit="${it.id}">Submit answer</button>`;
+    else { const c=it.correct(); h+=`<div class="choices">${it.opts.map((o,i)=>`<div class="ch ro ${i===c?'right':''} ${i===a.v&&!a.ok?'wrong':''}">${o}${i===a.v?' <span class="small">(your answer)</span>':''}</div>`).join('')}</div>
+      <div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Correct.':'Not quite.'}</b> ${it.why()}</div>`; }
+  }
+  if (it.type==='num'){
+    if (!a) h+=`<div class="ans"><input data-in="${it.id}" inputmode="decimal" placeholder="your answer"><span class="u">${it.unit}</span><button class="btn primary sm" data-submit="${it.id}">Submit</button></div>`;
+    else h+=`<div class="mine">Your answer: <b>${a.v} ${it.unit}</b></div><div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Good.':'Compare with this:'}</b> ${it.why(parseFloat(a.v))}</div>`;
+  }
+  if (it.type==='num2'){
+    if (!a) h+=`<div class="ans two"><label>${it.labels[0]} <input data-in="${it.id}" inputmode="decimal"></label><label>${it.labels[1]} <input data-in2="${it.id}" inputmode="decimal"></label><span class="u">${it.unit}</span></div><button class="btn primary sm" data-submit="${it.id}">Submit</button>`;
+    else h+=`<div class="mine">Your answer: <b>${it.labels[0]} = ${a.v}, ${it.labels[1]} = ${a.v2} ${it.unit}</b></div><div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Good.':'Compare with this:'}</b> ${it.why(parseFloat(a.v),parseFloat(a.v2))}</div>`;
+  }
+  if (it.type==='text'){
+    if (!a) h+=`<textarea data-in="${it.id}" rows="3" placeholder="Write your answer…"></textarea><button class="btn primary sm" data-submit="${it.id}">Submit</button>`;
+    else h+=`<div class="mine">Your answer: <i>${a.v.replace(/</g,'&lt;')}</i></div><div class="fb model"><b>Compare with this model answer:</b><br>${it.model()}</div>`;
+  }
+  return h+'</div>';
+}
+function renderLab(){
+  const card=document.getElementById('labCard');
+  if (mode!=='lab'){ card.style.display='none'; return; }
+  card.style.display=''; ensureLab();
+  let h=`<h2>Mystery particle <span class="prog">${Math.min(LAB.sec+1,SECTIONS.length)} / ${SECTIONS.length}</span></h2><div class="bar"><i style="width:${(LAB.sec/SECTIONS.length*100).toFixed(0)}%"></i></div>`;
+  SECTIONS.forEach((sec,si)=>{
+    if (si>LAB.sec) return;
+    const live = si===LAB.sec;
+    let body=`<div class="intro">${sec.intro()}</div>`, allDone=true;
+    for (const it of sec.items){ body+=itemHTML(it, live); if (!itemDone(it)){ allDone=false; break; } }
+    if (live && allDone){ body += si<SECTIONS.length-1? `<button class="btn primary" data-act="next">Continue to ${si+2}. ${SECTIONS[si+1].title} →</button>`
+      : `<div class="fb ok"><b>Investigation complete.</b> Download your answers to hand in, or start again with a new particle.</div><div class="row2"><button class="btn primary sm" data-act="report">Download my answers</button><button class="btn sm" data-act="restart">New mystery particle</button></div>`; }
+    h+= live? `<section class="labsec live"><h3>${si+1}. ${sec.title}</h3>${body}</section>` : `<details class="labsec"><summary>✓ ${si+1}. ${sec.title}</summary>${body}</details>`;
+  });
+  if (LAB.sec<SECTIONS.length-1) h+=`<div class="labfoot"><button class="linkbtn" data-act="report">Download my answers so far</button> · <button class="linkbtn" data-act="restart">Start again</button></div>`;
+  card.innerHTML=h;
+  // wiring
+  card.querySelectorAll('.choices button.ch').forEach(b=>b.onclick=()=>{ b.parentNode.querySelectorAll('button.ch').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  card.querySelectorAll('[data-submit]').forEach(b=>b.onclick=()=>submitItem(b.dataset.submit, b.closest('.item')));
+  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ if (b.dataset.act==='next'){ LAB.sec++; saveLab(); renderAll(); card.scrollTop=0; return; } labAction(b.dataset.act); });
+  const cur=SECTIONS[LAB.sec]; if (cur) cur.items.forEach(it=>{ if (it.wire) it.wire(); });
+  card.querySelectorAll('.lres').forEach(e=>e.textContent=LAB.res||'');
+  const live=card.querySelector('.labsec.live'); if (live){ const pend=[...live.querySelectorAll('.item')].pop(); if (pend && renderLab._last!==pend.dataset.item){ renderLab._last=pend.dataset.item; pend.scrollIntoView({block:'nearest'}); } }
+}
+function submitItem(id, el){
+  const it=SECTIONS.flatMap(s=>s.items).find(x=>x.id===id); let rec=null;
+  const nag=msg=>{ let n=el.querySelector('.nag'); if (!n){ n=document.createElement('div'); n.className='nag'; el.appendChild(n); } n.textContent=msg; };
+  if (it.type==='choice'){ const on=el.querySelector('button.ch.on'); if (!on) return nag('Choose an answer first: a guess is fine.'); const v=+on.dataset.pick;
+    rec={v, ok: v===it.correct() || (it.alsoOk && it.alsoOk().includes(v))}; }
+  if (it.type==='num'){ const raw=el.querySelector(`[data-in="${id}"]`).value.trim(), v=parseNum(raw); if (!isFinite(v)) return nag('Enter a number to continue: your best attempt is fine.'); rec={v:raw, ok:it.check(v).ok}; }
+  if (it.type==='num2'){ const r1=el.querySelector(`[data-in="${id}"]`).value.trim(), r2=el.querySelector(`[data-in2="${id}"]`).value.trim(), a=parseNum(r1), b=parseNum(r2);
+    if (!isFinite(a)||!isFinite(b)) return nag('Enter both numbers to continue.'); rec={v:r1, v2:r2, ok:it.check(a,b).ok}; if (id==='k') LAB.ans['k_d']={v:r2}; }
+  if (it.type==='text'){ const v=el.querySelector(`[data-in="${id}"]`).value.trim(); if (v.length<8) return nag('Write at least a sentence before you see the model answer.'); rec={v, ok:null}; }
+  LAB.ans[id]=rec; if (it.after) it.after(); saveLab(); renderAll();
+}
+
 /* ================= modes ================= */
 const PLACEHOLDERS = {
   selector:['Velocity selector','Crossed E and B fields in one region. Only particles with v = E/B pass through the exit slit; faster ones curve towards the magnetic force, slower ones towards the electric force. Coming in the next build.'],
@@ -968,9 +1578,16 @@ const PLACEHOLDERS = {
   millikan:["Millikan's Basement",'Oil drops in real time through a microscope: time the fall with the field off, the rise with the field on, then find r and q with drag and buoyancy. Ionise a drop to watch its charge jump by whole multiples of e. Coming in the next build.']
 };
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
-  mode=b.dataset.mode; document.querySelectorAll('#modes button').forEach(x=>x.classList.toggle('on',x===b));
+  const prev=mode, next=b.dataset.mode; if (prev===next) return;
+  if (next==='lab' && predict.on) togglePredict();
+  if (prev==='lab'){ saveLab(); if (BEAM_S) S=BEAM_S; }
+  if (next==='lab'){ BEAM_S=S; ensureLab(); S={...LAB.st}; }
+  shots=[]; renderLegend([]); view.z=1; view.panX=0; view.panY=0;
+  mode=next; document.querySelectorAll('#modes button').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('predictWrap').style.visibility = mode==='beam'? 'visible':'hidden';
+  fitScale();
   const ph=document.getElementById('placeholder');
-  if (mode==='beam'){ ph.style.display='none'; } else { ph.style.display='flex'; document.getElementById('phTitle').textContent=PLACEHOLDERS[mode][0]; document.getElementById('phText').textContent=PLACEHOLDERS[mode][1]; }
+  if (mode==='beam'||mode==='lab'){ ph.style.display='none'; } else { ph.style.display='flex'; document.getElementById('phTitle').textContent=PLACEHOLDERS[mode][0]; document.getElementById('phText').textContent=PLACEHOLDERS[mode][1]; }
   renderAll();
 });
 const psw=document.getElementById('predictSwitch');
@@ -982,9 +1599,9 @@ function togglePredict(){
 }
 psw.onclick=togglePredict; psw.onkeydown=e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); togglePredict(); } };
 document.getElementById('fireBtn').onclick=doFire;
-document.getElementById('clearBtn').onclick=()=>{ if(predict.on && predict.fired) return; shots=[]; renderLegend([]); draw(); };
+document.getElementById('clearBtn').onclick=clearShots;
 
-function renderAll(){ renderPredict(); renderControls(); renderOpts(); renderReadouts(); updateFire(); draw(); }
+function renderAll(){ renderLab(); renderPredict(); renderControls(); renderOpts(); renderReadouts(); updateFire(); draw(); }
 renderAll(); resize();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ draw(); });
 </script>
