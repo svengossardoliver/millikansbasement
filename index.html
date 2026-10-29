@@ -149,7 +149,7 @@ table.dt .x{background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px
 table.cand{width:100%;border-collapse:collapse;font-size:13px}table.cand td,table.cand th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
 .labfoot{font-size:12.5px;color:var(--muted);margin-top:8px}.linkbtn{background:none;border:0;color:#f6c983;cursor:pointer;padding:0;font-size:12.5px;text-decoration:underline}
 .mkrec{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:10px 0;background:#111417}
-.mkh{display:flex;align-items:center;gap:6px;margin-bottom:4px}.mkh .x{margin-left:auto;background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px}
+.mkh{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}.mkh .del{margin-left:auto;min-height:30px;padding:4px 10px;font-size:12.5px;border-color:#7a3229;color:#ffb3a8}
 .mrow{font-size:13px;margin:5px 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px}.mrow span{color:var(--muted);min-width:100%;font-size:12px}
 input.mi{width:86px;background:#1f262c;border:1.5px solid #8a8f94;border-radius:6px;padding:7px 8px;color:#ffffff;font:700 15px 'JetBrains Mono',monospace}
 input.mi:placeholder-shown{border-color:#f2a541;border-style:dashed;background:#221c12}
@@ -1632,8 +1632,13 @@ function mkStep(dt){
     if (M.brown){ const D=MK.kT/(6*Math.PI*MK.eta*dp.r), s=Math.sqrt(2*D*dt)*1000; dp.x+=s*gauss(); dp.y+=s*gauss(); }
   }
   const before=M.drops.length;
+  const gone=M.drops.filter(dp=>!(Math.abs(dp.y)<0.72 && Math.abs(dp.x)<0.7));
   M.drops = M.drops.filter(dp=>Math.abs(dp.y)<0.72 && Math.abs(dp.x)<0.7);
-  if (M.sel!==null && !M.drops.some(d=>d.id===M.sel)){ M.msg='The selected drop drifted out of view.'; M.sel=null; renderMillikan(); }
+  if (gone.length){ const empty=r=>['fd','ft','rd','rt','V','r','q','n'].every(k=>!String(r[k]||'').trim());
+    const lost=M.recs.filter(r=>gone.some(g=>g.id===r.id) && empty(r));
+    if (lost.length){ M.recs=M.recs.filter(r=>!lost.includes(r)); M.msg=`Drop ${lost.map(r=>r.label).join(', ')} left the view before anything was recorded, so its record was removed.`; mkSave(); renderMillikan(); }
+    else if (M.recs.some(r=>gone.some(g=>g.id===r.id))) renderMillikan(); }
+  if (M.sel!==null && !M.drops.some(d=>d.id===M.sel)){ if (!/record was removed/.test(M.msg)) M.msg='The selected drop drifted out of view.'; M.sel=null; renderMillikan(); }
   return before!==M.drops.length;
 }
 function mkStart(){ if (M.loop) return; M.loop=true; M.last=performance.now(); requestAnimationFrame(mkTick); }
@@ -1776,6 +1781,9 @@ function mkSelectAt(x,y){
 /* ---- records, checking and worked solutions ---- */
 function mkSave(){ try{ localStorage.setItem('mb.millikan.v1', JSON.stringify({recs:M.recs})); }catch(e){} }
 function mkLoad(){ try{ const r=JSON.parse(localStorage.getItem('mb.millikan.v1')||'null'); if (r && Array.isArray(r.recs)) M.recs=r.recs; }catch(e){} }
+function mkClearView(){ M.drops=[]; M.sel=null; M.msg=''; renderMillikan(); draw(); }
+function mkStartOver(){ if (!confirm('Start the experiment again? This deletes all your drop records and clears the eyepiece and stopwatch.')) return;
+  M.drops=[]; M.sel=null; M.recs=[]; M.msg=''; M.field=false; mkSw('reset'); mkSave(); renderMillikan(); draw(); }
 function mkNewRec(){
   const dp=M.drops.find(d=>d.id===M.sel); if (!dp) return;
   M.recs.unshift({ id:dp.id, label:dp.label, ver:dp.ver, truth:{r:dp.r, n:dp.n}, fd:'', ft:'', V:'', rd:'', rt:'', r:'', q:'', n:'', checked:null });
@@ -1815,7 +1823,8 @@ function mkCheck(i){
 function mkCardHTML(rec,i){
   const f=(k,ph,u)=>`<label class="mf"><input class="mi" data-rec="${i}" data-k="${k}" value="${rec[k]}" placeholder="${ph}" inputmode="decimal"><span>${u}</span></label>`;
   const stale = (()=>{ const dp=M.drops.find(d=>d.id===rec.id); return dp && dp.ver!==rec.ver; })();
-  let h=`<div class="mkrec"><div class="mkh"><b>Drop ${rec.label}</b>${stale?'<span class="warnc"> · charge changed since this record started</span>':''}<button class="x" data-del="${i}" title="Delete record">×</button></div>
+  const gone = !M.drops.some(d=>d.id===rec.id);
+  let h=`<div class="mkrec"><div class="mkh"><b>Drop ${rec.label}</b>${stale?'<span class="warnc"> · charge changed since this record started</span>':''}${gone?'<span class="small"> · has left the view</span>':''}<button class="btn sm del" data-del="${i}">Delete record</button></div>
     <div class="mgrp"><div class="mgt">1 · Falling, field OFF</div><div class="mgr">${f('fd','e.g. 5','divisions')}${f('ft','e.g. 9.8','s')}</div></div>
     <div class="mgrp"><div class="mgt">2 · Rising, field ON</div><div class="mgr">${f('rd','e.g. 5','divisions')}${f('rt','e.g. 4.2','s')}${f('V','e.g. 600','V')}</div>
       <button class="linkbtn" data-usev="${i}">fill in the current p.d. (${M.V} V)</button></div>
@@ -1866,6 +1875,7 @@ function renderMillikan(){
       <div class="small2">1 division = 0.100 mm. Speed = (divisions × 0.100 × 10⁻³ m) / time.</div></details>
     <table class="cand mkc"><tr><td>Plate separation d</td><td class="mono">6.00 × 10⁻³ m</td></tr><tr><td>Density of oil ρ<sub>oil</sub></td><td class="mono">875 kg m⁻³</td></tr>
       <tr><td>Density of air ρ<sub>air</sub></td><td class="mono">1.20 kg m⁻³</td></tr><tr><td>Viscosity of air η</td><td class="mono">1.81 × 10⁻⁵ Pa s</td></tr><tr><td>g</td><td class="mono">9.81 m s⁻²</td></tr></table>
+    <div class="row2"><button class="btn sm" data-act="mkclear">Clear the eyepiece</button><button class="btn sm" data-act="mkover">Start over</button></div>
     <div class="mksel">${dp? `Selected: <b>drop ${dp.label}</b> <button class="btn primary sm" data-act="mkrec">Start a record for drop ${dp.label}</button>` : '<span class="small">No drop selected. Tap a drop in the eyepiece.</span>'}</div>
     ${M.recs.map(mkCardHTML).join('')}
     <div class="row2" style="margin-top:10px"><button class="btn sm" data-act="mkexport" ${nQ<2?'disabled':''}>Plot q against n in Graphical Laboratories ↗</button></div>
@@ -1875,7 +1885,7 @@ function renderMillikan(){
   card.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>{ card.querySelectorAll(`input.mi[data-rec="${b.dataset.check}"]`).forEach(inp=>M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim()); mkCheck(+b.dataset.check); });
   card.querySelectorAll('[data-usev]').forEach(b=>b.onclick=()=>{ M.recs[+b.dataset.usev].V=String(M.V); mkSave(); renderMillikan(); });
   card.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ M.recs.splice(+b.dataset.del,1); mkSave(); renderMillikan(); });
-  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=async()=>{ if (b.dataset.act==='mkrec') mkNewRec(); if (b.dataset.act==='mkexport'){ const w=window.open('about:blank','_blank'); const u=await mkExportURL(); if (w) w.location.href=u; else location.href=u; } });
+  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=async()=>{ if (b.dataset.act==='mkclear') mkClearView(); if (b.dataset.act==='mkover') mkStartOver(); if (b.dataset.act==='mkrec') mkNewRec(); if (b.dataset.act==='mkexport'){ const w=window.open('about:blank','_blank'); const u=await mkExportURL(); if (w) w.location.href=u; else location.href=u; } });
 }
 document.addEventListener('keydown',e=>{
   if (mode!=='millikan' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
