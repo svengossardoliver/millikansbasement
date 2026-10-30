@@ -108,9 +108,6 @@ ol.sol li:last-child .eq{color:#ffd27a}
 .log{max-height:180px;overflow-y:auto;font-size:12.5px}
 .log table{width:100%;border-collapse:collapse}
 .log td,.log th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
-.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(14,17,19,.92)}
-.placeholder .box{max-width:520px;border:1px solid var(--line);border-radius:10px;padding:20px 22px;background:var(--panel)}
-.placeholder h3{margin:0 0 8px;color:var(--amber)}
 .labsec{margin:0 0 10px}
 details.labsec{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#111417}
 details.labsec summary{cursor:pointer;color:#8fd6a2;font-weight:600}
@@ -193,8 +190,6 @@ dialog.help::backdrop{background:rgba(5,7,9,.72)}
   </div>
   <nav class="modes" id="modes">
     <button data-mode="beam" class="on">Beam line</button>
-    <button data-mode="selector">Velocity selector</button>
-    <button data-mode="spectro">Mass spectrometer</button>
     <button data-mode="lab">Mystery particle</button>
     <button data-mode="millikan">Millikan</button>
   </nav>
@@ -213,7 +208,6 @@ dialog.help::backdrop{background:rgba(5,7,9,.72)}
         <button id="zoomFit" title="Fit view">⤢</button>
       </div>
       <input id="modInput" inputmode="decimal" autocomplete="off">
-      <div class="placeholder" id="placeholder" style="display:none"><div class="box"><h3 id="phTitle"></h3><div id="phText"></div></div></div>
     </div>
     <div class="firebar">
       <button class="btn fire" id="fireBtn" hidden>FIRE</button>
@@ -244,7 +238,7 @@ dialog.help::backdrop{background:rgba(5,7,9,.72)}
   </div>
   <div class="help-body">
     <section><h4>Quick start</h4><ol>
-      <li>Choose a mode along the top. <b>Beam line</b>, <b>Mystery particle</b> and <b>Millikan</b> are ready. <b>Velocity selector</b> and <b>Mass spectrometer</b> only describe what is coming next.</li>
+      <li>Choose a mode along the top: <b>Beam line</b>, <b>Mystery particle</b> or <b>Millikan</b>.</li>
       <li>On the <b>Beam line</b>, choose a <b>Particle</b> under the apparatus.</li>
       <li>Set each value on its module: turn the knob, or tap the display and type.</li>
       <li>Press <b>FIRE</b>. The path is drawn in slow motion and the numbers appear in the <b>Data</b> panel.</li>
@@ -2001,11 +1995,6 @@ document.addEventListener('keydown',e=>{
 mkLoad();
 
 /* ================= modes ================= */
-const PLACEHOLDERS = {
-  selector:['Velocity selector','Crossed E and B fields in one region. Only particles with v = E/B pass through the exit slit; faster ones curve towards the magnetic force, slower ones towards the electric force. Coming in the next build.'],
-  spectro:['Mass spectrometer','A mixed beam of ions lands on a detector strip. Switch between “accelerate, then B” (r ∝ √(m/q)) and a Bainbridge layout (r ∝ m/q). Coming in the next build.'],
-  millikan:["Millikan's Basement",'Oil drops in real time through a microscope: time the fall with the field off, the rise with the field on, then find r and q with drag and buoyancy. Ionise a drop to watch its charge jump by whole multiples of e. Coming in the next build.']
-};
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
   const prev=mode, next=b.dataset.mode; if (prev===next) return;
   if (next==='lab' && predict.on) togglePredict();
@@ -2016,9 +2005,7 @@ document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{
   document.getElementById('predictWrap').style.visibility = mode==='beam'? 'visible':'hidden';
   document.querySelector('.view-btns').style.display = mode==='millikan'? 'none':'flex';
   fitScale();
-  const ph=document.getElementById('placeholder');
   if (mode==='millikan') mkStart();
-  if (mode==='beam'||mode==='lab'||mode==='millikan'){ ph.style.display='none'; } else { ph.style.display='flex'; document.getElementById('phTitle').textContent=PLACEHOLDERS[mode][0]; document.getElementById('phText').textContent=PLACEHOLDERS[mode][1]; }
   renderAll();
 });
 const psw=document.getElementById('predictSwitch');
