@@ -228,6 +228,24 @@ async function run(){
     $('M.recs='+realM);
   }
 
+  /* ===== help sheet ===== */
+  group('Help sheet');
+  { const D=W.document, dlg=D.getElementById('helpDlg');
+    check('In test mode the help sheet does not open by itself', dlg && !dlg.open);
+    $('openHelp()');
+    check('openHelp() opens the help sheet', dlg.open);
+    check('The help sheet has 10 sections', D.querySelectorAll('#helpDlg .help-body section').length===10, D.querySelectorAll('#helpDlg .help-body section').length);
+    check('Footer: Start the lab, and the standard credit line', D.getElementById('btnHelpGo').textContent.trim()==='Start the lab' && /Created by Christopher B\. Slough, Head of Science, Strothoff International School\. You can open this page again/.test(D.querySelector('.help-credit').textContent));
+    $('closeHelp()');
+    check('closeHelp() closes it', !dlg.open);
+    $(`openEditor(modules().find(m=>m.key==='d')); document.getElementById('modInput').value='3.5'; openHelp(); closeHelp();`);
+    check('Opening help commits an open edit box', Math.abs($(`ctlDefs.d.get()`)-3.5)<1e-9 && $(`editing`)===null, $(`ctlDefs.d.get()`));
+    $(`setVal('d',2)`);
+    $(`openEditor(modules().find(m=>m.key==='d')); document.getElementById('modInput').value='2.5'; openEditor(modules().find(m=>m.key==='L'));`);
+    check('Opening a second edit box commits the first', Math.abs($(`ctlDefs.d.get()`)-2.5)<1e-9 && $(`editing.key`)==='L', $(`ctlDefs.d.get()`));
+    $(`closeEditor(false); setVal('d',2)`);
+  }
+
   /* ===== 7. page health ===== */
   group('Page health');
   check('No uncaught script errors while testing', errs.length===0, errs.join('\n'));

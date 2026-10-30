@@ -160,6 +160,29 @@ input.mi:focus{outline:none;border-color:#ffd27a;box-shadow:0 0 0 3px rgba(242,1
 .vars div{margin:3px 0}
 .mksel{margin:10px 0;font-size:14px}.small2{font-size:13px;color:#cfcabe}.mkc{margin:8px 0}
 footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+/* ---- help sheet (Strothoff collection standard) ---- */
+.helpbtn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:14px;padding:9px 14px;cursor:pointer;min-height:40px}
+.helpbtn:hover{border-color:var(--amber)}
+dialog.help{max-width:860px;width:calc(100% - 48px);padding:0;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);max-height:88vh;flex-direction:column}
+dialog.help[open]{display:flex}
+dialog.help::backdrop{background:rgba(5,7,9,.72)}
+.help-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 22px 12px;border-bottom:2px solid var(--amber)}
+.help-head h3{font:700 22px 'Space Grotesk',sans-serif;margin:0}
+.help-head p{margin:2px 0 0;font:500 11px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.help-x{background:none;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:16px;font-weight:600;padding:4px 10px;cursor:pointer}
+.help-body{overflow:auto;padding:6px 22px 10px;columns:2;column-gap:28px}
+@media (max-width:900px){.help-body{columns:1}}
+.help-body section{padding:10px 0;border-bottom:1px solid var(--line);break-inside:avoid;display:inline-block;width:100%}
+.help-body h4{font:700 14px 'Space Grotesk',sans-serif;margin:0 0 6px;color:var(--amber)}
+.help-body p,.help-body li{font-size:13.5px;line-height:1.45;color:#d6d1c6;margin:0 0 6px}
+.help-body ol,.help-body ul{margin:0;padding-left:18px}
+.help-body code{font:12.5px 'JetBrains Mono',monospace}
+.help-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 22px;border-top:1px solid var(--line)}
+.help-foot label{font-size:13.5px;color:var(--muted);display:flex;gap:8px;align-items:center;cursor:pointer}
+.help-credit{margin:0;padding:0 22px 16px;font-size:12px;color:var(--muted)}
+/* ---- phones are not supported ---- */
+#phoneNote{display:none;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:18px;line-height:1.5}
+@media (max-width:760px){header,main,footer{display:none}#phoneNote{display:flex}}
 </style>
 </head>
 <body>
@@ -176,6 +199,7 @@ footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color
     <button data-mode="millikan">Millikan</button>
   </nav>
   <div class="predict-switch" id="predictWrap"><span>Predict</span><div class="switch" id="predictSwitch" role="switch" aria-checked="false" tabindex="0"></div></div>
+  <button type="button" class="helpbtn" id="btnHelp" title="How to use this lab">? Help</button>
 </header>
 
 <main>
@@ -210,6 +234,68 @@ footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color
   <span>Millikan's Basement · Strothoff Physics Laboratories</span>
   <span>Created by Christopher B. Slough, Head of Science, Strothoff International School</span>
 </footer>
+
+<div id="phoneNote">Millikan's Basement is designed for computers and tablets.<br>Please open it on a larger screen.</div>
+
+<dialog id="helpDlg" class="help" aria-labelledby="helpTitle">
+  <div class="help-head">
+    <div><h3 id="helpTitle">Millikan's Basement</h3><p>How to use this lab</p></div>
+    <button type="button" class="help-x" id="btnHelpX" aria-label="Close">✕</button>
+  </div>
+  <div class="help-body">
+    <section><h4>Quick start</h4><ol>
+      <li>Choose a mode along the top. <b>Beam line</b>, <b>Mystery particle</b> and <b>Millikan</b> are ready. <b>Velocity selector</b> and <b>Mass spectrometer</b> only describe what is coming next.</li>
+      <li>On the <b>Beam line</b>, choose a <b>Particle</b> under the apparatus.</li>
+      <li>Set each value on its module: turn the knob, or tap the display and type.</li>
+      <li>Press <b>FIRE</b>. The path is drawn in slow motion and the numbers appear in the <b>Data</b> panel.</li>
+      <li>When you are ready, turn on <b>Predict</b> and try a challenge.</li></ol></section>
+    <section><h4>Using the controls</h4><ul>
+      <li><b>Knobs:</b> drag round. The scroll wheel over a knob or display also steps the value.</li>
+      <li><b>Displays:</b> tap to type. <b>Enter</b> confirms, <b>Esc</b> cancels, and tapping anywhere else confirms. The amber box is the edit box.</li>
+      <li><b>Small chips</b> on a module flip a polarity or the direction of B. <b>Plates</b>, <b>B field</b> and <b>Screen</b> under the apparatus switch each part on or off.</li>
+      <li><b>+</b>, <b>−</b> and <b>⤢</b> zoom in, zoom out and fit the view. Ctrl + scroll also zooms. When zoomed in, drag to pan.</li>
+      <li>The controls are locked while <b>Predict</b> is on.</li></ul></section>
+    <section><h4>Beam line</h4><ul>
+      <li>A charge is accelerated from rest through V<sub>acc</sub>, passes between plates (separation d, length L, plate p.d. V<sub>p</sub>), can cross a magnetic field region, and lands on a screen a distance D beyond the plates.</li>
+      <li>The colour key in the <b>Data</b> panel shows d, L, D and y. y is measured from the centre line, with up positive.</li>
+      <li><b>Display</b> options: <b>Time dots</b>, <b>v components</b>, <b>Force arrow</b> and <b>Right-hand rule</b>.</li></ul></section>
+    <section><h4>Predict, then fire</h4><ul>
+      <li>Turn on <b>Predict</b>, choose a challenge, and type a value with its unit, or choose an answer.</li>
+      <li>Press <b>Lock in prediction</b>, then <b>FIRE</b>. The tolerance can be set from ±1 % to ±10 %.</li>
+      <li>The worked solution is shown afterwards, even when you are right, because a right answer can be a lucky guess.</li>
+      <li><b>Download log (CSV)</b> saves your challenge log.</li></ul></section>
+    <section><h4>Mystery particle</h4><ul>
+      <li>A guided investigation, as practice for an IA: find q/m for an unknown particle and identify it.</li>
+      <li>Each question must be attempted before the next one opens.</li>
+      <li>For each value of B, press <b>FIRE</b>, read s on the magnified ruler, type it and press <b>Record</b>. Take 3 trials at 5 or more values of B.</li>
+      <li><b>Open in SGL</b> sends your table to Strothoff Graphical Laboratories, set up to plot s against 1/B with max/min lines.</li>
+      <li>Your progress is saved in this browser. <b>Download my answers</b> saves them to hand in.</li></ul></section>
+    <section><h4>Millikan's oil drops</h4><ol>
+      <li>Press <b>SPRAY</b>, tap a drop in the eyepiece, then press <b>Start a record</b>.</li>
+      <li><b>Field OFF:</b> time the drop falling a number of graticule divisions (1 division = 0.100 mm).</li>
+      <li><b>Field ON:</b> set V so the drop rises steadily. If it falls faster instead, press <b>POL</b>. If it never rises, it is uncharged: choose another drop.</li>
+      <li>Find r from the falling speed, q from the rising speed and n = q / e, then press <b>Check</b>.</li></ol></section>
+    <section><h4>Data and SGL</h4><ul>
+      <li>The <b>Data</b> panel lists the values for the last shot: exit speed, kinetic energy, the deflection between the plates, the motion in the field and the spot on the screen.</li>
+      <li>Results go to SGL through a link that keeps every value exactly as you typed it, with its uncertainty. Strict precision is on, so values must match the decimal places of their uncertainty.</li></ul></section>
+    <section><h4>Conventions</h4><ul>
+      <li>Right and up are positive, so left and down are negative. g = −9.81 m s⁻².</li>
+      <li>Worked solutions show the equation, the rearrangement until the variable is isolated, the substitution, and a step-by-step evaluation.</li>
+      <li>Table headings are in IB style, for example <code>s / cm ± 0.05</code>.</li></ul></section>
+    <section><h4>Why the data are not perfect</h4><ul>
+      <li>In the mystery lab, V and B fluctuate slightly from shot to shot, and you judge the centre of the spot on the ruler yourself.</li>
+      <li>Oil drops wander because of Brownian motion (it can be switched off), and you start and stop the stopwatch by hand.</li>
+      <li>Scatter between trials is expected. Explaining it is part of the experiment.</li></ul></section>
+    <section><h4>Devices</h4><ul>
+      <li>Use a computer, or a tablet in landscape. Phones are not supported.</li>
+      <li>Records and answers are stored only in this browser on this device.</li></ul></section>
+  </div>
+  <div class="help-foot">
+    <label><input type="checkbox" id="helpNever"> Don’t show this when the lab starts</label>
+    <button type="button" class="btn primary" id="btnHelpGo">Start the lab</button>
+  </div>
+  <p class="help-credit">Created by Christopher B. Slough, Head of Science, Strothoff International School. You can open this page again at any time with <b>? Help</b>.</p>
+</dialog>
 
 <script>
 "use strict";
@@ -583,7 +669,9 @@ function drawWires(ms, L){
 let knobDrag=null, pan=null, editing=null;
 function evPos(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
 const inR=(x,y,r)=> x>=r.x && x<=r.x+r.w && y>=r.y && y<=r.y+r.h;
+let tapHit=null;   // a tap resolved against the layout on screen before an open edit box was committed
 function hit(e){
+  if (tapHit && tapHit.ev===e){ if (!tapHit.key) return null; const m=modules().find(m=>m.key===tapHit.key); return m? {m,part:tapHit.part} : null; }
   const [x,y]=evPos(e);
   for (const m of modules()){
     if (m.chip && inR(x,y,m.chip)) return {m,part:'chip'};
@@ -634,6 +722,7 @@ cv.addEventListener('wheel',e=>{
 /* ---- type a value straight into a module display ---- */
 const edIn=document.getElementById('modInput');
 function openEditor(m){
+  if (editing) closeEditor(true);   // opening a second box commits the first
   editing={key:m.key}; const d=m.disp;
   Object.assign(edIn.style,{display:'block', left:d.x+'px', top:d.y+'px', width:d.w+'px', height:d.h+'px'});
   edIn.value = +ctlDefs[m.key].get().toPrecision(4); edIn.focus(); edIn.select(); draw();
@@ -645,6 +734,17 @@ function closeEditor(commit){
 }
 edIn.addEventListener('keydown',e=>{ if (e.key==='Enter'){ e.preventDefault(); closeEditor(true); } if (e.key==='Escape'){ e.preventDefault(); closeEditor(false); } });
 edIn.addEventListener('blur',()=>closeEditor(true));
+// The canvas calls preventDefault() on pointerdown, so the box never loses focus when the student
+// taps elsewhere. Commit it here instead, before any other handler (FIRE, a knob, another display) runs.
+// Committing can move the modules (a new d spreads the plates), so the tap is matched to what the
+// student saw before the commit, then applied to the module in its new position.
+document.addEventListener('pointerdown',e=>{
+  if (!editing || e.target===edIn) return;
+  if (e.target===cv){ const h=hit(e); tapHit={ev:e, key:h&&h.m.key, part:h&&h.part}; }
+  closeEditor(true);
+},true);
+window.addEventListener('resize',()=>closeEditor(true));
+window.addEventListener('scroll',()=>closeEditor(true),true);
 
 /* ================= shots + animation ================= */
 let shots=[];           // {res, color, label, start, dur}
@@ -1025,7 +1125,7 @@ const CHALLENGES = [
    setup(){ for(let i=0;i<100;i++){ const st=BSetup(); const cap=capV(st); st.Vacc=Math.min(st.Vacc, Math.floor(cap/4/10)*10); if (st.Vacc<100) continue; const p=particleOf(st),v=Math.sqrt(2*p.q*4*st.Vacc/p.m); if (p.m*v/(p.q*st.B)>0.12) continue; return {st}; } },
    prompt:c=>`V<sub>acc</sub> is made four times larger (${fmt(c.st.Vacc,3)} V → ${fmt(4*c.st.Vacc,3)} V), which doubles the speed. What happens to the period?${givens([gPart(c.st),gB(c.st)])}`,
    shots:c=>[{st:{...c.st},color:COLORS.beam,label:`${fmt(c.st.Vacc,3)} V`},{st:{...c.st,Vacc:4*c.st.Vacc},color:COLORS.shot2,label:`${fmt(4*c.st.Vacc,3)} V`}],
-   correct:()=>2, explain:'T = 2πm / (qB) has no v in it: double the speed and the radius doubles too, so the time per circle is the same. Both particles reach the detector together.' },
+   correct:()=>2, explain:'T = 2πm / (qB) has no v in it: double the speed and the radius doubles too, so the time per circle is the same. Both particles spend the same time in the field, half a period. The faster one still reaches the detector first, because it crosses the accelerating gap and the drift space more quickly.' },
  { id:'exitY', group:'Magnetic field', title:'14 · Exit point (r > region width)', kind:'num', units:[['cm',1e-2],['mm',1e-3]], signed:true,
    setup(){ const st=base(); st.particle=randParticle(); st.BOn=true; st.Bdir=pick([1,-1]); st.W=rndStep(0.05,0.15,0.01); st.Vacc=rndStep(200,capV(st),100);
      const p=particleOf(st), v=Math.sqrt(2*p.q*st.Vacc/p.m); const r=st.W*(1.3+Math.random()*2.2); st.B=p3(p.m*v/(p.q*r)); return {st}; },
@@ -1331,13 +1431,15 @@ function labFire(){
 function labCanFire(){ return LAB && LAB.sec>=1; }
 
 /* ---------- the walkthrough ---------- */
-const meanS = row => { const v=row.s.map(parseFloat).filter(isFinite); return v.length? v.reduce((a,b)=>a+b,0)/v.length : NaN; };
-const fullRows = ()=> LAB.data.filter(r=>r.s.filter(x=>isFinite(parseFloat(x))).length>=3);
-function fitK(){ const pts=fullRows().map(r=>[1/parseFloat(r.B), meanS(r)]); if (pts.length<2) return NaN;
+// Students in Germany type decimal commas: read every typed value with parseNum, never parseFloat ("8,35" → 8).
+const pf = x => parseNum(String(x));
+const meanS = row => { const v=row.s.map(pf).filter(isFinite); return v.length? v.reduce((a,b)=>a+b,0)/v.length : NaN; };
+const fullRows = ()=> LAB.data.filter(r=>r.s.filter(x=>isFinite(pf(x))).length>=3);
+function fitK(){ const pts=fullRows().map(r=>[1/pf(r.B), meanS(r)]); if (pts.length<2) return NaN;
   const n=pts.length, sx=pts.reduce((a,p)=>a+p[0],0), sy=pts.reduce((a,p)=>a+p[1],0), sxx=pts.reduce((a,p)=>a+p[0]*p[0],0), sxy=pts.reduce((a,p)=>a+p[0]*p[1],0);
   return (n*sxy-sx*sy)/(n*sxx-sx*sx); }
 const A = id => LAB.ans[id];
-const num = id => A(id)? parseFloat(A(id).v) : NaN;
+const num = id => A(id)? pf(A(id).v) : NaN;
 
 const SECTIONS = [
  { id:'brief', title:'The task', intro:()=>`A source accelerates an unknown particle through a p.d. <b>V</b> and fires it into a uniform magnetic field <b>B</b>, at right angles to the field. The particle curves round and lands on a detector strip.<br><br><b>Your goal:</b> measure the particle's charge-to-mass ratio <b>q/m</b>, with an uncertainty, and use it to identify the particle.<br><br>Each question must be attempted before the next one opens. A wrong answer is fine: read the explanation and carry on.`,
@@ -1361,7 +1463,7 @@ const SECTIONS = [
    { id:'ke', type:'choice', q:'The particle starts from rest and is accelerated through a p.d. V. How much kinetic energy does it gain?', opts:['qV','½qV','qV²','q / V'], correct:()=>0,
      why:()=>'The work done on a charge moved through a p.d. is W = qV, and it all becomes kinetic energy: <b>½mv² = qV</b>.' },
    { id:'cent', type:'choice', q:'In the field the particle moves in a circle. Which equation describes the force that keeps it on the circle?', opts:['mg = mv²/r','qE = mv²/r','qvB = mv²/r','qvB = mv'], correct:()=>2,
-     why:()=>'The magnetic force qvB is the only significant force (gravity is about 10¹⁵ times smaller) and it points to the centre: <b>qvB = mv²/r</b>.' },
+     why:()=>'The magnetic force qvB is the only significant force (gravity is at least 10⁹ times smaller) and it points to the centre: <b>qvB = mv²/r</b>.' },
    { id:'rexp', type:'choice', q:'Combine ½mv² = qV and qvB = mv²/r. Which expression for r is correct?', opts:['r = (1/B)√(2Vm/q)','r = (1/B)√(2Vq/m)','r = B√(2Vm/q)','r = 2Vm / (qB)'], correct:()=>0,
      why:()=>'From qvB = mv²/r: r = mv / (qB).<br>From ½mv² = qV: v = √(2qV/m).<br>Substitute: r = (m / qB)·√(2qV/m) = <b>(1/B)√(2Vm/q)</b>.' },
    { id:'sr', type:'choice', q:'The detector measures <b>s</b>, the distance from the entry hole to where the particle lands. How is s related to r?', opts:['s = r','s = 2r','s = πr','s = r / 2'], correct:()=>1,
@@ -1391,7 +1493,7 @@ const SECTIONS = [
        S.B = Math.round(S.B*1000/LAB.res)*LAB.res/1000; } },
    { id:'spacing', type:'choice', q:'You will plot <b>1/B</b> on the x-axis. How should you choose about six values of B?', opts:['Evenly spaced in B','Evenly spaced in 1/B, across the whole range','All near the top of the range','It does not matter'], correct:()=>1,
      why:()=>{ const [lo,hi]=LAB.range, a=1/hi, b=1/lo, vals=[...Array(6)].map((_,i)=>1/(a+(b-a)*i/5)).map(v=>(Math.round(v/LAB.res)*LAB.res).toFixed(LAB.resDec));
-       return `Points spread evenly along the x-axis pin down the gradient best. Values evenly spaced in 1/B crowd together at low B. For your range, something like: <b>${vals.join(', ')} mT</b>.`; } } ]},
+       return `Points spread evenly along the x-axis pin down the gradient best. Choose values evenly spaced in 1/B, not in B: evenly spaced B values would bunch the points at small 1/B. Evenly spaced 1/B values mean your chosen B values bunch together at low B, which is what you want. For your range, something like: <b>${vals.join(', ')} mT</b>.`; } } ]},
  { id:'unc', title:'Uncertainties', intro:()=>'Decide the uncertainty of each measurement <b>before</b> you collect data.',
    items:[
    { id:'ds', type:'num', unit:'cm', q:'The detector ruler has <b>1 mm</b> divisions. What absolute uncertainty will you give each reading of s, in cm?',
@@ -1406,12 +1508,12 @@ const SECTIONS = [
  { id:'process', title:'Process and graph', intro:()=>'',
    items:[
    { id:'invB', type:'num', unit:'mT⁻¹', q:()=>`Calculate <b>1/B</b> for your first value of B (${fullRows()[0]?fullRows()[0].B:'—'} mT), in mT⁻¹, to 3 s.f.`,
-     check:x=>{ const t=1/parseFloat(fullRows()[0].B); return {ok:Math.abs(x-t)/t<0.01}; }, why:()=>{ const B=parseFloat(fullRows()[0].B); return `1/B = 1 / ${fullRows()[0].B} = <b>${fmt(1/B,3)} mT⁻¹</b>. Graphical Laboratories does this for every row when you choose <b>1/x</b> as the x linearisation.`; } },
-   { id:'export', type:'task', q:'Open your data in Strothoff Graphical Laboratories. The link fills in the axis cards (B in mT ±'+'<span class="lres"></span>, s in cm ±0.05), all three trials, the 1/x linearisation and a linear fit with max/min lines.',
-     ui:()=>`<div class="row2"><button class="btn primary sm" data-act="openGL">Open in Graphical Laboratories ↗</button><button class="btn sm" data-act="copyGL">Copy data</button></div>
+     check:x=>{ const t=1/pf(fullRows()[0].B); return {ok:Math.abs(x-t)/t<0.01}; }, why:()=>{ const B=pf(fullRows()[0].B); return `1/B = 1 / ${fullRows()[0].B} = <b>${fmt(1/B,3)} mT⁻¹</b>. SGL does this for every row when you choose <b>1/x</b> as the x linearisation.`; } },
+   { id:'export', type:'task', q:'Open your data in Strothoff Graphical Laboratories (SGL). The link fills in the axis cards (B in mT ±'+'<span class="lres"></span>, s in cm ±0.05), all three trials, the 1/x linearisation and a linear fit with max/min lines.',
+     ui:()=>`<div class="row2"><button class="btn primary sm" data-act="openGL">Open in SGL ↗</button><button class="btn sm" data-act="copyGL">Copy data</button></div>
        <ol class="steps"><li>Check the axis cards and the raw data table.</li><li>Fix any cell highlighted by strict precision.</li><li>Read the gradient <b>k</b> and its uncertainty from the max/min lines.</li><li>Look at the intercept: is it close to zero?</li></ol>`,
      done:()=>LAB.exported, doneText:()=>'Opened.' },
-   { id:'k', type:'num2', labels:['gradient k','uncertainty Δk'], unit:'cm mT', q:'Enter your gradient <b>k</b> and its uncertainty <b>Δk</b> from Graphical Laboratories.',
+   { id:'k', type:'num2', labels:['gradient k','uncertainty Δk'], unit:'cm mT', q:'Enter your gradient <b>k</b> and its uncertainty <b>Δk</b> from SGL.',
      check:(k,dk)=>{ const f=fitK(); return {ok: Math.abs(k-f)/f<0.03 && dk>0}; },
      why:(k,dk)=>{ const f=fitK(); return `A best-fit line through your means gives k ≈ <b>${fmt(f,3)} cm mT</b>${Math.abs(k-f)/f<0.03?', which matches yours.':'. Check you plotted s against 1/B and read the gradient, not the intercept.'} Your percentage uncertainty: Δk/k = ${fmt(dk/k*100,2)} %.`; } } ]},
  { id:'calc', title:'Calculate q/m', intro:()=>`Use your own values: k = ${A('k')?A('k').v:'—'} cm mT, V = ${LAB.V?Math.round(LAB.V):'—'} V (±1 %).`,
@@ -1451,7 +1553,7 @@ function collectUI(){
 function wireCollect(){
   drawRuler();
   const rd=document.getElementById('labRead'); if (rd) rd.addEventListener('keydown',e=>{ if (e.key==='Enter'){ e.preventDefault(); labAction('record'); } });
-  document.querySelectorAll('#labCard input.cell').forEach(inp=>inp.onchange=()=>{ const r=LAB.data[+inp.dataset.r]; r.s[+inp.dataset.t]=inp.value.trim(); saveLab(); renderLab(); });
+  document.querySelectorAll('#labCard input.cell').forEach(inp=>inp.onchange=()=>{ const r=LAB.data[+inp.dataset.r]; r.s[+inp.dataset.t]=inp.value.trim().replace(',','.'); saveLab(); renderLab(); });
   document.querySelectorAll('#labCard button[data-del]').forEach(b=>b.onclick=()=>{ LAB.data.splice(+b.dataset.del,1); saveLab(); renderLab(); });
 }
 function drawRuler(){
@@ -1480,7 +1582,7 @@ function labAction(act){
     if (LAB.last.Btxt!==bDisp()){ m.textContent='B has changed since that shot. Fire again at this B.'; return; }
     if (!isFinite(v)){ m.textContent='Type your reading of s in cm first.'; return; }
     if (LAB.last.used){ m.textContent='That shot is already recorded. Fire again for the next trial.'; return; }
-    let row=LAB.data.find(r=>r.B===LAB.last.Btxt); if (!row){ row={B:LAB.last.Btxt, s:['','',''], f:[0,0,0]}; LAB.data.push(row); LAB.data.sort((a,b)=>parseFloat(a.B)-parseFloat(b.B)); }
+    let row=LAB.data.find(r=>r.B===LAB.last.Btxt); if (!row){ row={B:LAB.last.Btxt, s:['','',''], f:[0,0,0]}; LAB.data.push(row); LAB.data.sort((a,b)=>pf(a.B)-pf(b.B)); }
     const j=row.s.findIndex(x=>!x); if (j<0){ m.textContent='Three trials are already recorded for this B. Choose another value.'; return; }
     row.s[j]=raw.replace(',','.'); row.f=row.f||[0,0,0]; row.f[j]= Math.abs(v-LAB.last.s)>0.08? 1:0; LAB.last.used=true;
     const dp=(raw.split(/[.,]/)[1]||'').length;
@@ -1491,8 +1593,11 @@ function labAction(act){
   }
   if (act==='openGL' || act==='copyGL'){
     LAB.exported=true; saveLab();
-    if (act==='copyGL'){ const tsv=['B / mT\ts1 / cm\ts2 / cm\ts3 / cm', ...fullRows().map(r=>[r.B,...r.s].join('\t'))].join('\n');
-      navigator.clipboard && navigator.clipboard.writeText(tsv); }
+    if (act==='copyGL'){ const tsv=[`B / mT ± ${LAB.res}\ts / cm ± 0.05 (trial 1)\ts / cm ± 0.05 (trial 2)\ts / cm ± 0.05 (trial 3)`, ...fullRows().map(r=>[r.B,...r.s].join('\t'))].join('\n');
+      saveLab(); renderAll();   // re-render first, so the feedback lands on the button the student can see
+      const say=t=>{ const btn=document.querySelector('#labCard [data-act="copyGL"]'); if (btn){ btn.textContent=t; setTimeout(()=>{ btn.textContent='Copy data'; },1400); } };
+      Promise.resolve().then(()=>navigator.clipboard.writeText(tsv)).then(()=>say('Copied'),()=>say('Copy failed'));
+      return; }
     else { const w=window.open('about:blank','_blank'); graphLabURL().then(u=>{ if (w) w.location.href=u; else location.href=u; }); }
   }
   if (act==='restart'){ if (!confirm('Start a new investigation with a new mystery particle? Your answers and data will be cleared.')) return;
@@ -1541,11 +1646,11 @@ function itemHTML(it, live){
   }
   if (it.type==='num'){
     if (!a) h+=`<div class="ans"><input data-in="${it.id}" inputmode="decimal" placeholder="your answer"><span class="u">${it.unit}</span><button class="btn primary sm" data-submit="${it.id}">Submit</button></div>`;
-    else h+=`<div class="mine">Your answer: <b>${a.v} ${it.unit}</b></div><div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Good.':'Compare with this:'}</b> ${it.why(parseFloat(a.v))}</div>`;
+    else h+=`<div class="mine">Your answer: <b>${a.v} ${it.unit}</b></div><div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Good.':'Compare with this:'}</b> ${it.why(pf(a.v))}</div>`;
   }
   if (it.type==='num2'){
     if (!a) h+=`<div class="ans two"><label>${it.labels[0]} <input data-in="${it.id}" inputmode="decimal"></label><label>${it.labels[1]} <input data-in2="${it.id}" inputmode="decimal"></label><span class="u">${it.unit}</span></div><button class="btn primary sm" data-submit="${it.id}">Submit</button>`;
-    else h+=`<div class="mine">Your answer: <b>${it.labels[0]} = ${a.v}, ${it.labels[1]} = ${a.v2} ${it.unit}</b></div><div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Good.':'Compare with this:'}</b> ${it.why(parseFloat(a.v),parseFloat(a.v2))}</div>`;
+    else h+=`<div class="mine">Your answer: <b>${it.labels[0]} = ${a.v}, ${it.labels[1]} = ${a.v2} ${it.unit}</b></div><div class="fb ${a.ok?'ok':'bad'}"><b>${a.ok?'Good.':'Compare with this:'}</b> ${it.why(pf(a.v),pf(a.v2))}</div>`;
   }
   if (it.type==='text'){
     if (!a) h+=`<textarea data-in="${it.id}" rows="3" placeholder="Write your answer…"></textarea><button class="btn primary sm" data-submit="${it.id}">Submit</button>`;
@@ -1878,9 +1983,9 @@ function renderMillikan(){
     <div class="row2"><button class="btn sm" data-act="mkclear">Clear the eyepiece</button><button class="btn sm" data-act="mkover">Start over</button></div>
     <div class="mksel">${dp? `Selected: <b>drop ${dp.label}</b> <button class="btn primary sm" data-act="mkrec">Start a record for drop ${dp.label}</button>` : '<span class="small">No drop selected. Tap a drop in the eyepiece.</span>'}</div>
     ${M.recs.map(mkCardHTML).join('')}
-    <div class="row2" style="margin-top:10px"><button class="btn sm" data-act="mkexport" ${nQ<2?'disabled':''}>Plot q against n in Graphical Laboratories ↗</button></div>
+    <div class="row2" style="margin-top:10px"><button class="btn sm" data-act="mkexport" ${nQ<2?'disabled':''}>Plot q against n in SGL ↗</button></div>
     <div class="small">${nQ<2?'Complete at least two records with q and n to plot them.':`The gradient of q against n (proportional fit) is your value of e. Accepted value: 1.60 × 10⁻¹⁹ C.`}</div>
-    <details class="solbox"><summary>Teacher note</summary><div class="small2">The sim uses pure Stokes' law so students' calculations match exactly. For real drops of about 1 µm, Stokes' law needs the Cunningham slip correction (≈ 10 %), which Millikan had to apply. Brownian motion (on by default) gives the readings genuine random scatter; switching it off isolates the physics. Drops leave the field of view if ignored, as in the real apparatus.</div></details>`;
+    <details class="solbox"><summary>Teacher note</summary><div class="small2">The sim uses pure Stokes' law so students' calculations match exactly. For real drops of about 1 µm, Stokes' law needs the Cunningham slip correction (about 10 % for a 1 µm drop, and about 20 % for the smallest drops), which Millikan had to apply. Brownian motion (on by default) gives the readings genuine random scatter; switching it off isolates the physics. Drops leave the field of view if ignored, as in the real apparatus.</div></details>`;
   card.querySelectorAll('input.mi').forEach(inp=>inp.onchange=()=>{ M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim(); M.recs[+inp.dataset.rec].checked=null; mkSave(); });
   card.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>{ card.querySelectorAll(`input.mi[data-rec="${b.dataset.check}"]`).forEach(inp=>M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim()); mkCheck(+b.dataset.check); });
   card.querySelectorAll('[data-usev]').forEach(b=>b.onclick=()=>{ M.recs[+b.dataset.usev].V=String(M.V); mkSave(); renderMillikan(); });
@@ -1930,6 +2035,19 @@ document.getElementById('clearBtn').onclick=clearShots;
 function renderAll(){ renderLab(); renderMillikan(); renderPredict(); renderControls(); renderOpts(); renderReadouts(); updateFire(); draw(); }
 renderAll(); resize();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ draw(); });
+/* ================= help sheet ================= */
+const TEST_MODE=/[?&]test=/.test(location.search);   // ?test=1, or the test suite's ?test=<time>
+const HELPKEY='mb.hideHelp';
+function openHelp(){ let hidden=false; try{ hidden=localStorage.getItem(HELPKEY)==='1'; }catch(e){}
+  document.getElementById('helpNever').checked=hidden; closeEditor(true);
+  const d=document.getElementById('helpDlg'); if(!d.open) d.showModal(); d.querySelector('.help-body').scrollTop=0; }
+function closeHelp(){ const d=document.getElementById('helpDlg'); if(d.open) d.close(); }
+document.getElementById('btnHelp').addEventListener('click',openHelp);
+document.getElementById('btnHelpX').addEventListener('click',closeHelp);
+document.getElementById('btnHelpGo').addEventListener('click',closeHelp);
+document.getElementById('helpDlg').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeHelp(); });
+document.getElementById('helpNever').addEventListener('change',e=>{ try{ e.target.checked? localStorage.setItem(HELPKEY,'1') : localStorage.removeItem(HELPKEY); }catch(err){} });
+if (!TEST_MODE && !matchMedia('(max-width:760px)').matches){ let hidden=false; try{ hidden=localStorage.getItem(HELPKEY)==='1'; }catch(e){} if (!hidden) openHelp(); }
 </script>
 </body>
 </html>
