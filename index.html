@@ -28,7 +28,7 @@ nav.modes button.on{border-color:var(--amber);color:var(--text);background:#2a22
 .switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:left .15s}
 .switch.on{background:#3a2c14;border-color:var(--amber)}
 .switch.on::after{left:25px;background:var(--amber)}
-main{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:calc(100vh - 110px)}
+main{display:grid;grid-template-columns:minmax(0,1fr) clamp(340px,27vw,520px);min-height:calc(100vh - 110px)}
 @media (max-width:920px){main{grid-template-columns:1fr}}
 .stage{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0}
 .canvas-wrap{position:relative;flex:1;min-height:440px}
@@ -44,7 +44,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:calc(100v
 .tog.on{color:var(--text);border-color:#6a5530;background:#221c12}
 .tog.on i{background:var(--amber);box-shadow:0 0 8px rgba(242,165,65,.7)}
 .tog:disabled{opacity:.4;cursor:not-allowed}
-.key{display:grid;gap:4px;font-size:13px;margin-bottom:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#111417}
+.key{display:grid;gap:4px;font-size:14px;margin-bottom:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#111417}
 .key i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
 .key b{font-size:15px;margin-right:2px}
 .sec{color:var(--amber);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
@@ -62,7 +62,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:calc(100v
 .legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
 aside{background:var(--panel);overflow-y:auto;max-height:calc(100vh - 110px)}
 @media (max-width:920px){aside{max-height:none}}
-section.card{border-bottom:1px solid var(--line);padding:12px 16px}
+section.card{border-bottom:1px solid var(--line);padding:14px 20px}
 section.card h2{margin:0 0 8px;font:700 13.5px 'Space Grotesk',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);display:flex;align-items:center;justify-content:space-between;gap:8px}
 .ctl{margin:8px 0 12px}
 .ctl .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
@@ -77,14 +77,14 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;p
 .toggle-row{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
 .disabled-block{opacity:.38;pointer-events:none}
 .locked .ctl input,.locked .ctl select,.locked .seg,.locked .switch{pointer-events:none;opacity:.6}
-.ro{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14.5px}
+.ro{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:15px}
 .ro div:has(> .sec){padding-top:8px}
 .ro .k{color:var(--muted)}
 .ro .v{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right}
 .ro .note{grid-column:1/-1;color:var(--muted);font-size:12.5px;font-family:inherit;text-align:left}
 .hidden-note{color:var(--muted);font-size:13px;font-style:italic}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
-.prompt{background:#1f1a12;border:1px solid #4a3a1c;border-radius:8px;padding:10px 12px;font-size:14.5px}
+.prompt{background:#1f1a12;border:1px solid #4a3a1c;border-radius:8px;padding:10px 12px;font-size:15.5px}
 .prompt b{color:var(--amber)}
 .givens{font-family:'JetBrains Mono',monospace;font-size:13px;margin-top:6px;color:#e9d9b8}
 .answer{display:flex;gap:8px;margin-top:10px}
@@ -100,11 +100,11 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;p
 .solbox summary{cursor:pointer;color:#f6c983;font-weight:600}
 .solhead{color:#f6c983;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
 ol.sol{margin:6px 0 0;padding-left:28px;display:grid;gap:7px}
-ol.sol .why{color:#b8b2a6;font-size:13px}
-ol.sol .eq{font-size:14.5px;font-weight:600;color:var(--text);padding-left:2px;overflow-wrap:anywhere}
+ol.sol .why{color:#b8b2a6;font-size:14px}
+ol.sol .eq{font-size:15px;font-weight:600;color:var(--text);padding-left:2px;overflow-wrap:anywhere}
 ol.sol li:last-child .eq{color:#ffd27a}
 .mono{font-family:'JetBrains Mono',monospace}
-.small{font-size:12.5px;color:var(--muted)}
+.small{font-size:13.5px;color:var(--muted)}
 .log{max-height:180px;overflow-y:auto;font-size:12.5px}
 .log table{width:100%;border-collapse:collapse}
 .log td,.log th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
@@ -112,38 +112,42 @@ ol.sol li:last-child .eq{color:#ffd27a}
 details.labsec{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#111417}
 details.labsec summary{cursor:pointer;color:#8fd6a2;font-weight:600}
 section.labsec.live h3{margin:4px 0 8px;font-size:17px}
-.labsec .intro{font-size:14px;color:#cfcabe;margin-bottom:10px}
+.labsec .intro{font-size:15px;color:#cfcabe;margin-bottom:10px}
 .prog{font:600 12px 'JetBrains Mono',monospace;color:var(--muted);letter-spacing:0}
 .bar{height:4px;background:#22282d;border-radius:2px;margin:-2px 0 12px;overflow:hidden}.bar i{display:block;height:100%;background:var(--amber)}
 .item{border-left:2px solid #4a3a1c;padding:4px 0 8px 10px;margin:10px 0}
 .item.done{border-left-color:#2f6b40}
-.item .q{font-size:14.5px;margin-bottom:6px}
+.item .q{font-size:15.5px;margin-bottom:6px}
 .item .choices{display:grid;gap:6px;margin:6px 0}
-.item .ch{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:14px}
+.item .ch{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 10px;cursor:pointer;font-size:15px}
 .item .ch.on{border-color:var(--amber);background:#2a2216}
 .item .ch.ro{cursor:default}.item .ch.right{border-color:#2f6b40;background:#14261a}.item .ch.wrong{border-color:#7a3229;background:#2a1614}
 .item textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px;color:var(--text);font:inherit;font-size:14px;resize:vertical;margin-bottom:6px}
 .item .ans{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .item .ans input{width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--text);font:600 15px 'JetBrains Mono',monospace}
 .item .ans.two label{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
-.item .u{color:var(--muted);font-size:13px}
-.item .mine{font-size:13.5px;color:#cfcabe;margin:4px 0}
-.fb{margin-top:6px;border-radius:7px;padding:8px 10px;font-size:13.5px;line-height:1.45}
+.item .u{color:var(--muted);font-size:14px}
+.item .mine{font-size:14.5px;color:#cfcabe;margin:4px 0}
+.fb{margin-top:6px;border-radius:7px;padding:8px 10px;font-size:14.5px;line-height:1.45}
 .fb.ok{background:#14261a;border:1px solid #2f6b40}.fb.bad{background:#2a1c14;border:1px solid #7a5229}.fb.model{background:#16202a;border:1px solid #2d4c6b}
-.nag{color:#ffb38a;font-size:13px;margin-top:6px}
+.nag{color:#ffb38a;font-size:14px;margin-top:6px}
 .btn.sm{min-height:38px;padding:7px 12px;font-size:14px}
+.btn.solid{background:#262d33;border:2px solid #9aa3ab;color:#f1ede4;font-weight:700;box-shadow:0 2px 0 #05070a}
+.btn.solid:hover{border-color:var(--amber);background:#2e353c}
+.btn.solid.warn{border-color:#d9775a;color:#ffd9c9;background:#2e1d18}
+.mktog{display:flex;gap:0;margin:4px 0 10px;border:2px solid #9aa3ab;border-radius:9px;overflow:hidden}.mktog button{flex:1;background:#1a1f23;color:#cfcabe;border:0;padding:9px 6px;font-weight:700;cursor:pointer;font-size:13.5px}.mktog button.on{background:#3a2c14;color:#ffd27a}
 .row2{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
-.steps{margin:6px 0;padding-left:20px;font-size:13.5px;color:#cfcabe}
+.steps{margin:6px 0;padding-left:20px;font-size:14.5px;color:#cfcabe}
 #labRuler{width:100%;height:104px;border-radius:6px;display:block;margin:4px 0 8px}
 .rec{display:flex;gap:8px;align-items:center}.rec input{width:90px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;color:var(--text);font:700 15px 'JetBrains Mono',monospace}
 .warnc{color:#ffb38a}
-table.dt{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+table.dt{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
 table.dt th{color:var(--muted);font-weight:600;text-align:left;padding:3px;border-bottom:1px solid var(--line)}
 table.dt td{padding:2px 3px;border-bottom:1px solid #20262b}
 table.dt input.cell{width:58px;background:#0f1215;border:1px solid #2a3138;border-radius:4px;padding:4px;color:var(--text);font:600 13px 'JetBrains Mono',monospace}
 table.dt input.cell.flag{border-color:#c77d3a;background:#2a1c14}
 table.dt .x{background:none;border:0;color:#ff7a6b;cursor:pointer;font-size:16px}
-table.cand{width:100%;border-collapse:collapse;font-size:13px}table.cand td,table.cand th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
+table.cand{width:100%;border-collapse:collapse;font-size:14px}table.cand td,table.cand th{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left}
 .labfoot{font-size:12.5px;color:var(--muted);margin-top:8px}.linkbtn{background:none;border:0;color:#f6c983;cursor:pointer;padding:0;font-size:12.5px;text-decoration:underline}
 .mkrec{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:10px 0;background:#111417}
 .mkh{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}.mkh .del{margin-left:auto;min-height:30px;padding:4px 10px;font-size:12.5px;border-color:#7a3229;color:#ffb3a8}
@@ -152,10 +156,10 @@ input.mi{width:86px;background:#1f262c;border:1.5px solid #8a8f94;border-radius:
 input.mi:placeholder-shown{border-color:#f2a541;border-style:dashed;background:#221c12}
 input.mi::placeholder{color:#8a7a5a;font-weight:500;font-size:12px}
 input.mi:focus{outline:none;border-color:#ffd27a;box-shadow:0 0 0 3px rgba(242,165,65,.25)}
-.mf{display:inline-flex;align-items:center;gap:5px;margin:3px 10px 3px 0;font-size:13.5px;color:#e7e3d9;font-weight:600}
-.mgrp{margin:8px 0}.mgt{font-size:13px;font-weight:700;color:#ffd27a;margin-bottom:2px}.mgr{display:flex;flex-wrap:wrap}
+.mf{display:inline-flex;align-items:center;gap:5px;margin:3px 10px 3px 0;font-size:14.5px;color:#e7e3d9;font-weight:600}
+.mgrp{margin:8px 0}.mgt{font-size:14px;font-weight:700;color:#ffd27a;margin-bottom:2px}.mgr{display:flex;flex-wrap:wrap}
 .vars div{margin:3px 0}
-.mksel{margin:10px 0;font-size:14px}.small2{font-size:13px;color:#cfcabe}.mkc{margin:8px 0}
+.mksel{margin:10px 0;font-size:15px}.small2{font-size:14.5px;color:#cfcabe}.mkc{margin:8px 0}
 footer{padding:10px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 /* ---- help sheet (Strothoff collection standard) ---- */
 .helpbtn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:14px;padding:9px 14px;cursor:pointer;min-height:40px}
@@ -552,7 +556,7 @@ function setVal(key,v){ const d=ctlDefs[key]; v=Math.max(d.min,Math.min(maxFor(k
   if (mode==='lab' && key==='B' && LAB && LAB.res){ v=+(Math.round(v/LAB.res)*LAB.res).toFixed(LAB.resDec); if (v<LAB.res) v=LAB.res; } if (v===d.get()) return false; d.set(v); shots=[]; renderLegend([]); renderReadouts(); draw(); return true; }
 
 function modules(){
-  if (mode==='millikan') return CW? mkModules() : [];
+  if (mode==='millikan') return CW? mkModulesScreen() : [];
   if (!(mode==='beam'||mode==='lab') || !CW) return [];
   const L=layout(S), out=[], top=[], bot=[], lab=mode==='lab';
   const [,Yc]=W2S(0,0), [,Ytop]=W2S(0,view.yT), [,Ybot]=W2S(0,view.yB);
@@ -681,7 +685,7 @@ function launchHit(e){ const g=launcher(); if (!g) return null; const [x,y]=evPo
   if (Math.hypot(x-g.fire.x,y-g.fire.y)<g.fire.r+9) return 'fire'; if (Math.hypot(x-g.clear.x,y-g.clear.y)<g.clear.r+9) return 'clear'; return null; }
 function clearShots(){ if (predict.on && predict.fired) return; shots=[]; renderLegend([]); draw(); }
 cv.addEventListener('pointerdown',e=>{
-  if (mode==='millikan'){ const [x,y]=evPos(e), bt=mkButtons().find(b=>inR(x,y,b)); if (bt){ e.preventDefault(); bt.act(); draw(); return; } if (mkSelectAt(x,y)) return; }
+  if (mode==='millikan'){ const [x,y]=evPos(e), [lx,ly]=mkLocal(x,y), bt=mkButtons().find(b=>inR(lx,ly,b)); if (bt){ e.preventDefault(); bt.act(); draw(); return; } if (mkSelectAt(x,y)) return; }
   const lh=launchHit(e); if (lh){ e.preventDefault(); if (lh==='fire'){ if (!document.getElementById('fireBtn').disabled) doFire(); } else clearShots(); return; }
   const h=hit(e);
   if (h){ if (predict.on || h.m.lock) return; e.preventDefault();
@@ -698,7 +702,7 @@ cv.addEventListener('pointermove',e=>{
     let da=a-knobDrag.last; if (da>180) da-=360; if (da<-180) da+=360; knobDrag.last=a;
     knobDrag.frac=Math.max(0,Math.min(1,knobDrag.frac+da/270)); setVal(knobDrag.key, valFromFrac(knobDrag.key,knobDrag.frac)); return; }
   if (pan){ view.panX=pan.px+e.clientX-pan.x; view.panY=pan.py+e.clientY-pan.y; draw(); return; }
-  if (mode==='millikan'){ const [x,y]=evPos(e); if (mkButtons().some(b=>inR(x,y,b))){ cv.style.cursor='pointer'; return; } const g=mkGeom(); if (Math.hypot(x-g.ex,y-g.ey)<g.R){ cv.style.cursor='crosshair'; return; } }
+  if (mode==='millikan'){ const [x,y]=evPos(e), [lx,ly]=mkLocal(x,y); if (mkButtons().some(b=>inR(lx,ly,b))){ cv.style.cursor='pointer'; return; } const g=mkGeom(); if (Math.hypot(x-g.ex,y-g.ey)<g.R){ cv.style.cursor='crosshair'; return; } }
   if (launchHit(e)){ cv.style.cursor='pointer'; return; }
   const h=hit(e); cv.style.cursor = h? (predict.on?'not-allowed': h.part==='disp'?'text': h.part==='body'?'default':'pointer') : (view.z>1.001?'grab':'default');
 });
@@ -1536,6 +1540,9 @@ const SECTIONS = [
      model:()=>'The <b>deuteron</b> (4.78 × 10⁷ C kg⁻¹) and the <b>alpha particle</b> (4.82 × 10⁷ C kg⁻¹) differ by under 1 %, which is smaller than a typical uncertainty here. Telling them apart needs a much more precise measurement, or a different one (e.g. measuring the charge separately).' } ]},
 ];
 
+const LABG = { title:'Mystery particle', st:()=>LAB, sections:SECTIONS, save:()=>saveLab(), file:'mystery-particle-answers.txt',
+  doneMsg:'Download your answers to hand in, or start again with a new particle.', restartLabel:'New mystery particle',
+  act:a=>labAction(a), dataLines:()=>['Data (B / mT, s / cm × 3):', ...LAB.data.map(r=>`  ${r.B}\t${r.s.join('\t')}`)] };
 /* ---------- collect-data UI ---------- */
 function collectUI(){
   const rows=LAB.data.map((r,i)=>`<tr><td class="mono">${r.B}</td>${[0,1,2].map(j=>`<td><input class="cell ${r.f&&r.f[j]?'flag':''}" data-r="${i}" data-t="${j}" value="${r.s[j]||''}" inputmode="decimal"></td>`).join('')}<td><button class="x" data-del="${i}" title="Delete row">×</button></td></tr>`).join('');
@@ -1596,7 +1603,7 @@ function labAction(act){
   }
   if (act==='restart'){ if (!confirm('Start a new investigation with a new mystery particle? Your answers and data will be cleared.')) return;
     LAB=newLab(); LAB.st=labDefaultSt(LAB); S={...LAB.st}; shots=[]; fitScale(); }
-  if (act==='report'){ downloadReport(); return; }
+  if (act==='report'){ downloadReport(LABG); return; }
   saveLab(); renderAll();
 }
 async function graphLabURL(){
@@ -1611,21 +1618,22 @@ async function graphLabURL(){
     return GRAPHLAB+'#g=z'+b64u(new Uint8Array(await new Response(cs).arrayBuffer())); }
   return GRAPHLAB+'#g=j'+b64u(bytes);
 }
-function downloadReport(){
+let GCUR=null;
+function downloadReport(G){
+  G=G||LABG;
   const strip=h=>String(h).replace(/<br>/g,'\n').replace(/<[^>]+>/g,'').replace(/&gt;/g,'>').replace(/&lt;/g,'<');
-  const out=['Millikan\'s Basement — Mystery particle investigation',''];
-  SECTIONS.forEach((sec,si)=>{ out.push(`${si+1}. ${sec.title}`); sec.items.forEach(it=>{ const a=LAB.ans[it.id]; if (!a || it.type==='task') return;
+  const out=[`Millikan's Basement — ${G.title}`,''];
+  G.sections.forEach((sec,si)=>{ out.push(`${si+1}. ${sec.title}`); sec.items.forEach(it=>{ const a=G.st().ans[it.id]; if (!a || it.type==='task') return;
     const q=strip(typeof it.q==='function'? it.q(): it.q); let v=a.v; if (it.type==='choice') v=it.opts[a.v]; if (it.type==='num2') v=`${a.v} ; ${a.v2}`;
     out.push('  Q: '+q, '  A: '+v+(a.ok===true?'  (correct)':a.ok===false?'  (check)':''), ''); }); });
-  out.push('Data (B / mT, s / cm × 3):', ...LAB.data.map(r=>`  ${r.B}\t${r.s.join('\t')}`));
-  const blob=new Blob([out.join('\n')],{type:'text/plain'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mystery-particle-answers.txt'; a.click();
+  out.push(...G.dataLines());
+  const blob=new Blob([out.join('\n')],{type:'text/plain'}), el=document.createElement('a'); el.href=URL.createObjectURL(blob); el.download=G.file; el.click();
 }
-
 /* ---------- render ---------- */
-function itemDone(it){ return it.type==='task'? it.done() : !!LAB.ans[it.id]; }
+function itemDone(it){ return it.type==='task'? it.done() : !!GCUR.st().ans[it.id]; }
 function qText(it){ return typeof it.q==='function'? it.q() : it.q; }
 function itemHTML(it, live){
-  const a=LAB.ans[it.id]; let h=`<div class="item ${itemDone(it)?'done':''}" data-item="${it.id}">`;
+  const a=GCUR.st().ans[it.id]; let h=`<div class="item ${itemDone(it)?'done':''}" data-item="${it.id}">`;
   if (it.type==='task'){
     if (qText(it)) h+=`<div class="q">${qText(it)}</div>`;
     if (it.ui && live) h+=it.ui();
@@ -1652,40 +1660,47 @@ function itemHTML(it, live){
   }
   return h+'</div>';
 }
+function renderGuide(G, card, pre=''){
+  GCUR=G; const st=G.st(), SEC=G.sections;
+  let h=pre+`<h2>${G.title} <span class="prog">${Math.min(st.sec+1,SEC.length)} / ${SEC.length}</span></h2><div class="bar"><i style="width:${(st.sec/SEC.length*100).toFixed(0)}%"></i></div>`;
+  SEC.forEach((sec,si)=>{
+    if (si>st.sec) return;
+    const live = si===st.sec;
+    let body=`<div class="intro">${sec.intro()}</div>`, allDone=true;
+    for (const it of sec.items){ body+=itemHTML(it, live); if (!itemDone(it)){ allDone=false; break; } }
+    if (live && allDone){ body += si<SEC.length-1? `<button class="btn primary" data-gact="next">Continue to ${si+2}. ${SEC[si+1].title} →</button>`
+      : `<div class="fb ok"><b>Investigation complete.</b> ${G.doneMsg}</div><div class="row2"><button class="btn primary sm" data-gact="report">Download my answers</button><button class="btn sm" data-gact="restart">${G.restartLabel}</button></div>`; }
+    h+= live? `<section class="labsec live"><h3>${si+1}. ${sec.title}</h3>${body}</section>` : `<details class="labsec"><summary>✓ ${si+1}. ${sec.title}</summary>${body}</details>`;
+  });
+  if (st.sec<SEC.length-1) h+=`<div class="labfoot"><button class="linkbtn" data-gact="report">Download my answers so far</button> · <button class="linkbtn" data-gact="restart">Start again</button></div>`;
+  card.innerHTML=h;
+  card.querySelectorAll('.choices button.ch').forEach(b=>b.onclick=()=>{ b.parentNode.querySelectorAll('button.ch').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+  card.querySelectorAll('[data-submit]').forEach(b=>b.onclick=()=>{ GCUR=G; submitItem(b.dataset.submit, b.closest('.item')); });
+  card.querySelectorAll('[data-gact]').forEach(b=>b.onclick=()=>{ GCUR=G; const act=b.dataset.gact;
+    if (act==='next'){ st.sec++; G.save(); renderAll(); card.scrollTop=0; return; }
+    if (act==='report'){ downloadReport(G); return; }
+    G.act(act); });
+  const cur=SEC[st.sec]; if (cur) cur.items.forEach(it=>{ if (it.wire) it.wire(); });
+  const live=card.querySelector('.labsec.live'); if (live){ const pend=[...live.querySelectorAll('.item')].pop(); if (pend && G._last!==pend.dataset.item){ G._last=pend.dataset.item; pend.scrollIntoView({block:'nearest'}); } }
+}
 function renderLab(){
   const card=document.getElementById('labCard');
   if (mode!=='lab'){ card.style.display='none'; return; }
   card.style.display=''; ensureLab();
-  let h=`<h2>Mystery particle <span class="prog">${Math.min(LAB.sec+1,SECTIONS.length)} / ${SECTIONS.length}</span></h2><div class="bar"><i style="width:${(LAB.sec/SECTIONS.length*100).toFixed(0)}%"></i></div>`;
-  SECTIONS.forEach((sec,si)=>{
-    if (si>LAB.sec) return;
-    const live = si===LAB.sec;
-    let body=`<div class="intro">${sec.intro()}</div>`, allDone=true;
-    for (const it of sec.items){ body+=itemHTML(it, live); if (!itemDone(it)){ allDone=false; break; } }
-    if (live && allDone){ body += si<SECTIONS.length-1? `<button class="btn primary" data-act="next">Continue to ${si+2}. ${SECTIONS[si+1].title} →</button>`
-      : `<div class="fb ok"><b>Investigation complete.</b> Download your answers to hand in, or start again with a new particle.</div><div class="row2"><button class="btn primary sm" data-act="report">Download my answers</button><button class="btn sm" data-act="restart">New mystery particle</button></div>`; }
-    h+= live? `<section class="labsec live"><h3>${si+1}. ${sec.title}</h3>${body}</section>` : `<details class="labsec"><summary>✓ ${si+1}. ${sec.title}</summary>${body}</details>`;
-  });
-  if (LAB.sec<SECTIONS.length-1) h+=`<div class="labfoot"><button class="linkbtn" data-act="report">Download my answers so far</button> · <button class="linkbtn" data-act="restart">Start again</button></div>`;
-  card.innerHTML=h;
-  // wiring
-  card.querySelectorAll('.choices button.ch').forEach(b=>b.onclick=()=>{ b.parentNode.querySelectorAll('button.ch').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
-  card.querySelectorAll('[data-submit]').forEach(b=>b.onclick=()=>submitItem(b.dataset.submit, b.closest('.item')));
-  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ if (b.dataset.act==='next'){ LAB.sec++; saveLab(); renderAll(); card.scrollTop=0; return; } labAction(b.dataset.act); });
-  const cur=SECTIONS[LAB.sec]; if (cur) cur.items.forEach(it=>{ if (it.wire) it.wire(); });
+  renderGuide(LABG, card);
+  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>labAction(b.dataset.act));
   card.querySelectorAll('.lres').forEach(e=>e.textContent=LAB.res||'');
-  const live=card.querySelector('.labsec.live'); if (live){ const pend=[...live.querySelectorAll('.item')].pop(); if (pend && renderLab._last!==pend.dataset.item){ renderLab._last=pend.dataset.item; pend.scrollIntoView({block:'nearest'}); } }
 }
 function submitItem(id, el){
-  const it=SECTIONS.flatMap(s=>s.items).find(x=>x.id===id); let rec=null;
+  const it=GCUR.sections.flatMap(s=>s.items).find(x=>x.id===id); let rec=null;
   const nag=msg=>{ let n=el.querySelector('.nag'); if (!n){ n=document.createElement('div'); n.className='nag'; el.appendChild(n); } n.textContent=msg; };
   if (it.type==='choice'){ const on=el.querySelector('button.ch.on'); if (!on) return nag('Choose an answer first: a guess is fine.'); const v=+on.dataset.pick;
     rec={v, ok: v===it.correct() || (it.alsoOk && it.alsoOk().includes(v))}; }
   if (it.type==='num'){ const raw=el.querySelector(`[data-in="${id}"]`).value.trim(), v=parseNum(raw); if (!isFinite(v)) return nag('Enter a number to continue: your best attempt is fine.'); rec={v:raw, ok:it.check(v).ok}; }
   if (it.type==='num2'){ const r1=el.querySelector(`[data-in="${id}"]`).value.trim(), r2=el.querySelector(`[data-in2="${id}"]`).value.trim(), a=parseNum(r1), b=parseNum(r2);
-    if (!isFinite(a)||!isFinite(b)) return nag('Enter both numbers to continue.'); rec={v:r1, v2:r2, ok:it.check(a,b).ok}; if (id==='k') LAB.ans['k_d']={v:r2}; }
+    if (!isFinite(a)||!isFinite(b)) return nag('Enter both numbers to continue.'); rec={v:r1, v2:r2, ok:it.check(a,b).ok}; GCUR.st().ans[id+'_d']={v:r2}; }
   if (it.type==='text'){ const v=el.querySelector(`[data-in="${id}"]`).value.trim(); if (v.length<8) return nag('Write at least a sentence before you see the model answer.'); rec={v, ok:null}; }
-  LAB.ans[id]=rec; if (it.after) it.after(); saveLab(); renderAll();
+  GCUR.st().ans[id]=rec; if (it.after) it.after(); GCUR.save(); renderAll();
 }
 
 
@@ -1694,7 +1709,7 @@ const MK = { d:0.006, rhoOil:875, rhoAir:1.20, eta:1.81e-5, g:9.81, kT:1.38e-23*
 const mkWp = r => 4/3*Math.PI*r*r*r*(MK.rhoOil-MK.rhoAir)*MK.g;                 // weight − upthrust (N, acts down)
 const mkVbal = (r,n) => n>0? mkWp(r)*MK.d/(n*MK.e) : Infinity;                     // balancing p.d. (V)
 const M = { V:500, pol:1, field:false, speed:1, brown:true, swMode:'cum', drops:[], sel:null, nextId:0, t:0, last:0,
-            sw:{run:false, t0:0, acc:0, laps:[]}, recs:[], msg:'', loop:false };
+            sw:{run:false, t0:0, acc:0, laps:[]}, recs:[], msg:'', loop:false, gmode:'free', guide:null };
 function mkVel(dp){ // vertical terminal velocity, m/s, up positive
   const E = M.field? M.pol*M.V/MK.d : 0;
   return (dp.n*MK.e*E - mkWp(dp.r)) / (6*Math.PI*MK.eta*dp.r);
@@ -1730,6 +1745,7 @@ function mkStep(dt){
     dp.y += mkVel(dp)*dt*1000;
     if (M.brown){ const D=MK.kT/(6*Math.PI*MK.eta*dp.r), s=Math.sqrt(2*D*dt)*1000; dp.x+=s*gauss(); dp.y+=s*gauss(); }
   }
+  if (M.gmode==='guided' && M.guide && !M.guide.flags.rose && M.field){ const sd=M.drops.find(d=>d.id===M.sel); if (sd && mkVel(sd)>0){ M.guide.flags.rose=true; mkSave(); setTimeout(renderMillikan,0); } }
   const before=M.drops.length;
   const gone=M.drops.filter(dp=>!(Math.abs(dp.y)<0.72 && Math.abs(dp.x)<0.7));
   M.drops = M.drops.filter(dp=>Math.abs(dp.y)<0.72 && Math.abs(dp.x)<0.7);
@@ -1748,13 +1764,23 @@ function mkTick(now){
 }
 
 /* ---- geometry (screen px) ---- */
+// The eyepiece is drawn in screen px. The apparatus (supply, plates, buttons, stopwatch) is laid out
+// in a fixed design space MK_DW × MK_DH and drawn scaled by k into the space right of the eyepiece.
+const MK_DW=350, MK_DH=560;
 function mkGeom(){
-  const R=Math.max(150, Math.min(CH*0.44, (CW-320)/2.35)), ex=R+28, ey=CH/2+4, ppmm=2*R/1.3;
-  const px=ex+R+44, pw=Math.max(270, CW-px-14), w=Math.min(pw-22,310);
-  const y0=16, topY=y0+MOD.h+44, botY=topY+104, xc=px+w*0.58;
-  const swW=Math.min(270, w), swH=Math.round(swW*0.70);
-  return { R, ex, ey, ppmm, px, pw, w, y0, topY, botY, xc, sw:{x:px, y:CH-swH-62, w:swW, h:swH} };
+  const R=Math.max(150, Math.min(CH*0.44, (CW-MK_DW*0.9-60)/2.15)), ex=R+28, ey=CH/2+4, ppmm=2*R/1.3;
+  const ax=ex+R+34, aw=Math.max(200, CW-ax-12);
+  const k=Math.max(0.7, Math.min(2.2, aw/MK_DW, (CH-24)/MK_DH));
+  const ox=ax+Math.max(0,(aw-MK_DW*k)/2), oy=Math.max(4,(CH-MK_DH*k)/2);
+  const px=14, w=310, y0=16, topY=y0+MOD.h+44, botY=topY+104, xc=px+w*0.58;
+  const swW=270, swH=Math.round(swW*0.70);
+  return { R, ex, ey, ppmm, k, ox, oy, px, w, y0, topY, botY, xc, sw:{x:px, y:botY+82, w:swW, h:swH} };
 }
+const mkLocal=(x,y)=>{ const g=mkGeom(); return [(x-g.ox)/g.k, (y-g.oy)/g.k]; };
+function mkModulesScreen(){ const g=mkGeom(), X=v=>g.ox+v*g.k, Y=v=>g.oy+v*g.k, K=v=>v*g.k;
+  return mkModules().map(m=>({...m, x:X(m.x), y:Y(m.y), w:K(m.w), h:K(m.h),
+    disp:{x:X(m.disp.x), y:Y(m.disp.y), w:K(m.disp.w), h:K(m.disp.h)}, knob:{x:X(m.knob.x), y:Y(m.knob.y), r:K(m.knob.r)},
+    chip: m.chip && {...m.chip, x:X(m.chip.x), y:Y(m.chip.y), w:K(m.chip.w), h:K(m.chip.h)} })); }
 function mkButtons(){
   const g=mkGeom(), B=[], sx=g.xc+26, sw=g.sw;
   B.push({id:'spray',  x:sx, y:g.y0+2,  w:84, h:30, label:'SPRAY', act:mkSpray});
@@ -1786,6 +1812,8 @@ function drawBtn(b){
     if (M.field){ ctx.shadowColor='rgba(255,170,60,.9)'; ctx.shadowBlur=8; } ctx.beginPath(); ctx.arc(kx,b.y+b.h/2,b.h/2-3,0,7); ctx.fill(); ctx.shadowBlur=0;
     textSub(M.field?'ON':'OFF', M.field? b.x+b.w/2-6 : b.x+b.w/2+6, b.y+b.h/2+3.5, M.field?'#ffd27a':'#9aa4ad','center',9,700,false);
     textSub('FIELD', b.x+b.w+6, b.y+b.h/2+4, '#cfcabe','left',10.5,700,true); return; }
+  if (b.id==='spray'){ ctx.shadowColor='rgba(255,228,40,.75)'; ctx.shadowBlur=12; ctx.fillStyle='#ffe11a'; roundRect(b.x,b.y,b.w,b.h,6); ctx.fill(); ctx.shadowBlur=0;
+    ctx.strokeStyle='#fff6a8'; ctx.lineWidth=1.5; ctx.stroke(); textSub(b.label, b.x+b.w/2, b.y+b.h/2+5, '#1a1600','center',14,800,false); return; }
   ctx.fillStyle = b.on? '#2a2216' : '#1d2328'; roundRect(b.x,b.y,b.w,b.h,6); ctx.fill();
   ctx.strokeStyle = b.on? '#f2a541' : '#4d5761'; ctx.lineWidth=1.2; ctx.stroke();
   textSub(b.label, b.x+b.w/2, b.y+b.h/2+(b.small?3.5:5), b.on?'#ffd27a':'#e7e3d9', 'center', b.small?9.5:13.5, 700, false);
@@ -1844,7 +1872,8 @@ function drawMillikan(){
   textSub('MICROSCOPE  ·  1 division = 0.1 mm', ex, ey+R+30, '#9aa4ad','center',11,700,false);
   if (M.speed>1) textSub('×5 SPEED', ex, ey-R-12, '#ffb648','center',13,700,false);
 
-  // apparatus: supply above the plates, wired to each plate
+  // apparatus: supply above the plates, wired to each plate (design space, scaled by k)
+  ctx.save(); ctx.translate(g.ox,g.oy); ctx.scale(g.k,g.k);
   const x0=g.px, w=g.w, pl0=x0+16, pl1=x0+w, cTop = M.pol>0? COLORS.minus : COLORS.plus, cBot = M.pol>0? COLORS.plus : COLORS.minus;
   const wire=(pts,col)=>{ ctx.lineJoin='round'; for (const [lw,c] of [[5,'#040506'],[2.6,col]]){ ctx.strokeStyle=c; ctx.lineWidth=lw; ctx.beginPath(); pts.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b)); ctx.stroke(); } };
   const m=mkModules()[0], tA={x:m.x+30, y:m.y+m.h}, tB={x:m.x, y:m.y+m.h/2};
@@ -1868,7 +1897,8 @@ function drawMillikan(){
   for (const b of mkButtons()) if (!b.key) drawBtn(b);
   drawStopwatch();
   for (const b of mkButtons()) if (b.key) drawBtn(b);
-  textSub('Keyboard: Space = start/stop · L = lap · F = field', g.px, g.sw.y-14, '#6b747c','left',10.5,600,false);
+  textSub('Keyboard: Space = start/stop · L = lap · F = field', g.px, g.sw.y-16, '#8d969f','left',10.5,600,false);
+  ctx.restore();
   if (M.msg) textSub(M.msg, ex, CH-10, '#ffb38a','center',12,600,true);
 }
 function mkSelectAt(x,y){
@@ -1878,14 +1908,14 @@ function mkSelectAt(x,y){
 }
 
 /* ---- records, checking and worked solutions ---- */
-function mkSave(){ try{ localStorage.setItem('mb.millikan.v1', JSON.stringify({recs:M.recs})); }catch(e){} }
-function mkLoad(){ try{ const r=JSON.parse(localStorage.getItem('mb.millikan.v1')||'null'); if (r && Array.isArray(r.recs)) M.recs=r.recs; }catch(e){} }
+function mkSave(){ try{ localStorage.setItem('mb.millikan.v1', JSON.stringify({recs:M.recs, guide:M.guide||null, gmode:M.gmode})); }catch(e){} }
+function mkLoad(){ try{ const r=JSON.parse(localStorage.getItem('mb.millikan.v1')||'null'); if (r && Array.isArray(r.recs)) M.recs=r.recs; if (r && r.guide) M.guide=r.guide; if (r && r.gmode) M.gmode=r.gmode; }catch(e){} }
 function mkClearView(){ M.drops=[]; M.sel=null; M.msg=''; renderMillikan(); draw(); }
 function mkStartOver(){ if (!confirm('Start the experiment again? This deletes all your drop records and clears the eyepiece and stopwatch.')) return;
   M.drops=[]; M.sel=null; M.recs=[]; M.msg=''; M.field=false; mkSw('reset'); mkSave(); renderMillikan(); draw(); }
 function mkNewRec(){
   const dp=M.drops.find(d=>d.id===M.sel); if (!dp) return;
-  M.recs.unshift({ id:dp.id, label:dp.label, ver:dp.ver, truth:{r:dp.r, n:dp.n}, fd:'', ft:'', V:'', rd:'', rt:'', r:'', q:'', n:'', checked:null });
+  M.recs.unshift({ id:dp.id, label:dp.label, ver:dp.ver, truth:{r:dp.r, n:dp.n}, g:M.gmode==='guided', fd:'', ft:'', V:'', rd:'', rt:'', r:'', q:'', n:'', checked:null });
   mkSave(); renderMillikan();
 }
 function mkCalc(rec){ // from the student's own timings
@@ -1893,7 +1923,7 @@ function mkCalc(rec){ // from the student's own timings
   const r=Math.sqrt(9*MK.eta*vf/(2*(MK.rhoOil-MK.rhoAir)*MK.g)), E=V/MK.d, q=6*Math.PI*MK.eta*r*(vr+vf)/E;
   return { vf, vr, V, r, E, q, Wp:mkWp(r), n:q/MK.e };
 }
-function mkSolution(rec){
+function mkSolution(rec, guided=false){
   const c=mkCalc(rec), dr=MK.rhoOil-MK.rhoAir, st=[];
   st.push(stp('Fall speed (field off). Up is positive, so the velocity is negative; use its size here', `|v<sub>f</sub>| = distance / time = ${rec.fd} × 0.100 × 10⁻³ / ${rec.ft} = ${N4(c.vf)} m s⁻¹`));
   st.push(stp('At terminal velocity the forces balance: weight − upthrust = drag', `(4/3)πr³(ρ<sub>oil</sub> − ρ<sub>air</sub>)g = 6πηr|v<sub>f</sub>|`));
@@ -1906,8 +1936,9 @@ function mkSolution(rec){
   st.push(stp('Field strength between the plates', `E = V / d = ${rec.V} / ${N4(MK.d)} = ${N4(c.E)} V m⁻¹`));
   st.push(stp('Rearrange for q, substitute and evaluate', `q = 6πηr(v<sub>r</sub> + |v<sub>f</sub>|) / E`,
     `q = 6π × ${N4(MK.eta)} × ${N4(c.r)} × (${N4(c.vr)} + ${N4(c.vf)}) / ${N4(c.E)}`, `q = ${N4(c.q)} C`));
-  st.push(stp('Number of elementary charges', `n = q / e = ${N4(c.q)} / 1.60 × 10⁻¹⁹ = ${fmt(c.n,3)}`));
-  st.push(ans(`r = ${N3(c.r*1e6)} µm,  q = ${N3(c.q)} C,  n ≈ ${Math.round(c.n)}`));
+  if (!guided){ st.push(stp('Number of elementary charges', `n = q / e = ${N4(c.q)} / 1.60 × 10⁻¹⁹ = ${fmt(c.n,3)}`));
+    st.push(ans(`r = ${N3(c.r*1e6)} µm,  q = ${N3(c.q)} C,  n ≈ ${Math.round(c.n)}`)); }
+  else st.push(ans(`r = ${N3(c.r*1e6)} µm,  q = ${N3(c.q)} C  (q ÷ 10⁻¹⁹ = ${fmt(c.q*1e19,3)})`));
   return `<ol class="sol">${st.map(x=>`<li><div class="why">${x.why}</div>${x.eqs.map(e=>`<div class="eq">${e}</div>`).join('')}</li>`).join('')}</ol>`;
 }
 function mkCheck(i){
@@ -1919,7 +1950,8 @@ function mkCheck(i){
   rec.checked={ calcOK, measR, measQ, nOK: isFinite(sn) && sn===t.n, tn:t.n, tr:t.r };
   mkSave(); renderMillikan();
 }
-function mkCardHTML(rec,i){
+function mkCardHTML(rec,i,guided=false){
+  guided = guided || !!rec.g;
   const f=(k,ph,u)=>`<label class="mf"><input class="mi" data-rec="${i}" data-k="${k}" value="${rec[k]}" placeholder="${ph}" inputmode="decimal"><span>${u}</span></label>`;
   const stale = (()=>{ const dp=M.drops.find(d=>d.id===rec.id); return dp && dp.ver!==rec.ver; })();
   const gone = !M.drops.some(d=>d.id===rec.id);
@@ -1927,19 +1959,25 @@ function mkCardHTML(rec,i){
     <div class="mgrp"><div class="mgt">1 · Falling, field OFF</div><div class="mgr">${f('fd','e.g. 5','divisions')}${f('ft','e.g. 9.8','s')}</div></div>
     <div class="mgrp"><div class="mgt">2 · Rising, field ON</div><div class="mgr">${f('rd','e.g. 5','divisions')}${f('rt','e.g. 4.2','s')}${f('V','e.g. 600','V')}</div>
       <button class="linkbtn" data-usev="${i}">fill in the current p.d. (${M.V} V)</button></div>
-    <div class="mgrp"><div class="mgt">3 · Your results</div><div class="mgr">${f('r','radius','µm')}${f('q','charge','× 10⁻¹⁹ C')}${f('n','n','')}</div></div>
+    <div class="mgrp"><div class="mgt">3 · Your results</div><div class="mgr">${f('r','radius','µm')}${f('q','charge','× 10⁻¹⁹ C')}${guided?'':f('n','n','')}</div></div>
     <button class="btn primary sm" data-check="${i}">Check</button>`;
   const ck=rec.checked;
   if (ck && ck.err) h+=`<div class="nag">${ck.err}</div>`;
   else if (ck){
     h+=`<div class="fb ${ck.calcOK?'ok':'bad'}"><b>${ck.calcOK?'Your calculation matches your timings.':'Your r or q does not follow from your timings: compare with the worked solution.'}</b><br>
-      Measurement quality: your timings give r ${ck.measR>=0?'+':''}${fmt(ck.measR,2)} % from the drop's true radius (${N3(ck.tr*1e6)} µm)${isFinite(ck.measQ)?`, and q ${ck.measQ>=0?'+':''}${fmt(ck.measQ,2)} % from its true charge`:''}.<br>
-      The drop carried <b>n = ${ck.tn}</b>${ck.tn===0?' (it was neutral: it never rises)':''}. ${ck.nOK?'Your n is right.':'Check your n.'}</div>
-      <details class="solbox" ${ck.calcOK?'':'open'}><summary>Worked solution with your numbers</summary>${mkSolution(rec)}</details>`;
+      ${guided? `Measurement quality: your timings give r ${ck.measR>=0?'+':''}${fmt(ck.measR,2)} % from the drop's true radius.${ck.calcOK?' This drop counts towards your data.':''}</div>` :
+      `Measurement quality: your timings give r ${ck.measR>=0?'+':''}${fmt(ck.measR,2)} % from the drop's true radius (${N3(ck.tr*1e6)} µm)${isFinite(ck.measQ)?`, and q ${ck.measQ>=0?'+':''}${fmt(ck.measQ,2)} % from its true charge`:''}.<br>
+      The drop carried <b>n = ${ck.tn}</b>${ck.tn===0?' (it was neutral: it never rises)':''}. ${ck.nOK?'Your n is right.':'Check your n.'}</div>`}
+      <details class="solbox" ${ck.calcOK?'':'open'}><summary>Worked solution with your numbers</summary>${mkSolution(rec,guided)}</details>`;
   }
   return h+'</div>';
 }
-function mkExportURL(){
+function mkExportURL(guided=false){
+  if (guided){ const rows=mkDone().filter(r=>parseInt(r.n)>0).sort((a,b)=>a.n-b.n).map(r=>({x:String(parseInt(r.n)), y:[String(r.q)]}));
+    const pct=String(mA('m_pct')? mA('m_pct').v : 5);
+    return encodeGraphLab({ v:1, title:'Charge on oil drops against number of elementary charges', showTitle:true,
+      x:{name:'Number of elementary charges', sym:'n', unit:'', unc:'', mode:'abs'}, y:{name:'Charge', sym:'q', unit:'10⁻¹⁹ C', unc:pct, mode:'pct'},
+      trials:1, spread:'range', rows, perPoint:false, strict:false, linX:'none', linY:'none', fit:'linear', maxmin:true, residuals:false, origin:true, tab:'raw' }); }
   const rows=M.recs.filter(r=>isFinite(parseNum(r.q))&&isFinite(parseNum(r.n))).map(r=>({x:String(Math.round(parseNum(r.n))), y:[String(r.q)]}));
   const st={ v:1, title:'Charge on oil drops against number of elementary charges', showTitle:true,
     x:{name:'Number of elementary charges', sym:'n', unit:'', unc:'', mode:'abs'}, y:{name:'Charge', sym:'q', unit:'10⁻¹⁹ C', unc:'', mode:'abs'},
@@ -1953,13 +1991,135 @@ async function encodeGraphLab(st){
     return GRAPHLAB+'#g=z'+b64u(new Uint8Array(await new Response(cs).arrayBuffer())); }
   return GRAPHLAB+'#g=j'+b64u(bytes);
 }
+
+/* ================= MILLIKAN guided investigation: measure e ================= */
+function mkGuideState(){ if (!M.guide || M.guide.v!==1) M.guide={v:1, sec:0, ans:{}, flags:{}}; return M.guide; }
+const mA = id => (M.guide && M.guide.ans[id]);
+const mNum = id => mA(id)? parseFloat(mA(id).v) : NaN;
+const mkDone = ()=> M.recs.filter(r=>r.checked && r.checked.calcOK && isFinite(parseNum(r.q)));
+function mkFitE(){ const pts=mkDone().filter(r=>parseInt(r.n)>0).map(r=>[parseInt(r.n), parseNum(r.q)]); if (pts.length<2) return NaN;
+  const n=pts.length, sx=pts.reduce((a,p)=>a+p[0],0), sy=pts.reduce((a,p)=>a+p[1],0), sxx=pts.reduce((a,p)=>a+p[0]*p[0],0), sxy=pts.reduce((a,p)=>a+p[0]*p[1],0);
+  return (n*sxy-sx*sy)/(n*sxx-sx*sx); }
+function mkNCheck(){ const rows=mkDone(); if (rows.length<6) return {ok:false, msg:'Collect at least six checked drops first.'};
+  if (!rows.every(r=>/^\d+$/.test(String(r.n).trim()) && +r.n>0)) return {ok:false, msg:'Give every drop a whole number n of 1 or more.'};
+  const e=rows.map(r=>parseNum(r.q)/(+r.n)), mean=e.reduce((a,b)=>a+b,0)/e.length, worst=Math.max(...e.map(v=>Math.abs(v-mean)/mean));
+  return worst<=0.15? {ok:true, mean} : {ok:false, msg:`Your values of q / n range from ${fmt(Math.min(...e),3)} to ${fmt(Math.max(...e),3)} × 10⁻¹⁹ C. If n is right for every drop, q / n should be almost the same each time. Look again at the drops that stand out.`}; }
+const MK_SECTIONS = [
+ { id:'m_q', title:'The question', intro:()=>'Is electric charge continuous, like water, or does it come in lumps of one size? If it comes in lumps, every charge is a whole number of a smallest charge, <b>e</b>. In 1909 Robert Millikan tested this with tiny drops of oil. You will repeat his experiment and measure e.',
+   items:[
+   { id:'m_lumps', type:'choice', q:'Five drops were measured. If charge comes in whole-number lumps of one size, which set of charges (in units of 10⁻¹⁹ C) could be real?',
+     opts:['3.2, 4.8, 8.0, 6.4, 11.2','2.9, 4.1, 7.3, 5.0, 9.6','1.0, 2.5, 3.7, 4.4, 6.1','All of them'], correct:()=>0,
+     why:()=>'3.2, 4.8, 8.0, 6.4 and 11.2 are 2, 3, 5, 4 and 7 × 1.6. The other sets share no common lump size, so they could not come from whole numbers of one charge.' } ]},
+ { id:'m_fall', title:'Falling with the field off', intro:()=>'With no electric field, a drop falls. It reaches a steady (terminal) speed almost instantly, because air drag grows with speed.',
+   items:[
+   { id:'m_forces', type:'choice', q:'A drop falls at a steady speed with the field off. Which forces act on it?', opts:['Weight only','Weight down; upthrust and drag up','Weight down; drag down','Upthrust up; an electric force down'], correct:()=>1,
+     why:()=>'Weight acts down. The air gives an upthrust (buoyancy, like a tiny version of a boat floating) and a drag force, both up because drag opposes the downward motion.' },
+   { id:'m_net', type:'choice', q:'At terminal velocity, the resultant force on the drop is…', opts:['equal to its weight','zero','equal to the drag','increasing'], correct:()=>1,
+     why:()=>'Steady speed means no acceleration, so the forces balance: <b>weight − upthrust = drag</b>.' },
+   { id:'m_r', type:'choice', q:'Weight − upthrust = (4/3)πr³(ρ<sub>oil</sub> − ρ<sub>air</sub>)g and Stokes drag = 6πηrv. Setting them equal, which expression gives the radius r?',
+     opts:['r = √(9ηv / (2(ρ<sub>oil</sub> − ρ<sub>air</sub>)g))','r = 9ηv / (2(ρ<sub>oil</sub> − ρ<sub>air</sub>)g)','r = √(2(ρ<sub>oil</sub> − ρ<sub>air</sub>)g / (9ηv))','r = 6πηv / g'], correct:()=>0,
+     why:()=>'(4/3)πr³Δρg = 6πηrv. Divide both sides by r: (4/3)πr²Δρg = 6πηv. Rearrange: r² = 9ηv / (2Δρg), so <b>r = √(9ηv / (2Δρg))</b>. Timing the fall gives the size of the drop.' } ]},
+ { id:'m_rise', title:'Rising with the field on', intro:()=>'Now switch on a field between the plates. A charged drop feels an extra force qE.',
+   items:[
+   { id:'m_dir', type:'choice', q:'The drops in this apparatus carry positive charge. To make one rise, which plate must be positive?', opts:['The lower plate','The upper plate','It makes no difference'], correct:()=>0,
+     why:()=>'E points from the + plate to the − plate. The force on a positive charge is along E, so the <b>lower</b> plate must be positive to push it up. (POL swaps the plates in the sim.)' },
+   { id:'m_drag', type:'choice', q:'While the drop rises at a steady speed, which way does the drag act?', opts:['Up','Down','There is no drag'], correct:()=>1,
+     why:()=>'Drag always opposes the motion. Rising drop, so drag acts <b>down</b>.' },
+   { id:'m_E', type:'choice', q:'The p.d. across the plates is V and their separation is d. What is the field strength E?', opts:['E = V / d','E = Vd','E = d / V','E = V / d²'], correct:()=>0,
+     why:()=>'In a uniform field between parallel plates, <b>E = V / d</b>.' },
+   { id:'m_qexp', type:'choice', q:'Rising steadily: qE = (weight − upthrust) + drag. The fall told you weight − upthrust = 6πηr|v<sub>f</sub>|. Which expression gives q?',
+     opts:['q = 6πηr(v<sub>r</sub> + |v<sub>f</sub>|) / E','q = 6πηr(v<sub>r</sub> − |v<sub>f</sub>|) / E','q = 6πηr·v<sub>r</sub> / E','q = E / (6πηr·v<sub>r</sub>)'], correct:()=>0,
+     why:()=>'qE = 6πηr|v<sub>f</sub>| + 6πηr v<sub>r</sub> = 6πηr(v<sub>r</sub> + |v<sub>f</sub>|). Divide by E: <b>q = 6πηr(v<sub>r</sub> + |v<sub>f</sub>|) / E</b>.' } ]},
+ { id:'m_try', title:'Try the apparatus', intro:()=>'Get a feel for the apparatus before you take real data.',
+   items:[
+   { id:'m_t1', type:'task', q:'Press <b>SPRAY</b>, tap a drop and watch it fall with the field <b>OFF</b>. Then switch the field <b>ON</b> and turn up V until the selected drop rises.', done:()=>!!(M.guide&&M.guide.flags.rose), doneText:()=>'You made a drop rise.' },
+   { id:'m_neutral', type:'choice', q:'Some drops never rise, whatever V you choose, with either polarity. Why?', opts:['They have no charge','They are too big to move','The field is too weak for any drop','They are negatively charged'], correct:()=>0,
+     why:()=>'With q = 0 there is no electric force at all, so the drop just falls. A negative drop would rise with the other polarity.' },
+   { id:'m_steady', type:'text', q:'Why must the drop be moving at a steady speed while you time it?',
+     model:()=>'The equations assume the forces are balanced (terminal velocity). While a drop is speeding up or slowing down, drag does not equal weight − upthrust, so the formulas for r and q would not apply. Real oil drops reach terminal speed in microseconds, so in practice any drop you can see is already steady.' } ]},
+ { id:'m_unc', title:'Uncertainties', intro:()=>'Plan how precise your measurements can be.',
+   items:[
+   { id:'m_rt', type:'num', unit:'%', q:'Your reaction time on the stopwatch is about ±0.2 s. What is the percentage uncertainty in a time of 10.0 s?',
+     check:x=>({ok: Math.abs(x-2)<0.15}), why:()=>'0.2 / 10.0 × 100 = <b>2 %</b>.' },
+   { id:'m_rprop', type:'choice', q:'r ∝ √v<sub>f</sub>. If v<sub>f</sub> has a 4 % uncertainty, what is the percentage uncertainty in r?', opts:['2 %','4 %','8 %','16 %'], correct:()=>0,
+     why:()=>'Raising to a power multiplies the percentage uncertainty by that power: ½ × 4 % = <b>2 %</b>.' },
+   { id:'m_many', type:'choice', q:'Why time the drop over several divisions rather than just one?', opts:['The time is longer, so the reaction-time uncertainty is a smaller percentage of it','The drop speeds up over more divisions','It removes Brownian motion','It makes the drop bigger'], correct:()=>0,
+     why:()=>'±0.2 s is 20 % of 1 s but only 2 % of 10 s. Longer timings also average out the drop\'s Brownian jiggle.' } ]},
+ { id:'m_collect', title:'Collect your data', intro:()=>'Measure <b>at least six drops</b>. For each: start a record, time the fall (field off) and the rise (field on), calculate r and q, and press <b>Check</b>. Only drops whose r and q follow from your timings count. Leave n for now.<br><span class="small2">Tip: different drops carry different charges. You can also IONISE a drop to change its charge and measure it again as a new record.</span>',
+   items:[
+   { id:'m_data', type:'task', q:'', ui:()=>mkGuideCollectUI(), done:()=>mkDone().length>=6, doneText:()=>`${mkDone().length} checked drops. You can keep adding more.` } ]},
+ { id:'m_n', title:'Count the charges', intro:()=>'Now find how many charges n each drop carries, <b>without</b> using the known value of e.',
+   items:[
+   { id:'m_circ', type:'text', q:'Why would it be circular to work out n from n = q / (1.60 × 10⁻¹⁹ C) in this experiment?',
+     model:()=>'Because e is what we are trying to measure. Using 1.60 × 10⁻¹⁹ C to find n assumes the answer: a graph of q against those n values would just give back 1.60 × 10⁻¹⁹ C, whatever the data said.' },
+   { id:'m_assign', type:'task', q:'Your charges are listed from smallest to largest. Look for the smallest charge and the gaps between values: most gaps should be close to one common size. Give each drop a whole number n.',
+     ui:()=>mkAssignUI(), wire:()=>mkAssignWire(), done:()=>mkNCheck().ok, doneText:()=>`Consistent: q / n averages ${fmt(mkNCheck().mean,3)} × 10⁻¹⁹ C across your drops.` } ]},
+ { id:'m_graph', title:'Graph q against n', intro:()=>'If q = ne, a graph of q against n is a straight line through the origin with gradient <b>e</b>.',
+   items:[
+   { id:'m_pct', type:'num', unit:'%', q:'Estimate the percentage uncertainty in each value of q. Think about your timing uncertainties: q depends on r and on both speeds. (Between 3 % and 10 % is typical.)',
+     check:x=>({ok: x>=2 && x<=15}), why:x=>`Your graph will use ±${x} % error bars on q. A full propagation would add the percentage uncertainties of r, (v<sub>r</sub> + |v<sub>f</sub>|) and V.` },
+   { id:'m_open', type:'task', q:'Open your data in Strothoff Graphical Laboratories. The link fills in n on the x-axis, q (in 10⁻¹⁹ C) with your error bars on the y-axis, and a linear fit with max/min lines.',
+     ui:()=>`<div class="row2"><button class="btn primary sm" data-mact="openE">Open in Graphical Laboratories ↗</button></div><ol class="steps"><li>Read the gradient and its uncertainty from the max/min lines: this is your value of e.</li><li>Check the intercept is close to zero, as q = ne predicts.</li></ol>`,
+     done:()=>!!(M.guide&&M.guide.flags.exported), doneText:()=>'Opened.' },
+   { id:'m_e', type:'num2', labels:['gradient e','uncertainty Δe'], unit:'× 10⁻¹⁹ C', q:'Enter the gradient and its uncertainty from Graphical Laboratories.',
+     check:(e,de)=>{ const f=mkFitE(); return {ok: Math.abs(e-f)/f<0.05 && de>0}; },
+     why:(e,de)=>{ const f=mkFitE(); return `A best-fit line through your points gives a gradient of about <b>${fmt(f,3)} × 10⁻¹⁹ C</b>${Math.abs(e-f)/f<0.05?', which matches yours.':'. Check you read the gradient, not the intercept.'} Your result: e = (${mA('m_e').v} ± ${mA('m_e').v2}) × 10⁻¹⁹ C.`; } } ]},
+ { id:'m_eval', title:'Compare and evaluate', intro:()=>'The accepted value is e = 1.60 × 10⁻¹⁹ C (to 3 s.f.).',
+   items:[
+   { id:'m_pd', type:'num', unit:'%', q:'What is the percentage difference between your e and 1.60 × 10⁻¹⁹ C?',
+     check:x=>{ const t=(mNum('m_e')-1.60)/1.60*100; return {ok: Math.abs(Math.abs(x)-Math.abs(t))<0.6}; },
+     why:()=>{ const t=(mNum('m_e')-1.60)/1.60*100; return `(${mA('m_e').v} − 1.60) / 1.60 × 100 = <b>${fmt(t,2)} %</b>.`; } },
+   { id:'m_within', type:'choice', q:()=>`Is the accepted value inside your range e ± Δe = (${mA('m_e').v} ± ${mA('m_e').v2}) × 10⁻¹⁹ C?`, opts:['Yes','No'],
+     correct:()=> Math.abs(mNum('m_e')-1.60) <= parseFloat(mA('m_e').v2)? 0:1,
+     why:()=> Math.abs(mNum('m_e')-1.60) <= parseFloat(mA('m_e').v2)? 'Yes: the accepted value lies within your uncertainty, so your result agrees with it.' : 'No: the accepted value is outside your range. Either your uncertainty is underestimated, or a systematic error has shifted your result.' },
+   { id:'m_eta', type:'choice', q:'Millikan\'s published value was about 0.6 % too low, because the value he used for the viscosity of air η was slightly too small. If η is underestimated, what happens to the calculated e?',
+     opts:['It comes out too small','It comes out too large','It is not affected'], correct:()=>0,
+     why:()=>'r ∝ √η, and q ∝ η·r·(v<sub>r</sub> + |v<sub>f</sub>|) / E, so q ∝ η<sup>3/2</sup>. Every q, and therefore e, comes out too small: a <b>systematic</b> error that repeats in every drop.' },
+   { id:'m_err', type:'text', q:'Identify one random and one systematic source of error in your experiment, and suggest a realistic improvement for each.',
+     model:()=>'Random: reaction time on the stopwatch and the drop\'s Brownian motion. Improve by timing over more divisions and repeating each drop several times.<br>Systematic: errors in the constants (η, ρ<sub>oil</sub>, d) or a voltmeter calibration error; for real 1 µm drops, Stokes\' law itself needs a small correction (the Cunningham correction). Improve by using better reference values and calibrating the meter.' } ]},
+];
+const MKG = { title:'Measure e', st:()=>mkGuideState(), sections:MK_SECTIONS, save:()=>mkSave(), file:'millikan-measure-e-answers.txt',
+  doneMsg:'Download your answers to hand in, or start the investigation again.', restartLabel:'Start again',
+  act:a=>{ if (a==='restart'){ if (!confirm('Start the guided investigation again? Your answers and drop records will be cleared.')) return; M.guide=null; M.recs=[]; mkSave(); renderAll(); } },
+  dataLines:()=>['Drops (r / µm, q / 10⁻¹⁹ C, n):', ...mkDone().map(r=>`  ${r.label}\t${r.r}\t${r.q}\t${r.n}`)] };
+
+function mkGuideCollectUI(){
+  const dp=M.drops.find(d=>d.id===M.sel);
+  return `<div class="row2"><button class="btn sm solid" data-act="mkclear">Clear the eyepiece</button></div>
+    <div class="mksel">${dp? `Selected: <b>drop ${dp.label}</b> <button class="btn primary sm" data-act="mkrec">Start a record for drop ${dp.label}</button>` : '<span class="small">Tap a drop in the eyepiece to select it.</span>'}</div>
+    ${M.recs.map((r,i)=>mkCardHTML(r,i,true)).join('')}`;
+}
+function mkAssignUI(){
+  const rows=mkDone().slice().sort((a,b)=>parseNum(a.q)-parseNum(b.q));
+  return `<table class="dt"><tr><th>Drop</th><th>q / 10⁻¹⁹ C</th><th>n</th><th>q / n</th></tr>${rows.map(r=>{ const i=M.recs.indexOf(r), n=parseInt(r.n);
+    return `<tr><td>${r.label}</td><td class="mono">${r.q}</td><td><input class="cell nin" data-ni="${i}" value="${r.n||''}" inputmode="numeric" style="width:48px"></td><td class="mono">${n>0? fmt(parseNum(r.q)/n,3):'—'}</td></tr>`; }).join('')}</table>
+    <button class="btn primary sm" data-mact="ncheck" style="margin-top:8px">Check my n values</button><div id="nMsg" class="nag">${M.guide.flags.nmsg||''}</div>`;
+}
+function mkAssignWire(){
+  document.querySelectorAll('#millikanCard input.nin').forEach(inp=>inp.onchange=()=>{ M.recs[+inp.dataset.ni].n=inp.value.trim(); mkSave(); });
+}
+function mkGuideAction(a){
+  if (a==='ncheck'){ document.querySelectorAll('#millikanCard input.nin').forEach(inp=>M.recs[+inp.dataset.ni].n=inp.value.trim()); const c=mkNCheck(); M.guide.flags.nmsg=c.ok?'':c.msg; mkSave(); renderAll(); }
+  if (a==='openE'){ M.guide.flags.exported=true; mkSave(); const w=window.open('about:blank','_blank'); mkExportURL(true).then(u=>{ if (w) w.location.href=u; else location.href=u; }); renderAll(); }
+}
+
 function renderMillikan(){
   const card=document.getElementById('millikanCard');
   if (mode!=='millikan'){ card.style.display='none'; return; }
   card.style.display='';
+  const tog=`<div class="mktog"><button data-gm="free" class="${M.gmode!=='guided'?'on':''}">Free experiment</button><button data-gm="guided" class="${M.gmode==='guided'?'on':''}">Guided: measure e</button></div>`;
+  const consts=`<details class="solbox"><summary>Constants for your calculations</summary><table class="cand mkc"><tr><td>Plate separation d</td><td class="mono">6.00 × 10⁻³ m</td></tr><tr><td>Density of oil ρ<sub>oil</sub></td><td class="mono">875 kg m⁻³</td></tr>
+      <tr><td>Density of air ρ<sub>air</sub></td><td class="mono">1.20 kg m⁻³</td></tr><tr><td>Viscosity of air η</td><td class="mono">1.81 × 10⁻⁵ Pa s</td></tr><tr><td>g</td><td class="mono">9.81 m s⁻²</td></tr><tr><td>1 division</td><td class="mono">0.100 mm</td></tr></table></details>`;
+  const wireTog=()=>card.querySelectorAll('[data-gm]').forEach(b=>b.onclick=()=>{ M.gmode=b.dataset.gm; mkSave(); renderMillikan(); card.scrollTop=0; });
+  if (M.gmode==='guided'){
+    renderGuide(MKG, card, tog+consts);
+    wireTog(); wireMkCards(card);
+    card.querySelectorAll('[data-mact]').forEach(b=>b.onclick=()=>mkGuideAction(b.dataset.mact));
+    return;
+  }
   const dp=M.drops.find(d=>d.id===M.sel);
   const nQ=M.recs.filter(r=>isFinite(parseNum(r.q))&&isFinite(parseNum(r.n))).length;
-  card.innerHTML = `<h2>Millikan's oil drops</h2>
+  card.innerHTML = tog+`<h2>Millikan's oil drops</h2>
     <div class="intro small2">In 1909 Robert Millikan sprayed tiny oil drops between two charged plates. Some drops pick up electric charge. By timing how fast a drop falls with the electric field <b>off</b>, and how fast it rises with the field <b>on</b>, he found the charge on each drop, and showed it is always a whole number of one small charge: the charge of an electron, <b>e</b>.</div>
     <details class="solbox"${M.recs.length?"":" open"}><summary>What you will find for each drop</summary><div class="small2 vars">
       <div><b>r</b> = radius of the oil drop (about 1 µm, a millionth of a metre)</div>
@@ -1974,12 +2134,15 @@ function renderMillikan(){
       <div class="small2">1 division = 0.100 mm. Speed = (divisions × 0.100 × 10⁻³ m) / time.</div></details>
     <table class="cand mkc"><tr><td>Plate separation d</td><td class="mono">6.00 × 10⁻³ m</td></tr><tr><td>Density of oil ρ<sub>oil</sub></td><td class="mono">875 kg m⁻³</td></tr>
       <tr><td>Density of air ρ<sub>air</sub></td><td class="mono">1.20 kg m⁻³</td></tr><tr><td>Viscosity of air η</td><td class="mono">1.81 × 10⁻⁵ Pa s</td></tr><tr><td>g</td><td class="mono">9.81 m s⁻²</td></tr></table>
-    <div class="row2"><button class="btn sm" data-act="mkclear">Clear the eyepiece</button><button class="btn sm" data-act="mkover">Start over</button></div>
+    <div class="row2"><button class="btn sm solid" data-act="mkclear">Clear the eyepiece</button><button class="btn sm solid warn" data-act="mkover">Start over</button></div>
     <div class="mksel">${dp? `Selected: <b>drop ${dp.label}</b> <button class="btn primary sm" data-act="mkrec">Start a record for drop ${dp.label}</button>` : '<span class="small">No drop selected. Tap a drop in the eyepiece.</span>'}</div>
     ${M.recs.map(mkCardHTML).join('')}
     <div class="row2" style="margin-top:10px"><button class="btn sm" data-act="mkexport" ${nQ<2?'disabled':''}>Plot q against n in SGL ↗</button></div>
     <div class="small">${nQ<2?'Complete at least two records with q and n to plot them.':`The gradient of q against n (proportional fit) is your value of e. Accepted value: 1.60 × 10⁻¹⁹ C.`}</div>
     <details class="solbox"><summary>Teacher note</summary><div class="small2">The sim uses pure Stokes' law so students' calculations match exactly. For real drops of about 1 µm, Stokes' law needs the Cunningham slip correction (about 10 % for a 1 µm drop, and about 20 % for the smallest drops), which Millikan had to apply. Brownian motion (on by default) gives the readings genuine random scatter; switching it off isolates the physics. Drops leave the field of view if ignored, as in the real apparatus.</div></details>`;
+  wireTog(); wireMkCards(card);
+}
+function wireMkCards(card){
   card.querySelectorAll('input.mi').forEach(inp=>inp.onchange=()=>{ M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim(); M.recs[+inp.dataset.rec].checked=null; mkSave(); });
   card.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>{ card.querySelectorAll(`input.mi[data-rec="${b.dataset.check}"]`).forEach(inp=>M.recs[+inp.dataset.rec][inp.dataset.k]=inp.value.trim()); mkCheck(+b.dataset.check); });
   card.querySelectorAll('[data-usev]').forEach(b=>b.onclick=()=>{ M.recs[+b.dataset.usev].V=String(M.V); mkSave(); renderMillikan(); });

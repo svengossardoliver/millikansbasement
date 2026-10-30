@@ -228,6 +228,33 @@ async function run(){
     $('M.recs='+realM);
   }
 
+  /* ===== 6b. Millikan guided investigation ===== */
+  group('Millikan guided investigation: measure e');
+  { const MS=$('MK_SECTIONS'), mids=MS.flatMap(s=>s.items.map(i=>i.id)), lids=$('SECTIONS').flatMap(s=>s.items.map(i=>i.id));
+    check('Every question id is unique, and none clash with the mystery-particle guide', new Set(mids).size===mids.length && !mids.some(i=>lids.includes(i)), mids.join(','));
+    const realM=$('JSON.stringify({recs:M.recs, guide:M.guide})');
+    // a fabricated set of six checked drops with exact q values
+    $(`M.guide={v:1,sec:0,ans:{m_pct:{v:'5'}, m_e:{v:'1.60', v2:'0.05'}},flags:{}}; M.recs=[1,2,2,3,4,6].map((n,k)=>({label:'D'+k, q:(1.6*n).toFixed(3), n:String(n), truth:{n}, checked:{calcOK:true}}))`);
+    const okIdx=MS.flatMap(s=>s.items).filter(i=>i.type==='choice').every(it=>{ const c=it.correct(); return Number.isInteger(c) && c>=0 && c<it.opts.length; });
+    check('Every multiple-choice question has a valid answer', okIdx);
+    check('Six checked drops complete the data-collection task', $('MK_SECTIONS.find(s=>s.id==="m_collect").items[0].done()')===true);
+    check('Correct whole numbers n pass the n check', $('mkNCheck().ok')===true);
+    $('M.recs.forEach(r=>r.n="1")');
+    check('n = 1 for every drop is rejected', $('mkNCheck().ok')===false);
+    $('M.recs.forEach(r=>r.n=String(r.truth.n))');
+    check('Least-squares gradient of q against n is 1.60', near($('mkFitE()'),1.6,1e-6), $('mkFitE()'));
+    try {
+      const url=await $('mkExportURL(true)'), m=url.match(/#g=([zj])([A-Za-z0-9_-]+)$/);
+      let bytes=Uint8Array.from(atob(m[2].replace(/-/g,'+').replace(/_/g,'/')), c=>c.charCodeAt(0));
+      if (m[1]==='z') bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+      const g=JSON.parse(new TextDecoder().decode(bytes));
+      check('Guided export: 6 rows, q ± 5 %, linear fit with max/min lines', g.rows.length===6 && g.y.unc==='5' && g.y.mode==='pct' && g.fit==='linear' && g.maxmin===true, JSON.stringify(g.y));
+    } catch(e){ check('Guided export builds and decodes', false, e.message); }
+    const rec={fd:'5', ft:'10', V:'500', rd:'5', rt:'5'};
+    check('Guided worked solution leaves out n = q / e', !/n = q \/ e/.test(W.mkSolution(rec,true)) && /n = q \/ e/.test(W.mkSolution(rec,false)));
+    const back=JSON.parse(realM); $('M.recs='+JSON.stringify(back.recs)); $('M.guide='+JSON.stringify(back.guide));
+  }
+
   /* ===== help sheet ===== */
   group('Help sheet');
   { const D=W.document, dlg=D.getElementById('helpDlg');
